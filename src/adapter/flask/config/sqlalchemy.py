@@ -1,24 +1,13 @@
-from dataclasses import dataclass
-
 from sqlalchemy import create_engine, Table, Column, Integer, String, Enum, ForeignKey, DATETIME, Date
 from sqlalchemy.orm import scoped_session, sessionmaker, registry, relationship
 
+from src.domain.entities.attendance import Attendance
 from src.domain.entities.course import Course
+from src.domain.entities.enrollment import Enrollment
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 
-@dataclass
-class Enrollment:
-    id: int
-    student: User
-    course: Course
-
-@dataclass
-class Attendance:
-    id: int
-    student: User
-    lecture: Lecture
 
 engine = create_engine('sqlite:///dev.db', echo=True)
 
@@ -47,7 +36,7 @@ def init_db():
         metadata,
         Column("id", Integer, primary_key=True),
         Column("student_id", Integer, ForeignKey("user.id"), nullable=False),
-        Column("course_id", Integer, ForeignKey("course.id"), nullable=False),
+        Column("course_id", Integer, ForeignKey("course.id"), nullable=False)
     )
     lecture_table = Table(
         "lecture",
@@ -70,24 +59,29 @@ def init_db():
         course_table,
         properties={
             "professor": relationship("User"),
-            "lectures": relationship("Lecture")
+            "lectures": relationship("Lecture"),
+            "enrollments": relationship("Enrollment")
         }
     )
     mapper_registry.map_imperatively(
         Enrollment,
         enrollment_table,
         properties={
-            "student": relationship("User"),
-            "course": relationship("Course")
+            "student": relationship("User")
         }
     )
-    mapper_registry.map_imperatively(Lecture, lecture_table)
+    mapper_registry.map_imperatively(
+        Lecture,
+        lecture_table,
+        properties={
+            "attendances": relationship("Attendance")
+        }
+    )
     mapper_registry.map_imperatively(
         Attendance,
         attendance_table,
         properties={
-            "student": relationship("User"),
-            "lecture": relationship("Lecture")
+            "student": relationship("User")
         }
     )
     metadata.create_all(engine)
