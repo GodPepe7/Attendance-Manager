@@ -1,7 +1,7 @@
 import datetime
 from dataclasses import dataclass, field
 
-from src.domain.entities.attendance import Attendance
+from src.domain.entities.user import User
 
 
 @dataclass
@@ -9,4 +9,4 @@ class Lecture:
     id: int
     course_id: int
     date: datetime.date
-    attendances: list[Attendance] = field(default_factory=list)
+    attended_students: list[User] = field(default_factory=list)
