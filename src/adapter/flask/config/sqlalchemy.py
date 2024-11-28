@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, Table, Column, Integer, String, Enum, ForeignKey, DATETIME, Date
-from sqlalchemy.orm import scoped_session, sessionmaker, registry, relationship
+from sqlalchemy.orm import scoped_session, sessionmaker, registry, relationship, deferred
 
 from src.domain.entities.course import Course
 from src.domain.entities.lecture import Lecture
@@ -7,7 +7,7 @@ from src.domain.entities.role import Role
 from src.domain.entities.user import User
 
 
-engine = create_engine('sqlite:///dev.db', echo=False)
+engine = create_engine('sqlite:///dev.db', echo=True)
 
 def init_db():
     mapper_registry = registry()
@@ -49,7 +49,13 @@ def init_db():
         Column("lecture_id", Integer, ForeignKey("lecture.id"), primary_key=True, nullable=False)
     )
 
-    mapper_registry.map_imperatively(User, user_table)
+    mapper_registry.map_imperatively(
+        User,
+        user_table,
+        properties={
+            "password_hash": deferred(user_table.c.password_hash)
+        }
+    )
     mapper_registry.map_imperatively(
         Course,
         course_table,

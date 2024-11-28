@@ -18,6 +18,8 @@ class UserService:
 
     def authenticate(self, email: str, password: str) -> User:
         user = self.repo.get_by_email(email)
-        if user and user.check_password(password):
-            return user
-        raise InvalidCredentialsException()
+        try:
+            if user and user.check_password(password):
+                return user
+        except:
+            raise InvalidCredentialsException()

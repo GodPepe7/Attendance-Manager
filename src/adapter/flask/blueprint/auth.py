@@ -15,13 +15,16 @@ user_service = UserService(repo)
 
 def login_required(role: Role = None):
     """View decorator that blocks access to sites if not logged in."""
+
     def decorator(view):
         @functools.wraps(view)
         def wrapped_view(**kwargs):
             if g.user is None or (role and g.user.role != role):
                 return "", 403
             return view(**kwargs)
+
         return wrapped_view
+
     return decorator
 
 
@@ -45,8 +48,7 @@ def login():
         user = user_service.authenticate(email, password)
         session.clear()
         session["user_id"] = user.id
-        print(f"saved id: {user.id}")
-        return "", 200
+        return "", 204
     except Exception as e:
         abort(400, description=e)
 
@@ -60,7 +62,6 @@ def logout():
 @auth_bp.get("/")
 @login_required(role=Role.PROFESSOR)
 def get_users():
-    user = g.user
     return user_service.get_all()
 
 
