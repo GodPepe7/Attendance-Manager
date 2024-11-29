@@ -35,8 +35,9 @@ def get_course_by_id(id: int):
 @course_bp.post("/<int:course_id>/lecture")
 @login_required(role=Role.PROFESSOR)
 def save_course(course_id: int):
+    prof_id = g.user.id
     body = request.json
     date = body["date"]
     lecture = Lecture.create(course_id=course_id, date=date)
-    lecture_service.save(lecture)
+    lecture_service.save(lecture=lecture, professor_id=prof_id)
     return "", 204

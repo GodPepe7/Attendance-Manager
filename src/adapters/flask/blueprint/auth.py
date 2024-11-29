@@ -5,7 +5,7 @@ from flask import (request, Blueprint, jsonify, g, session, abort)
 from src.adapters.flask.config.sqlalchemy import db_session
 from src.adapters.repositories.user_repository_impl import UserRepository
 from src.domain.entities.role import Role
-from src.domain.entities.user import user_factory
+from src.domain.entities.user import User
 from src.domain.services.user_service import UserService
 
 auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
@@ -80,7 +80,7 @@ def save_users():
     password = body["password"]
     role = body["role"]
     try:
-        user = user_factory(id, name, email, password, role)
+        user = User.create(name, email, password, role)
         user_service.create_user(user)
         return jsonify({"message": "User created"}), 201
     except Exception as e:

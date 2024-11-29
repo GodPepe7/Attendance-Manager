@@ -13,11 +13,11 @@ class InvalidRoleException(Exception):
 
 @dataclass
 class User:
-    id: int
     name: str
     email: str
     password_hash: str
     role: Role
+    id: int = None
 
     def __repr__(self):
         return f"<User {self.id} {self.name}>"
@@ -34,4 +34,4 @@ class User:
         role = get_enum_by_value(role_input)
         if not role:
             raise InvalidInputException(f"Invalid role \'{role_input}\'. Needs to be one of: {[role for role in Role]}")
-        return cls(id=0, name=name, email=email, password_hash=password_hash, role=role)
+        return cls(name=name, email=email, password_hash=password_hash, role=role)

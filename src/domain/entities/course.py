@@ -7,9 +7,9 @@ from src.domain.entities.user import User
 
 @dataclass
 class Course:
-    id: int
     name: str
     professor: User
+    id: int = None
     lectures: list[Lecture] = field(default_factory=list)
     enrolled_students: list[User] = field(default_factory=list)
 

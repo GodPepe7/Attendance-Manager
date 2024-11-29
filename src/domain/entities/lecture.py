@@ -8,9 +8,9 @@ from src.domain.exceptions import InvalidInputException
 
 @dataclass
 class Lecture:
-    id: int
     course_id: int
     date: datetime.date
+    id: int = None
     attended_students: list[User] = field(default_factory=list)
 
     def __repr__(self):
@@ -29,4 +29,4 @@ class Lecture:
             parsed_date = datetime.strptime(date, '%Y-%m-%d').date()
         except:
             raise InvalidInputException("Date needs to be of format YYYY-MM-DD")
-        return cls(id=0, course_id=course_id, date=parsed_date)
+        return cls(course_id=course_id, date=parsed_date)
