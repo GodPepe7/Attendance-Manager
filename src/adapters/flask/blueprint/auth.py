@@ -1,6 +1,6 @@
 import functools
 
-from flask import (request, Blueprint, jsonify, g, session, abort)
+from flask import (request, Blueprint, jsonify, g, session)
 
 from src.adapters.flask.config.sqlalchemy import db_session
 from src.adapters.repositories.user_repository_impl import UserRepository
@@ -41,16 +41,14 @@ def load_logged_in_user():
 
 @auth_bp.post("/login")
 def login():
+    session.clear()
     body = request.json
     email = body["email"]
     password = body["password"]
-    try:
-        user = user_service.authenticate(email, password)
-        session.clear()
+    user = user_service.authenticate(email, password)
+    if user:
         session["user_id"] = user.id
-        return "", 204
-    except Exception as e:
-        abort(400, description=e)
+    return "", 204
 
 
 @auth_bp.get("/logout")
@@ -71,17 +69,13 @@ def get_user(id):
 
 
 @auth_bp.post("/")
-# @login_required(role=Role.ADMIN)
+@login_required(role=Role.ADMIN)
 def save_users():
     body = request.json
-    id = body["id"]
     email = body["email"]
     name = body["name"]
     password = body["password"]
     role = body["role"]
-    try:
-        user = User.create(name, email, password, role)
-        user_service.create_user(user)
-        return jsonify({"message": "User created"}), 201
-    except Exception as e:
-        abort(400, description=e)
+    user = User.create(name, email, password, role)
+    user_service.create_user(user)
+    return jsonify({"message": "User created"}), 201

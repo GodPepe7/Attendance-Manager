@@ -9,21 +9,21 @@ from src.domain.entities.user import User
 from src.domain.ports.course_repository import ICourseRepository
 
 
-# query statement for course with only necessary data e.g. no password hash from user etc.
-# due to lazyloading=select the not selected fields are only queried when accessed
-def __select_course(self) -> Select[tuple[Course]]:
-    template = (select(Course)
-    .options(
-        defaultload(Course.professor).load_only(User.id, User.name, raiseload=True),
-        defaultload(Course.lectures).options(
-            defaultload(Lecture.attended_students).load_only(User.id, User.name, raiseload=True))
-    ))
-    return template
-
-
 class CourseRepository(ICourseRepository):
     def __init__(self, session: Session):
         self.session = session
+
+    # query statement for course with only necessary data e.g. no password hash from user etc.
+    # due to lazyloading=select the not selected fields are only queried when accessed
+    @staticmethod
+    def __select_course() -> Select[tuple[Course]]:
+        template = (select(Course)
+        .options(
+            defaultload(Course.professor).load_only(User.id, User.name, raiseload=True),
+            defaultload(Course.lectures).options(
+                defaultload(Lecture.attended_students).load_only(User.id, User.name, raiseload=True))
+        ))
+        return template
 
     def get_by_id(self, id: int) -> Optional[Course]:
         stmt = self.__select_course().where(Course.id == id)
