@@ -6,3 +6,7 @@ class InvalidCredentialsException(Exception):
 
 class InvalidInputException(Exception):
     pass
+
+
+class NoCourseException(Exception):
+    pass
