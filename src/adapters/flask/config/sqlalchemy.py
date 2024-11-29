@@ -1,13 +1,21 @@
-from sqlalchemy import create_engine, Table, Column, Integer, String, Enum, ForeignKey, DATETIME, Date
 from sqlalchemy.orm import scoped_session, sessionmaker, registry, relationship, deferred
 
+from sqlalchemy import create_engine, Table, Column, Integer, String, Enum, ForeignKey, Date, event
 from src.domain.entities.course import Course
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 
-
 engine = create_engine('sqlite:///dev.db', echo=True)
+
+
+# enforce foreign keys constraints on sqlite
+@event.listens_for(engine, "connect")
+def enable_sqlite_fks(dbapi_connection):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
+
 
 def init_db():
     mapper_registry = registry()
@@ -73,7 +81,6 @@ def init_db():
         }
     )
     metadata.create_all(engine)
-
 
 
 db_session = scoped_session(sessionmaker(bind=engine))

@@ -1,8 +1,8 @@
 from flask import Flask
 
-from src.adapter.flask.blueprint.auth import auth_bp
-from src.adapter.flask.blueprint.course import course_bp
-from src.adapter.flask.config.sqlalchemy import db_session, init_db
+from src.adapters.flask.blueprint.auth import auth_bp
+from src.adapters.flask.blueprint.course import course_bp
+from src.adapters.flask.config.sqlalchemy import db_session, init_db
 
 
 def create_app() -> Flask:
