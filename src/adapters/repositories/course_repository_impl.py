@@ -10,11 +10,11 @@ from src.domain.ports.course_repository import ICourseRepository
 
 
 class CourseRepository(ICourseRepository):
+
     def __init__(self, session: Session):
         self.session = session
 
     # query statement for course with only necessary data e.g. no password hash from user etc.
-    # due to lazyloading=select the not selected fields are only queried when accessed
     @staticmethod
     def __select_course() -> Select[tuple[Course]]:
         template = (select(Course)

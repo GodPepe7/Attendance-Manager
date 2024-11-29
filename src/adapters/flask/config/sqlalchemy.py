@@ -47,7 +47,7 @@ def init_db():
         "lecture",
         metadata,
         Column("id", Integer, primary_key=True, autoincrement=True),
-        Column("course_id", Integer, ForeignKey("course.id"), nullable=False),
+        Column("course_id", Integer, ForeignKey("course.id", ondelete="CASCADE"), nullable=False),
         Column("date", Date, nullable=False)
     )
     attendance_table = Table(
@@ -69,7 +69,7 @@ def init_db():
         course_table,
         properties={
             "professor": relationship("User", lazy="select"),
-            "lectures": relationship("Lecture"),
+            "lectures": relationship("Lecture", cascade="all, delete, delete-orphan"),
             "enrolled_students": relationship("User", secondary=enrollment_table)
         }
     )
@@ -80,6 +80,7 @@ def init_db():
             "attended_students": relationship("User", secondary=attendance_table)
         }
     )
+
     metadata.create_all(engine)
 
 

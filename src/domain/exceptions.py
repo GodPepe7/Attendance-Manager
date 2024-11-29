@@ -10,3 +10,7 @@ class InvalidInputException(Exception):
 
 class NoCourseException(Exception):
     pass
+
+
+class NoLectureException(Exception):
+    pass

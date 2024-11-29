@@ -1,7 +1,9 @@
-from src.domain.exceptions import InvalidInputException, InvalidCredentialsException, NoCourseException
+from src.domain.exceptions import InvalidInputException, InvalidCredentialsException, NoCourseException, \
+    NoLectureException
 
 EXCEPTION_DICT = {
     InvalidInputException: 400,
     InvalidCredentialsException: 403,
-    NoCourseException: 404
+    NoCourseException: 404,
+    NoLectureException: 404
 }
