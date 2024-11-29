@@ -11,7 +11,7 @@ engine = create_engine('sqlite:///dev.db', echo=True)
 
 # enforce foreign keys constraints on sqlite
 @event.listens_for(engine, "connect")
-def enable_sqlite_fks(dbapi_connection):
+def enable_sqlite_fks(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()

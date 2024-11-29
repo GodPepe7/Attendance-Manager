@@ -17,6 +17,8 @@ class UserService:
         return self.repo.get_by_id(id)
 
     def authenticate(self, email: str, password: str) -> User:
+        """Checks if the passed in credentials are correct and returns the User if so. Otherwise, raises an InvalidCredentialsException"""
+        
         user = self.repo.get_by_email(email)
         try:
             if user and user.check_password(password):
