@@ -1,24 +1,24 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 
 
-@dataclass
+@dataclass(frozen=True)
 class UserDto:
     id: int
     name: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class LectureDto:
     id: int
     date: datetime.date
-    attended_students: list[UserDto]
+    attended_students: list[UserDto] = field(compare=False)
 
 
-@dataclass
+@dataclass(frozen=True)
 class CourseDto:
     id: int
     name: str
     professor: UserDto
     lectures: list[LectureDto]
-    enrolled_students: list[UserDto]
+    enrolled_students: list[UserDto] = field(compare=False)

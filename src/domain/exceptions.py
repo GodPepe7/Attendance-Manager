@@ -8,9 +8,9 @@ class InvalidInputException(Exception):
     pass
 
 
-class NoCourseException(Exception):
+class NotFoundException(Exception):
     pass
 
 
-class NoLectureException(Exception):
+class NotAuthorizedException(Exception):
     pass

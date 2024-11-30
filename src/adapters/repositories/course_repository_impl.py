@@ -14,7 +14,7 @@ class CourseRepository(ICourseRepository):
     def __init__(self, session: Session):
         self.session = session
 
-    # query statement for course with only necessary data e.g. no password hash from user etc.
+    # query statement for course with only necessary data and makes sure that sensitive user data can't be accessed.
     @staticmethod
     def __select_course() -> Select[tuple[Course]]:
         template = (select(Course)

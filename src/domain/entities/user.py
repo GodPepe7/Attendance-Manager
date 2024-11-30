@@ -22,6 +22,9 @@ class User:
     def __repr__(self):
         return f"<User {self.id} {self.name}>"
 
+    def __hash__(self):
+        return hash((self.id, self.name))
+
     def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
 

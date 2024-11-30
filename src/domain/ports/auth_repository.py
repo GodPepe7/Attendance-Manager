@@ -7,5 +7,5 @@ class IAuthRepository(ABC):
         pass
 
     @abstractmethod
-    def is_lecture_student(self, student_id: int, lecture_id: int) -> bool:
+    def is_course_student(self, student_id: int, course_id: int) -> bool:
         pass

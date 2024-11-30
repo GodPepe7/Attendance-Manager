@@ -13,7 +13,7 @@ course_service = CourseService(course_repo)
 
 
 @course_bp.get("/")
-@login_required(role=Role.PROFESSOR)
+@login_required(roles=[Role.PROFESSOR])
 def get_courses():
     prof_id = g.user.id
     courses = course_service.get_courses_by_prof_id(prof_id)
@@ -21,7 +21,7 @@ def get_courses():
 
 
 @course_bp.get("/<int:id>/")
-@login_required(role=Role.PROFESSOR)
+@login_required(roles=[Role.PROFESSOR])
 def get_course_by_id(id: int):
     course = course_service.get_by_id(id)
     return jsonify(course), 200

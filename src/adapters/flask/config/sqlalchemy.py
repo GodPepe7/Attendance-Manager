@@ -8,6 +8,69 @@ from src.domain.entities.user import User
 
 engine = create_engine('sqlite:///dev.db', echo=True)
 
+mapper_registry = registry()
+metadata = mapper_registry.metadata
+
+user_table = Table(
+    "user",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("name", String(50), nullable=False),
+    Column("email", String(30), nullable=False, unique=True),
+    Column("password_hash", String(100), nullable=False),
+    Column("role", Enum(Role), nullable=False)
+)
+course_table = Table(
+    "course",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("name", String(50), nullable=False),
+    Column("professor_id", Integer, ForeignKey("user.id"), nullable=False)
+)
+enrollment_table = Table(
+    "enrollment",
+    metadata,
+    Column("student_id", Integer, ForeignKey("user.id"), primary_key=True, nullable=False),
+    Column("course_id", Integer, ForeignKey("course.id"), primary_key=True, nullable=False)
+)
+lecture_table = Table(
+    "lecture",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("course_id", Integer, ForeignKey("course.id", ondelete="CASCADE"), nullable=False),
+    Column("date", Date, nullable=False)
+)
+attendance_table = Table(
+    "attendance",
+    metadata,
+    Column("student_id", Integer, ForeignKey("user.id"), primary_key=True, nullable=False),
+    Column("lecture_id", Integer, ForeignKey("lecture.id"), primary_key=True, nullable=False)
+)
+
+mapper_registry.map_imperatively(
+    User,
+    user_table,
+    properties={
+        "password_hash": deferred(user_table.c.password_hash)
+    }
+)
+mapper_registry.map_imperatively(
+    Course,
+    course_table,
+    properties={
+        "professor": relationship("User", lazy="select"),
+        "lectures": relationship("Lecture", cascade="all, delete, delete-orphan", collection_class=set),
+        "enrolled_students": relationship("User", secondary=enrollment_table, collection_class=set)
+    }
+)
+mapper_registry.map_imperatively(
+    Lecture,
+    lecture_table,
+    properties={
+        "attended_students": relationship("User", secondary=attendance_table, collection_class=set)
+    }
+)
+
 
 # enforce foreign keys constraints on sqlite
 @event.listens_for(engine, "connect")
@@ -18,69 +81,6 @@ def enable_sqlite_fks(dbapi_connection, connection_record):
 
 
 def init_db():
-    mapper_registry = registry()
-    metadata = mapper_registry.metadata
-
-    user_table = Table(
-        "user",
-        metadata,
-        Column("id", Integer, primary_key=True, autoincrement=True),
-        Column("name", String(50), nullable=False),
-        Column("email", String(30), nullable=False, unique=True),
-        Column("password_hash", String(100), nullable=False),
-        Column("role", Enum(Role), nullable=False)
-    )
-    course_table = Table(
-        "course",
-        metadata,
-        Column("id", Integer, primary_key=True, autoincrement=True),
-        Column("name", String(50), nullable=False),
-        Column("professor_id", Integer, ForeignKey("user.id"), nullable=False)
-    )
-    enrollment_table = Table(
-        "enrollment",
-        metadata,
-        Column("student_id", Integer, ForeignKey("user.id"), primary_key=True, nullable=False),
-        Column("course_id", Integer, ForeignKey("course.id"), primary_key=True, nullable=False)
-    )
-    lecture_table = Table(
-        "lecture",
-        metadata,
-        Column("id", Integer, primary_key=True, autoincrement=True),
-        Column("course_id", Integer, ForeignKey("course.id", ondelete="CASCADE"), nullable=False),
-        Column("date", Date, nullable=False)
-    )
-    attendance_table = Table(
-        "attendance",
-        metadata,
-        Column("student_id", Integer, ForeignKey("user.id"), primary_key=True, nullable=False),
-        Column("lecture_id", Integer, ForeignKey("lecture.id"), primary_key=True, nullable=False)
-    )
-
-    mapper_registry.map_imperatively(
-        User,
-        user_table,
-        properties={
-            "password_hash": deferred(user_table.c.password_hash)
-        }
-    )
-    mapper_registry.map_imperatively(
-        Course,
-        course_table,
-        properties={
-            "professor": relationship("User", lazy="select"),
-            "lectures": relationship("Lecture", cascade="all, delete, delete-orphan"),
-            "enrolled_students": relationship("User", secondary=enrollment_table)
-        }
-    )
-    mapper_registry.map_imperatively(
-        Lecture,
-        lecture_table,
-        properties={
-            "attended_students": relationship("User", secondary=attendance_table)
-        }
-    )
-
     metadata.create_all(engine)
 
 

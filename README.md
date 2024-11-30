@@ -5,13 +5,15 @@ Problems so far:
 
 - Mapping ORM to Vanilla Python Classes has barely any documentation
 - Lazy Loading
+- Putting Authorization in domain instead of letting db handle it
 
 TODO:
 
-- Lecture Management
-- Course Management
-- Attendance Management
+~~- Lecture Management~~
+~~- Attendance Management~~
+
 - Attendance logging with QR Code or Password
+- Course Management
 - Frontend
 - Tests
 - DI

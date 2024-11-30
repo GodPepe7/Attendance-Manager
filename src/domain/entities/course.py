@@ -10,11 +10,14 @@ class Course:
     name: str
     professor: User
     id: int = None
-    lectures: list[Lecture] = field(default_factory=list)
-    enrolled_students: list[User] = field(default_factory=list)
+    lectures: set[Lecture] = field(default_factory=set)
+    enrolled_students: set[User] = field(default_factory=set)
 
     def __repr__(self):
         return f"<Course {self.id} {self.name}>"
+
+    def __hash__(self):
+        return hash((self.name, self.id))
 
     def to_dto(self) -> CourseDto:
         return CourseDto(

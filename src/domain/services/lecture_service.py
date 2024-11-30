@@ -1,5 +1,5 @@
 from src.domain.entities.lecture import Lecture
-from src.domain.exceptions import NoCourseException, NoLectureException
+from src.domain.exceptions import NotFoundException
 from src.domain.ports.auth_repository import IAuthRepository
 from src.domain.ports.lecture_repository import ILectureRepository
 
@@ -14,7 +14,7 @@ class LectureService:
         or it doesn't belong to the professor, raises a NoCourseException"""
         is_course_professor = self.auth_repo.is_course_professor(professor_id, lecture.course_id)
         if not is_course_professor:
-            raise NoCourseException(
+            raise NotFoundException(
                 f"Couldn't save lecture. Only allowed to save lectures to owned courses!")
         return self.repo.save(lecture, professor_id)
 
@@ -23,8 +23,8 @@ class LectureService:
         a NoCourseException or if no lecture is found raises a NoLectureException"""
         is_course_professor = self.auth_repo.is_course_professor(professor_id, course_id)
         if not is_course_professor:
-            raise NoCourseException(
+            raise NotFoundException(
                 f"Couldn't delete lecture. Only allowed to delete of owned courses!")
         deleted = self.repo.delete(id)
         if not deleted:
-            raise NoLectureException(f"Couldn't delete lecture. Lecture with ID: {id} doesn't exist")
+            raise NotFoundException(f"Couldn't delete lecture. Lecture with ID: {id} doesn't exist")

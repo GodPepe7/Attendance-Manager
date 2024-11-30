@@ -1,5 +1,3 @@
-from typing import Optional
-
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -15,11 +13,11 @@ class AuthRepository(IAuthRepository):
         stmt = (select(Course.id)
                 .where(Course.id == course_id)
                 .where(Course.professor_id == professor_id))
-        course: Optional[Course] = self.session.scalar(stmt)
-        if course:
-            return True
-        else:
-            return False
+        course = self.session.scalar(stmt)
+        return course is not None
 
-    def is_lecture_student(self, student_id: int, lecture_id: int) -> bool:
-        pass
+    def is_course_student(self, student_id: int, course_id: int) -> bool:
+        course = self.session.get(Course, course_id)
+        if not course:
+            return False
+        return student_id in [student.id for student in course.enrolled_students]

@@ -13,14 +13,14 @@ repo = UserRepository(db_session())
 user_service = UserService(repo)
 
 
-def login_required(role: Role = None):
+def login_required(roles: list[Role] = None):
     """View decorator that blocks access to sites if not logged in."""
 
     def decorator(view):
         @functools.wraps(view)
         def wrapped_view(**kwargs):
-            if g.user is None or (role and g.user.role != role):
-                return "", 403
+            if g.user is None or (g.user.role not in roles):
+                return f"User needs to be logged in as {[role.name for role in roles]}!", 403
             return view(**kwargs)
 
         return wrapped_view
@@ -58,7 +58,7 @@ def logout():
 
 
 @auth_bp.get("/")
-@login_required(role=Role.PROFESSOR)
+@login_required(roles=[Role.PROFESSOR])
 def get_users():
     return user_service.get_all()
 
@@ -69,7 +69,7 @@ def get_user(id):
 
 
 @auth_bp.post("/")
-@login_required(role=Role.ADMIN)
+@login_required(roles=[Role.ADMIN])
 def save_users():
     body = request.json
     email = body["email"]

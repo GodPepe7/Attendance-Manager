@@ -1,12 +1,10 @@
-import logging
+from flask import Flask
 
-from flask import Flask, jsonify
-
+from src.adapters.flask.blueprint.attendance import attendance_bp
 from src.adapters.flask.blueprint.auth import auth_bp
 from src.adapters.flask.blueprint.course import course_bp
 from src.adapters.flask.blueprint.lecture import lecture_bp
 from src.adapters.flask.config.sqlalchemy import db_session, init_db
-from src.adapters.flask.exception_handler import EXCEPTION_DICT
 
 
 def create_app() -> Flask:
@@ -21,19 +19,20 @@ def create_app() -> Flask:
     def shutdown_session(exception=None):
         db_session.remove()
 
-    @app.errorhandler(Exception)
-    def handle_exception(error):
-        for exc_type, code in EXCEPTION_DICT.items():
-            if isinstance(error, exc_type):
-                response = {"error": exc_type.__name__, "message": str(error)}
-                return jsonify(response), code
-
-        response = {"error": "InternalServerError"}
-        logging.error(error)
-        return jsonify(response), 500
+    # @app.errorhandler(Exception)
+    # def handle_exception(error):
+    #     for exc_type, code in EXCEPTION_DICT.items():
+    #         if isinstance(error, exc_type):
+    #             response = {"error": exc_type.__name__, "message": str(error)}
+    #             return jsonify(response), code
+    #
+    #     response = {"error": "InternalServerError"}
+    #     logging.error(error)
+    #     return jsonify(response), 500
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(course_bp)
     app.register_blueprint(lecture_bp)
+    app.register_blueprint(attendance_bp)
     app.add_url_rule("/", endpoint="index")
     return app

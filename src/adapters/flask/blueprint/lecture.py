@@ -16,7 +16,7 @@ lecture_service = LectureService(lecture_repo, auth_repo)
 
 
 @lecture_bp.post("/")
-@login_required(role=Role.PROFESSOR)
+@login_required(roles=[Role.PROFESSOR])
 def save(course_id: int):
     prof_id = g.user.id
     body = request.json
@@ -28,7 +28,7 @@ def save(course_id: int):
 
 
 @lecture_bp.delete("/<int:lecture_id>")
-@login_required(role=Role.PROFESSOR)
+@login_required(roles=[Role.PROFESSOR])
 def delete(course_id: int, lecture_id: int):
     prof_id = g.user.id
     lecture_service.delete(id=lecture_id, professor_id=prof_id, course_id=course_id)

@@ -11,10 +11,13 @@ class Lecture:
     course_id: int
     date: datetime.date
     id: int = None
-    attended_students: list[User] = field(default_factory=list)
+    attended_students: set[User] = field(default_factory=set)
 
     def __repr__(self):
         return f"<Lecture {self.id} of {self.date}>"
+
+    def __hash__(self):
+        return hash((self.id, self.date, self.course_id))
 
     def to_dto(self) -> LectureDto:
         return LectureDto(
