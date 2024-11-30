@@ -14,3 +14,7 @@ class NotFoundException(Exception):
 
 class NotAuthorizedException(Exception):
     pass
+
+
+class QrCodeExpired(Exception):
+    pass

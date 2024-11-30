@@ -69,7 +69,7 @@ def get_user(id):
 
 
 @auth_bp.post("/")
-@login_required(roles=[Role.ADMIN])
+# @login_required(roles=[Role.ADMIN])
 def save_users():
     body = request.json
     email = body["email"]
