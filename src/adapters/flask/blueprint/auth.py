@@ -1,6 +1,7 @@
 import functools
 
-from flask import (request, Blueprint, jsonify, g, session, redirect, url_for, flash, render_template)
+from flask import (request, Blueprint, jsonify, g, session, redirect, url_for, flash, render_template, Response,
+                   render_template_string)
 
 from src.adapters.flask.config.sqlalchemy import db_session
 from src.adapters.repositories.user_repository_impl import UserRepository
@@ -57,11 +58,11 @@ def login():
             session["user_id"] = user.id
             next_page = session.get('next')
             session.pop('next', None)
-            return redirect(next_page or url_for('course.index'))
-        except InvalidCredentialsException:
-            flash(str(InvalidCredentialsException), "error")
-            response = {"error": "InvalidCredentialsException", "message": str(InvalidCredentialsException)}
-            return jsonify(response), 403
+            response = Response("Logged in")
+            response.headers["HX-Redirect"] = next_page or url_for('course.index')
+            return response
+        except InvalidCredentialsException as e:
+            return render_template_string(f"<p>{e}<p>")
 
     return render_template("login.html")
 
