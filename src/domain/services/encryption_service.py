@@ -3,6 +3,8 @@ from typing import Optional
 
 from fernet import Fernet
 
+from src.domain.exceptions import InvalidInputException
+
 
 class EncryptionService:
     def __init__(self, fernet_key: bytes):
@@ -18,4 +20,4 @@ class EncryptionService:
             date_time = datetime.strptime(decrypted_str, "%Y-%m-%d %H:%M:%S")
             return date_time
         except Exception:
-            return None
+            raise InvalidInputException("Qr Code String is not valid")

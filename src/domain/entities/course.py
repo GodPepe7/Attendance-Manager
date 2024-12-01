@@ -17,7 +17,7 @@ class Course:
         return f"<Course {self.id} {self.name}>"
 
     def __hash__(self):
-        return hash((self.name, self.id))
+        return hash((self.name, self.id, self.professor))
 
     def to_dto(self) -> CourseDto:
         return CourseDto(

@@ -1,14 +1,15 @@
 import functools
 
-from flask import (request, Blueprint, jsonify, g, session)
+from flask import (request, Blueprint, jsonify, g, session, redirect, url_for, flash, render_template)
 
 from src.adapters.flask.config.sqlalchemy import db_session
 from src.adapters.repositories.user_repository_impl import UserRepository
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
+from src.domain.exceptions import InvalidCredentialsException
 from src.domain.services.user_service import UserService
 
-auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
+auth = Blueprint('auth', __name__, url_prefix="/auth", template_folder="../templates")
 repo = UserRepository(db_session())
 user_service = UserService(repo)
 
@@ -19,7 +20,11 @@ def login_required(roles: list[Role] = None):
     def decorator(view):
         @functools.wraps(view)
         def wrapped_view(**kwargs):
-            if g.user is None or (g.user.role not in roles):
+            if g.user is None:
+                session['next'] = request.url
+                return redirect(url_for('auth.login'))
+            if roles and g.user.role not in roles:
+                flash(f"Access denied. Required roles: {[role.name for role in roles]}", 'error')
                 return f"User needs to be logged in as {[role.name for role in roles]}!", 403
             return view(**kwargs)
 
@@ -28,7 +33,7 @@ def login_required(roles: list[Role] = None):
     return decorator
 
 
-@auth_bp.before_app_request
+@auth.before_app_request
 def load_logged_in_user():
     """If a user id is stored in the session, load the user object from
     the database into ``g.user``."""
@@ -39,36 +44,46 @@ def load_logged_in_user():
         g.user = user_service.get_by_id(user_id)
 
 
-@auth_bp.post("/login")
+@auth.route("/login", methods=["GET", "POST"])
 def login():
-    session.clear()
-    body = request.json
-    email = body["email"]
-    password = body["password"]
-    user = user_service.authenticate(email, password)
-    if user:
-        session["user_id"] = user.id
-    return "", 204
+    if g.user is not None:
+        return redirect(url_for("course.index"))
+
+    if request.method == "POST":
+        email = request.form.get('username')
+        password = request.form.get('password')
+        try:
+            user = user_service.authenticate(email, password)
+            session["user_id"] = user.id
+            next_page = session.get('next')
+            session.pop('next', None)
+            return redirect(next_page or url_for('course.index'))
+        except InvalidCredentialsException:
+            flash(str(InvalidCredentialsException), "error")
+            response = {"error": "InvalidCredentialsException", "message": str(InvalidCredentialsException)}
+            return jsonify(response), 403
+
+    return render_template("login.html")
 
 
-@auth_bp.get("/logout")
+@auth.get("/logout")
 def logout():
     session.clear()
     return "", 200
 
 
-@auth_bp.get("/")
+@auth.get("/")
 @login_required(roles=[Role.PROFESSOR])
 def get_users():
     return user_service.get_all()
 
 
-@auth_bp.get("/<int:id>/")
+@auth.get("/<int:id>/")
 def get_user(id):
     return jsonify(user_service.get_by_id(id))
 
 
-@auth_bp.post("/")
+@auth.post("/")
 # @login_required(roles=[Role.ADMIN])
 def save_users():
     body = request.json

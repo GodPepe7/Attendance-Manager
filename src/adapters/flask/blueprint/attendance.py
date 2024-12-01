@@ -36,13 +36,13 @@ def delete(course_id: int, lecture_id: int, student_id: int):
     return "", 204
 
 
-@attendance_bp.get("/qr-code-link")
+@attendance_bp.get("/qr")
 @login_required(roles=[Role.PROFESSOR])
 def get_qr_code_string(course_id: int, lecture_id: int):
     prof_id = g.user.id
     seconds_string = request.args.get('seconds')
     if not seconds_string:
-        return "Need seconds in parameters", 401
+        return "Missing 'seconds' paremeter in URL", 400
     try:
         seconds = int(seconds_string)
         encypted_expiration_time = attendance_service.generate_qr_code_string(prof_id, course_id, seconds,
@@ -50,10 +50,10 @@ def get_qr_code_string(course_id: int, lecture_id: int):
         qr_code_link = f"/course/{course_id}/lecture/{lecture_id}/attendance/student/{encypted_expiration_time}"
         return qr_code_link, 200
     except ValueError:
-        return "Invalid input", 401
+        return "'seconds' input needs to be valid number", 400
 
 
-@attendance_bp.post("/student/<qr_code_string>")
+@attendance_bp.get("/qr/<qr_code_string>")
 @login_required(roles=[Role.STUDENT])
 def save_with_qr_code_string(course_id: int, lecture_id: int, qr_code_string: str):
     student_id = g.user.id
