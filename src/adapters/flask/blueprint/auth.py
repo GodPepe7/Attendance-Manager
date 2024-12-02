@@ -1,6 +1,6 @@
 import functools
 
-from flask import (request, Blueprint, jsonify, g, session, redirect, url_for, flash, render_template, Response,
+from flask import (request, Blueprint, jsonify, g, session, redirect, url_for, render_template, Response,
                    render_template_string)
 
 from src.adapters.flask.config.sqlalchemy import db_session
@@ -25,8 +25,7 @@ def login_required(roles: list[Role] = None):
                 session['next'] = request.url
                 return redirect(url_for('auth.login'))
             if roles and g.user.role not in roles:
-                flash(f"Access denied. Required roles: {[role.name for role in roles]}", 'error')
-                return f"User needs to be logged in as {[role.name for role in roles]}!", 403
+                return f"Access denied. Needs to be logged in as {[role.name for role in roles]}!", 403
             return view(**kwargs)
 
         return wrapped_view

@@ -41,4 +41,5 @@ def create_app() -> Flask:
     app.register_blueprint(lecture_bp)
     app.register_blueprint(attendance_bp)
     # app.add_url_rule("/", endpoint="index")
+
     return app

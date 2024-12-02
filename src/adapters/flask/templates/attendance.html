@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div
+    class="min-h-screen p-4 relative overflow-hidden">
+  <header class="bg-white shadow-md p-4 mb-4 flex justify-between items-center">
+    <div class="flex items-center space-x-3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24"
+           stroke="currentColor">
+        <path d="M12 14l9-5-9-5-9 5 9 5z"/>
+        <path
+            d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/>
+      </svg>
+      <h1 class="text-2xl font-bold text-gray-800">{{ course.name }}</h1>
+    </div>
+    <a href="/courses"
+       class="bg-gray-700 hover:bg-gray-500 text-white font-semibold py-2 px-4 border rounded shadow">
+      Back to Courses
+    </a>
+  </header>
+  <div class="relative z-10 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6">
+    <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-md mb-4">
+      <div class="flex items-center space-x-2">
+        <input type="text" placeholder="Search by name, ID, or email" class="px-4 py-2 border rounded-md">
+        <button class="bg-gray-700 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                  clip-rule="evenodd"/>
+          </svg>
+          Add Lecture
+        </button>
+        <button class="bg-gray-700 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+                  d="M3 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 2V5h1v1H5zM3 13a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1v-3zm2 2v-1h1v1H5zM13 3a1 1 0 00-1 1v3a1 1 0 001 1h3a1 1 0 001-1V4a1 1 0 00-1-1h-3zm1 2v1h1V5h-1z"
+                  clip-rule="evenodd"/>
+            <path
+                d="M11 4a1 1 0 10-2 0v1a1 1 0 002 0V4zM10 7a1 1 0 011 1v1h2a1 1 0 110 2h-3a1 1 0 01-1-1V8a1 1 0 011-1zM16 9a1 1 0 100 2 1 1 0 000-2zM9 13a1 1 0 011-1h1a1 1 0 110 2v2a1 1 0 11-2 0v-3zM7 11a1 1 0 100-2H4a1 1 0 100 2h3zM17 13a1 1 0 01-1 1h-2a1 1 0 110-2h2a1 1 0 011 1zM16 17a1 1 0 100-2h-3a1 1 0 100 2h3z"/>
+          </svg>
+          QR Code
+        </button>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="overflow-x-auto" style="height: calc(100vh - 250px);">
+        <table class="w-full">
+          <thead>
+          <tr class="border-b border-gray-200">
+            <th class="sticky left-0 z-20 bg-gray-100 px-6 py-3 text-left text-base font-semibold text-gray-500 uppercase tracking-wider ">
+              Name
+            </th>
+            {% for lecture in course.lectures %}
+            <th class="text-center p-0 bg-gray-50">
+              <button class="w-full h-full px-2 py-3 hover:bg-gray-200 font-normal">
+                {{ lecture.date.strftime('%d.%m.%y') }}
+              </button>
+            </th>
+            {% endfor %}
+          </tr>
+          </thead>
+          <tbody>
+          {% for student in course.enrolled_students %}
+          <tr class="border-b border-gray-200">
+            <td class="sticky left-0 z-20 bg-white px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="text-sm font-medium text-gray-900">{{student.name}}</div>
+              </div>
+            </td>
+            {% for lecture in course.lectures %}
+
+            <td class="p-0 whitespace-nowrap">
+              <button
+                  class="w-full h-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <span class="sr-only">Toggle attendance</span>
+                {% if student.id | is_attended(lecture.attended_students) %}
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="green">
+                  <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clip-rule="evenodd"/>
+                </svg>
+                {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="red">
+                  <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clip-rule="evenodd"/>
+                </svg>
+                {% endif %}
+              </button>
+              {% endfor %}
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
