@@ -1,4 +1,6 @@
-from flask import Blueprint, request, g, jsonify
+from datetime import datetime
+
+from flask import Blueprint, request, g, url_for, redirect
 
 from src.adapters.flask.blueprint.auth import login_required
 from src.adapters.flask.config.sqlalchemy import db_session
@@ -8,26 +10,25 @@ from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.services.lecture_service import LectureService
 
-lecture_bp = Blueprint('lecture', __name__, url_prefix="/course/<int:course_id>/lecture")
+lecture = Blueprint('lecture', __name__, url_prefix="/courses/<int:course_id>/lectures")
 
 lecture_repo = LectureRepository(session=db_session())
 auth_repo = AuthRepository(session=db_session())
 lecture_service = LectureService(lecture_repo, auth_repo)
 
 
-@lecture_bp.post("/")
+@lecture.post("/")
 @login_required(roles=[Role.PROFESSOR])
 def save(course_id: int):
     prof_id = g.user.id
-    body = request.json
-    date = body["date"]
-    lecture = Lecture.create(course_id=course_id, date=date)
-    id = lecture_service.save(lecture=lecture, professor_id=prof_id)
-    response = {"id": id}
-    return jsonify(response), 200
+    date = request.form.get('lecture-date')
+    datetime.strptime(date, '%Y-%m-%d')
+    lecture_data = Lecture.create(course_id=course_id, date=date)
+    lecture_service.save(lecture=lecture_data, professor_id=prof_id)
+    return redirect(url_for('course.get_by_id', course_id=course_id))
 
 
-@lecture_bp.delete("/<int:lecture_id>")
+@lecture.delete("/<int:lecture_id>")
 @login_required(roles=[Role.PROFESSOR])
 def delete(course_id: int, lecture_id: int):
     prof_id = g.user.id

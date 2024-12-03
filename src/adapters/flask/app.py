@@ -6,7 +6,7 @@ from flask import Flask, jsonify
 from src.adapters.flask.blueprint.attendance import attendance_bp
 from src.adapters.flask.blueprint.auth import auth
 from src.adapters.flask.blueprint.course import course
-from src.adapters.flask.blueprint.lecture import lecture_bp
+from src.adapters.flask.blueprint.lecture import lecture
 from src.adapters.flask.config.exception_handler import EXCEPTION_DICT
 from src.adapters.flask.config.sqlalchemy import db_session, init_db
 
@@ -38,7 +38,7 @@ def create_app() -> Flask:
 
     app.register_blueprint(auth)
     app.register_blueprint(course)
-    app.register_blueprint(lecture_bp)
+    app.register_blueprint(lecture)
     app.register_blueprint(attendance_bp)
     # app.add_url_rule("/", endpoint="index")
 

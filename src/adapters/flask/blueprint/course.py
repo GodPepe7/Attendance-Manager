@@ -21,10 +21,10 @@ def index():
     return render_template("course.html", courses=courses)
 
 
-@course.get("/<int:id>/")
+@course.get("/<int:course_id>/")
 @login_required(roles=[Role.PROFESSOR])
-def get_course_by_id(id: int):
-    course_data = course_service.get_by_id(id)
+def get_by_id(course_id: int):
+    course_data = course_service.get_by_id(course_id)
     course_data.lectures.sort(key=lambda lecture: lecture.date)
     return render_template("attendance.html", course=course_data)
 
