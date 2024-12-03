@@ -17,7 +17,6 @@ class AttendanceRepository(IAttendanceRepository):
         if not student or not lecture:
             return False
         lecture.attended_students.add(student)
-        self.session.commit()
         return True
 
     def delete(self, lecture_id: int, student_id: int) -> bool:
@@ -27,7 +26,6 @@ class AttendanceRepository(IAttendanceRepository):
             return False
         try:
             lecture.attended_students.remove(student)
-            self.session.commit()
             return True
         except Exception:
             logging.error("couldn't find student in set")

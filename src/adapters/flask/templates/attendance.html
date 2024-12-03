@@ -1,6 +1,52 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+{% import "reusable/dialog.html" as dialog %}
+
+{% call dialog.render("add-lecture", "Add Lecture") %}
+<form id="add-lecture-form" method="post" action="{{request.path}}lectures">
+  <div class="mb-8">
+    <label for="add-lecture-date" class="block text-left text-sm font-medium text-gray-700">Lecture Date</label>
+    <input type="date" id="add-lecture-date" name="lecture-date" required
+           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+  </div>
+  <div class="flex justify-center mt-4">
+    <button type="submit"
+            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+      Add
+    </button>
+  </div>
+</form>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dialog = document.getElementById("add-lecture");
+        const openDialogBtn = document.getElementById('open-add-lecture');
+        openDialogBtn.addEventListener('click', () => dialog.showModal())
+    })
+</script>
+{% endcall %}
+
+{% call dialog.render("edit-lecture", "Edit Lecture") %}
+<form id="edit-lecture-form">
+  <div class="mb-8">
+    <label for="edit-lecture-date" class="block text-left text-sm font-medium text-gray-700">Lecture Date</label>
+    <input type="date" id="edit-lecture-date" name="lecture-date" required
+           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+  </div>
+  <div class="flex items-center justify-center gap-6 mt-4">
+    <button type="button" id="delete-lecture-btn"
+            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+      Delete
+    </button>
+    <button type="button" id="edit-lecture-btn"
+            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+      Edit
+    </button>
+  </div>
+</form>
+{% endcall %}
+
 <div
     class="min-h-screen p-4 relative overflow-hidden">
   <header class="bg-white shadow-md p-4 mb-4 flex justify-between items-center">
@@ -54,26 +100,39 @@
               Name
             </th>
             {% for lecture in course.lectures %}
-            <th class="text-center p-0 bg-gray-50">
-              <button id="{{ lecture.id }}-btn"
+            <th class="text-center p-0 bg-gray-50 lecture-{{ lecture.id }}">
+              <button id="lecture-{{ lecture.id }}-btn"
                       data-date="{{lecture.date.strftime('%Y-%m-%d')}}"
                       class="w-full h-full px-6 py-3 hover:bg-gray-200 font-normal">
                 {{ lecture.date.strftime('%d.%m.%y') }}
               </button>
               <script>
-                  document.getElementById("{{ lecture.id }}-btn").addEventListener("click", () => {
+                  document.getElementById("lecture-{{ lecture.id }}-btn").addEventListener("click", () => {
                       const dialog = document.getElementById("edit-lecture")
                       const datePicker = document.getElementById("edit-lecture-date")
                       const editBtn = document.getElementById("edit-lecture-btn")
                       const deleteBtn = document.getElementById("delete-lecture-btn")
                       datePicker.value = "{{ lecture.date.strftime('%Y-%m-%d') }}"
-                      // editBtn.setAttribute("hx-patch", `${window.location.pathname}/lectures/{{ lecture.id }}`)
-                      deleteBtn.setAttribute("hx-delete", `${window.location.pathname}/lectures/{{ lecture.id }}`)
+                      // editBtn.setAttribute("hx-patch", `${window.location.pathname}lectures/{{ lecture.id }}`)
+                      deleteBtn.setAttribute("hx-delete", `${window.location.pathname}lectures/{{ lecture.id }}`)
+                      deleteBtn.setAttribute("hx-on::after-request", "deleteColumn(event, \"{{ lecture.id }}\")")
+                      htmx.process(deleteBtn)
                       dialog.showModal()
                   })
               </script>
             </th>
             {% endfor %}
+            <script>
+                function deleteColumn(event, lectureId) {
+                    if (!event.detail.successful) return
+                    const lectureTh = document.querySelector(`th.lecture-${lectureId}`)
+                    const lectureTds = document.querySelectorAll(`td.lecture-${lectureId}`)
+                    const dialog = document.getElementById("edit-lecture")
+                    lectureTh.remove()
+                    lectureTds.forEach(td => td.remove())
+                    dialog.close()
+                }
+            </script>
           </tr>
           </thead>
           <tbody>
@@ -85,24 +144,11 @@
               </div>
             </td>
             {% for lecture in course.lectures %}
-            <td class="p-0 h-full">
-              <button
-                  class="w-full h-full flex items-center justify-center focus:outline-none hover:bg-gray-200">
-                <span class="sr-only">Toggle attendance</span>
-                {% if student.id | is_attended(lecture.attended_students) %}
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="green">
-                  <path fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clip-rule="evenodd"/>
-                </svg>
-                {% else %}
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="red">
-                  <path fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                        clip-rule="evenodd"/>
-                </svg>
-                {% endif %}
-              </button>
+            <td class="p-0 h-full lecture-{{ lecture.id }}">
+              {% set has_attended = student.id | is_attended(lecture.attended_students) %}
+              {% set attendance_url = request.path ~ "lectures/" ~ lecture.id ~ "/attendance/" ~ student.id %}
+              {% import 'reusable/attendanceBtn.html' as attendance %}
+              {{ attendance.button(has_attended, attendance_url) }}
             </td>
             {% endfor %}
           </tr>
@@ -113,50 +159,5 @@
     </div>
   </div>
 </div>
-
-{% import "dialog.html" as dialog %}
-
-{% call dialog.render("add-lecture", "Add Lecture") %}
-<form id="add-lecture-form" method="post" action="{{request.path}}lectures">
-  <div class="mb-8">
-    <label for="add-lecture-date" class="block text-left text-sm font-medium text-gray-700">Lecture Date</label>
-    <input type="date" id="add-lecture-date" name="lecture-date" required
-           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-  </div>
-  <div class="flex justify-center mt-4">
-    <button type="submit"
-            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-      Add
-    </button>
-  </div>
-</form>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const dialog = document.getElementById("add-lecture");
-        const openDialogBtn = document.getElementById('open-add-lecture');
-        openDialogBtn.addEventListener('click', () => dialog.showModal())
-    })
-</script>
-{% endcall %}
-
-{% call dialog.render("edit-lecture", "Edit Lecture") %}
-<form id="edit-lecture-form">
-  <div class="mb-8">
-    <label for="edit-lecture-date" class="block text-left text-sm font-medium text-gray-700">Lecture Date</label>
-    <input type="date" id="edit-lecture-date" name="lecture-date" required
-           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-  </div>
-  <div class="flex items-center justify-center gap-6 mt-4">
-    <button type="button" id="delete-lecture-btn"
-            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-      Delete
-    </button>
-    <button type="button" id="edit-lecture-btn"
-            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-      Edit
-    </button>
-  </div>
-</form>
-{% endcall %}
 
 {% endblock %}

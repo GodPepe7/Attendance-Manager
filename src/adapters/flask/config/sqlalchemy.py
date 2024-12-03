@@ -6,7 +6,7 @@ from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 
-engine = create_engine('sqlite:///dev.db', echo=True)
+engine = create_engine('sqlite:///dev.db', echo=False)
 
 mapper_registry = registry()
 metadata = mapper_registry.metadata

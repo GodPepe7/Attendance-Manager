@@ -3,7 +3,7 @@ import traceback
 
 from flask import Flask, jsonify
 
-from src.adapters.flask.blueprint.attendance import attendance_bp
+from src.adapters.flask.blueprint.attendance import attendance
 from src.adapters.flask.blueprint.auth import auth
 from src.adapters.flask.blueprint.course import course
 from src.adapters.flask.blueprint.lecture import lecture
@@ -39,7 +39,7 @@ def create_app() -> Flask:
     app.register_blueprint(auth)
     app.register_blueprint(course)
     app.register_blueprint(lecture)
-    app.register_blueprint(attendance_bp)
+    app.register_blueprint(attendance)
     # app.add_url_rule("/", endpoint="index")
 
     return app
