@@ -3,9 +3,9 @@
 {% block content %}
 
 {% import "reusable/dialog.html" as dialog %}
-
+<!--TODO: split stuff up into multiple files-->
 {% call dialog.render("add-lecture", "Add Lecture") %}
-<form id="add-lecture-form" method="post" action="{{request.path}}lectures">
+<form id="add-lecture-form" method="post" action="{{request.path}}lectures" xmlns:hx-on="http://www.w3.org/1999/xhtml">
   <div class="mb-8">
     <label for="add-lecture-date" class="block text-left text-sm font-medium text-gray-700">Lecture Date</label>
     <input type="date" id="add-lecture-date" name="lecture-date" required
@@ -47,6 +47,95 @@
 </form>
 {% endcall %}
 
+{% call dialog.render("generate-qr", "Generate QR-Code") %}
+<form id="generate-qr-form">
+  <div class="mb-8">
+    <div class="mb-4">
+      <label for="qr-lecture-select" class="block text-left text-sm font-medium text-gray-700">Select Lecture</label>
+      <select id="qr-lecture-select" name="lecture-select" required onchange=""
+              class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+        <option value="" disabled selected>Choose a lecture</option>
+        {% set default_seconds = 30 %}
+        {% for lecture in course.lectures %}
+        <option class="qr-lecture-option lecture" value="{{ lecture.id }}"
+                hx-get="{{ request.path }}lectures/{{ lecture.id }}/attendance/qr"
+                hx-include="[name='seconds']" hx-swap="none" hx-on::after-request="generateQrCode(event)"
+                hx-trigger="click, every {{ default_seconds }}s [isSelected('{{ lecture.id }}')]">
+          {{ lecture.date.strftime('%d.%m.%y') }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="mb-4">
+      <label for="seconds" class="block text-left text-sm font-medium text-gray-700">Regeneration Time
+        (seconds)</label>
+      <input type="number" id="qr-polling-rate-input" onchange="setQrPolling()" id="seconds" name="seconds" required
+             min="30"
+             max="300"
+             value="{{ default_seconds }}"
+             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+    </div>
+    <div class="flex items-center">
+      <canvas class="w-full" id="qr-canvas"></canvas>
+    </div>
+  </div>
+</form>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dialog = document.getElementById("generate-qr");
+        const openDialogBtn = document.getElementById("open-generate-qr-btn")
+        const closeDialogBtn = document.getElementById("close-generate-qr")
+        const lectureSelect = document.getElementById("qr-lecture-select")
+        const qrCanvas = document.getElementById("qr-canvas")
+        const context = qrCanvas.getContext("2d")
+        openDialogBtn.addEventListener("click", () => dialog.showModal())
+        closeDialogBtn.addEventListener("click", () => {
+            lectureSelect.selectedIndex = -1
+            context.clearRect(0, 0, qrCanvas.width, qrCanvas.height);
+        })
+        dialog.addEventListener('click', (event) => {
+            if (event.target === dialog) {
+                lectureSelect.selectedIndex = 0
+                context.clearRect(0, 0, qrCanvas.width, qrCanvas.height);
+            }
+        })
+    })
+
+    function isSelected(lectureId) {
+        const lectureSelect = document.getElementById("qr-lecture-select")
+        return lectureSelect.value === lectureId
+    }
+
+    function setQrPolling() {
+        const pollingRateInput = document.getElementById("qr-polling-rate-input")
+        if (!pollingRateInput.checkValidity()) return
+        pollingRate = pollingRateInput.value
+        const qrLectureOptions = document.querySelectorAll(".qr-lecture-option")
+        qrLectureOptions.forEach(option => {
+            const triggerValue = option.getAttribute("hx-trigger")
+            const split = triggerValue.split(" ")
+            split[1] = pollingRate + "s"
+            const updatedTriggerValue = split.join(" ")
+            option.setAttribute("hx-trigger", updatedTriggerValue)
+            htmx.process(option)
+        })
+    }
+
+    function generateQrCode(event) {
+        if (!event.detail.successful) return
+        const qrString = window.location.hostname + event.detail.xhr.response
+        console.log(qrString)
+        const canvas = document.getElementById("qr-canvas")
+        new QRious({
+            element: canvas,
+            value: qrString,
+            size: canvas.width,
+        })
+    }
+
+</script>
+{% endcall %}
+
 <div
     class="min-h-screen p-4 relative overflow-hidden">
   <header class="bg-white shadow-md p-4 mb-4 flex justify-between items-center">
@@ -79,7 +168,8 @@
           </svg>
           Add Lecture
         </button>
-        <button class="bg-gray-700 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded flex items-center">
+        <button id="open-generate-qr-btn"
+                class="bg-gray-700 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd"
                   d="M3 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 2V5h1v1H5zM3 13a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1v-3zm2 2v-1h1v1H5zM13 3a1 1 0 00-1 1v3a1 1 0 001 1h3a1 1 0 001-1V4a1 1 0 00-1-1h-3zm1 2v1h1V5h-1z"

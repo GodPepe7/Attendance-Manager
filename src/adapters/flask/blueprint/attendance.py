@@ -59,7 +59,8 @@ def get_qr_code_string(course_id: int, lecture_id: int):
         seconds = int(seconds_string)
         encypted_expiration_time = attendance_service.generate_qr_code_string(prof_id, course_id, seconds,
                                                                               datetime.now())
-        qr_code_link = f"/course/{course_id}/lecture/{lecture_id}/attendance/student/{encypted_expiration_time}"
+        qr_code_link = url_for("attendance.save_with_qr_code_string", course_id=course_id, lecture_id=lecture_id,
+                               qr_code_string=encypted_expiration_time)
         return qr_code_link, 200
     except ValueError:
         return "'seconds' input needs to be a valid number", 400
