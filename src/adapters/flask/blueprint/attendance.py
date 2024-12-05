@@ -5,19 +5,20 @@ from flask import Blueprint, g, request, render_template_string, url_for
 from src.adapters.flask.blueprint.auth import login_required
 from src.adapters.flask.config.sqlalchemy import db_session
 from src.adapters.repositories.attendance_repository_impl import AttendanceRepository
-from src.adapters.repositories.auth_repository_impl import AuthRepository
+from src.adapters.repositories.course_repository_impl import CourseRepository
 from src.domain.entities.role import Role
 from src.domain.services.attendance_service import AttendanceService
+from src.domain.services.authorizer_service import AuthorizerService
 from src.domain.services.encryption_service import EncryptionService
 
 attendance = Blueprint('attendance', __name__,
                        url_prefix="/courses/<int:course_id>/lectures/<int:lecture_id>/attendance")
 
 attendance_repo = AttendanceRepository(session=db_session())
-auth_repo = AuthRepository(session=db_session())
-encryption_key: bytes
+course_repo = CourseRepository(session=db_session())
+authorizer = AuthorizerService(course_repo)
 encryption_service = EncryptionService(fernet_key=b'njox0E4EdV3zF3vP7E1LZ79tj9kM9BiX79W8pdfh7tg=')
-attendance_service = AttendanceService(attendance_repo, auth_repo, encryption_service)
+attendance_service = AttendanceService(attendance_repo, authorizer, encryption_service)
 
 
 @attendance.post("/<int:student_id>")

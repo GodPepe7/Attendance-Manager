@@ -26,6 +26,7 @@ class AttendanceRepository(IAttendanceRepository):
             return False
         try:
             lecture.attended_students.remove(student)
+            self.session.delete()
             return True
         except Exception:
             logging.error("couldn't find student in set")

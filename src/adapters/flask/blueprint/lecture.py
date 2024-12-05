@@ -4,17 +4,19 @@ from flask import Blueprint, request, g, url_for, redirect
 
 from src.adapters.flask.blueprint.auth import login_required
 from src.adapters.flask.config.sqlalchemy import db_session
-from src.adapters.repositories.auth_repository_impl import AuthRepository
+from src.adapters.repositories.course_repository_impl import CourseRepository
 from src.adapters.repositories.lecture_repository_impl import LectureRepository
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
+from src.domain.services.authorizer_service import AuthorizerService
 from src.domain.services.lecture_service import LectureService
 
 lecture = Blueprint('lecture', __name__, url_prefix="/courses/<int:course_id>/lectures")
 
 lecture_repo = LectureRepository(session=db_session())
-auth_repo = AuthRepository(session=db_session())
-lecture_service = LectureService(lecture_repo, auth_repo)
+course_repo = CourseRepository(session=db_session())
+authorizer = AuthorizerService(course_repo)
+lecture_service = LectureService(lecture_repo, authorizer)
 
 
 @lecture.post("/")

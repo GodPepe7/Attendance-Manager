@@ -12,7 +12,7 @@ class NotFoundException(Exception):
     pass
 
 
-class NotAuthorizedException(Exception):
+class UnauthorizedException(Exception):
     pass
 
 
