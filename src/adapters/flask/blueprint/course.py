@@ -29,6 +29,7 @@ def get_by_id(course_id: int):
     return render_template("attendance.html", course=course_data)
 
 
+# filter function used in jinja template
 @course.app_template_filter("is_attended")
 def is_attended(student_id, attended_students) -> bool:
     return any(student_id == student.id for student in attended_students)

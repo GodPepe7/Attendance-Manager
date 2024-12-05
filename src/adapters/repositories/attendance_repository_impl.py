@@ -1,5 +1,3 @@
-import logging
-
 from sqlalchemy.orm import Session
 
 from src.domain.entities.lecture import Lecture
@@ -26,8 +24,6 @@ class AttendanceRepository(IAttendanceRepository):
             return False
         try:
             lecture.attended_students.remove(student)
-            self.session.delete()
             return True
-        except Exception:
-            logging.error("couldn't find student in set")
+        except KeyError:
             return False

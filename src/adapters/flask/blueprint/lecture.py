@@ -12,10 +12,10 @@ from src.domain.services.authorizer_service import AuthorizerService
 from src.domain.services.lecture_service import LectureService
 
 lecture = Blueprint('lecture', __name__, url_prefix="/courses/<int:course_id>/lectures")
-
-lecture_repo = LectureRepository(session=db_session())
-course_repo = CourseRepository(session=db_session())
-authorizer = AuthorizerService(course_repo)
+session = db_session()
+lecture_repo = LectureRepository(session=session)
+course_repo = CourseRepository(session=session)
+authorizer = AuthorizerService(course_repo, lecture_repo)
 lecture_service = LectureService(lecture_repo, authorizer)
 
 
