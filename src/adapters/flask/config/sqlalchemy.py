@@ -1,4 +1,3 @@
-from flask import current_app
 from sqlalchemy.orm import scoped_session, sessionmaker, registry, relationship, deferred, Session
 
 from sqlalchemy import create_engine, Table, Column, Integer, String, Enum, ForeignKey, Date, event, MetaData
@@ -30,10 +29,6 @@ def init_db(database_uri: str):
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()
-
-    @current_app.teardown_appcontext
-    def shutdown_session(exception=None):
-        db_session.remove()
 
 
 def _init_db_structure() -> MetaData:

@@ -8,6 +8,10 @@ Problems so far:
 - Putting Authorization in domain instead of letting db handle it
 - Keeping queries as simple as possible
 
+Testing:
+
+- Entity tests super simple, not much to do here as they barely have functionality
+
 TODO:
 
 - ~~Lecture Management~~

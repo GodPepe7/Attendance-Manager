@@ -11,7 +11,7 @@ from src.adapters.flask.blueprint.lecture import lecture as lecture_bp
 from src.adapters.flask.config.config import DevConfig, TestConfig
 from src.adapters.flask.config.container import Container
 from src.adapters.flask.config.exception_handler import EXCEPTION_DICT
-from src.adapters.flask.config.sqlalchemy import init_db
+from src.adapters.flask.config.sqlalchemy import init_db, get_db_session
 
 environments = {
     "dev": DevConfig(),
@@ -30,6 +30,10 @@ def create_app(environment: str = "dev") -> Flask:
         container.wire(modules=[attendance, auth, course, lecture])
         container.config.encryption_key.from_value(app.config.get("ENCRYPTION_KEY"))
         app.container = container
+
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        get_db_session().remove()
 
     @app.errorhandler(Exception)
     def handle_exception(error):

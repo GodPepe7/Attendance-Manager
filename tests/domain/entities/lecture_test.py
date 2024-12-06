@@ -16,3 +16,10 @@ def test_lecture_factory_validates_date_input_with_invalid_format():
         Lecture.factory(1, "1-2-2024")
 
     assert "YYYY-MM-DD" in str(exception.value)
+
+
+def test_lecture_factory_validates_date_input_with_invalid_date():
+    with pytest.raises(InvalidInputException) as exception:
+        Lecture.factory(1, "9999-15-67")
+
+    assert "needs to be valid" in str(exception.value)

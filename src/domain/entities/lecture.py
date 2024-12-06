@@ -31,5 +31,5 @@ class Lecture:
         try:
             parsed_date = datetime.strptime(date, '%Y-%m-%d').date()
         except:
-            raise InvalidInputException("Date needs to be of format YYYY-MM-DD")
+            raise InvalidInputException("Date needs to be valid and of format YYYY-MM-DD!")
         return cls(course_id=course_id, date=parsed_date)

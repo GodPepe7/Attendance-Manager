@@ -1,5 +1,7 @@
+from typing import Optional
+
 from src.domain.entities.user import User
-from src.domain.exceptions import InvalidCredentialsException
+from src.domain.exceptions import InvalidCredentialsException, NotFoundException
 from src.domain.ports.user_repository import IUserRepository
 
 
@@ -13,12 +15,18 @@ class UserService:
     def get_all(self) -> list[User]:
         return self.repo.get_all()
 
-    def get_by_id(self, id: int) -> User:
-        return self.repo.get_by_id(id)
+    def get_by_id(self, id: int) -> Optional[User]:
+        user = self.repo.get_by_id(id)
+        if not user:
+            raise NotFoundException(f"User with ID: {id} doesn't exist")
+        return user
 
     def authenticate(self, email: str, password: str) -> User:
-        """Checks if the passed in credentials are correct and returns the User if so. Otherwise, raises an InvalidCredentialsException"""
-        
+        """
+        Checks if the passed in credentials are correct and returns the User if so.
+        Otherwise, raises an InvalidCredentialsException.
+        """
+
         user = self.repo.get_by_email(email)
         if user and user.check_password(password):
             return user
