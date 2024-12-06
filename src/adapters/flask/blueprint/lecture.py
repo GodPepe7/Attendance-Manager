@@ -1,27 +1,21 @@
 from datetime import datetime
 
+from dependency_injector.wiring import inject, Provide
 from flask import Blueprint, request, g, url_for, redirect
 
-from src.adapters.flask.blueprint.auth import login_required
-from src.adapters.flask.config.sqlalchemy import db_session
-from src.adapters.repositories.course_repository_impl import CourseRepository
-from src.adapters.repositories.lecture_repository_impl import LectureRepository
+from src.adapters.flask.blueprint.login_wrapper import login_required
+from src.adapters.flask.config.container import Container
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
-from src.domain.services.authorizer_service import AuthorizerService
 from src.domain.services.lecture_service import LectureService
 
 lecture = Blueprint('lecture', __name__, url_prefix="/courses/<int:course_id>/lectures")
-session = db_session()
-lecture_repo = LectureRepository(session=session)
-course_repo = CourseRepository(session=session)
-authorizer = AuthorizerService(course_repo, lecture_repo)
-lecture_service = LectureService(lecture_repo, authorizer)
 
 
 @lecture.post("/")
+@inject
 @login_required(roles=[Role.PROFESSOR])
-def save(course_id: int):
+def save(course_id: int, lecture_service: LectureService = Provide[Container.lecture_service]):
     prof_id = g.user.id
     date = request.form.get('lecture-date')
     datetime.strptime(date, '%Y-%m-%d')
@@ -31,8 +25,9 @@ def save(course_id: int):
 
 
 @lecture.delete("/<int:lecture_id>")
+@inject
 @login_required(roles=[Role.PROFESSOR])
-def delete(course_id: int, lecture_id: int):
+def delete(course_id: int, lecture_id: int, lecture_service: LectureService = Provide[Container.lecture_service]):
     prof_id = g.user.id
     lecture_service.delete(id=lecture_id, professor_id=prof_id, course_id=course_id)
     return "", 204
