@@ -1,7 +1,7 @@
 import logging
 import traceback
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, redirect, url_for
 
 from src.adapters.flask.blueprint import attendance, auth, course, lecture
 from src.adapters.flask.blueprint.attendance import attendance as attendance_bp
@@ -47,6 +47,6 @@ def create_app(environment: str = "dev") -> Flask:
     app.register_blueprint(course_bp)
     app.register_blueprint(lecture_bp)
     app.register_blueprint(attendance_bp)
-    app.add_url_rule("/", endpoint="course.index")
+    app.add_url_rule("/", "index", lambda: redirect(url_for("course.index")))
 
     return app
