@@ -11,10 +11,6 @@ db_session: scoped_session[Session]
 
 
 def get_db_session():
-    """
-    Getter method to access the db_session
-    This helps with import and provides a clean way to access the session
-    """
     global db_session
     if db_session is None:
         raise RuntimeError("Database not initialized. Call init_db first.")

@@ -27,7 +27,7 @@ class Lecture:
         )
 
     @classmethod
-    def create(cls, course_id: int, date: str) -> "Lecture":
+    def factory(cls, course_id: int, date: str) -> "Lecture":
         try:
             parsed_date = datetime.strptime(date, '%Y-%m-%d').date()
         except:

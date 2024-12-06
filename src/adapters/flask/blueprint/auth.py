@@ -75,6 +75,6 @@ def save_users(user_service: UserService = Provide[Container.user_service]):
     name = body["name"]
     password = body["password"]
     role = body["role"]
-    user = User.create(name, email, password, role)
+    user = User.factory(name, email, password, role)
     user_service.create_user(user)
     return jsonify({"message": "User created"}), 201

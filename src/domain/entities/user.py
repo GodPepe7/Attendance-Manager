@@ -32,9 +32,10 @@ class User:
         return UserDto(id=self.id, name=self.name)
 
     @classmethod
-    def create(cls, name: str, email: str, password: str, role_input: str) -> "User":
+    def factory(cls, name: str, email: str, password: str, role_input: str) -> "User":
         password_hash = generate_password_hash(password)
         role = get_enum_by_value(role_input)
         if not role:
-            raise InvalidInputException(f"Invalid role \'{role_input}\'. Needs to be one of: {[role for role in Role]}")
+            raise InvalidInputException(
+                f"Invalid role \'{role_input}\'. Needs to be one of: {[role.value for role in Role]}")
         return cls(name=name, email=email, password_hash=password_hash, role=role)

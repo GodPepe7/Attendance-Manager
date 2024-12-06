@@ -15,8 +15,12 @@ attendance = Blueprint('attendance', __name__,
 @attendance.post("/<int:student_id>")
 @inject
 @login_required(roles=[Role.PROFESSOR])
-def save(course_id: int, lecture_id: int, student_id: int,
-         attendance_service: AttendanceService = Provide[Container.attendance_service]):
+def save(
+        course_id: int,
+        lecture_id: int,
+        student_id: int,
+        attendance_service: AttendanceService = Provide[Container.attendance_service]
+):
     ids = IdWrapper(g.user.id, course_id, lecture_id)
     attendance_service.save(ids, student_id)
     delete_endpoint = url_for("attendance.delete", course_id=course_id, lecture_id=lecture_id,
@@ -32,8 +36,11 @@ def save(course_id: int, lecture_id: int, student_id: int,
 @attendance.delete("/<int:student_id>")
 @inject
 @login_required(roles=[Role.PROFESSOR])
-def delete(course_id: int, lecture_id: int, student_id: int,
-           attendance_service: AttendanceService = Provide[Container.attendance_service]):
+def delete(
+        course_id: int,
+        lecture_id: int, student_id: int,
+        attendance_service: AttendanceService = Provide[Container.attendance_service]
+):
     ids = IdWrapper(g.user.id, course_id, lecture_id)
     attendance_service.delete(ids, student_id)
     save_endpoint = url_for("attendance.save", course_id=course_id, lecture_id=lecture_id, student_id=student_id)
@@ -48,8 +55,11 @@ def delete(course_id: int, lecture_id: int, student_id: int,
 @attendance.get("/qr")
 @inject
 @login_required(roles=[Role.PROFESSOR])
-def get_qr_code_string(course_id: int, lecture_id: int,
-                       attendance_service: AttendanceService = Provide[Container.attendance_service]):
+def get_qr_code_string(
+        course_id: int,
+        lecture_id: int,
+        attendance_service: AttendanceService = Provide[Container.attendance_service]
+):
     seconds_string = request.args.get('seconds')
     if not seconds_string:
         return "Missing 'seconds' paremeter in URL", 400
@@ -67,8 +77,12 @@ def get_qr_code_string(course_id: int, lecture_id: int,
 @attendance.get("/qr/<qr_code_string>")
 @inject
 @login_required(roles=[Role.STUDENT])
-def save_with_qr_code_string(course_id: int, lecture_id: int, qr_code_string: str,
-                             attendance_service: AttendanceService = Provide[Container.attendance_service]):
+def save_with_qr_code_string(
+        course_id: int,
+        lecture_id: int,
+        qr_code_string: str,
+        attendance_service: AttendanceService = Provide[Container.attendance_service]
+):
     ids = IdWrapper(g.user.id, course_id, lecture_id)
     attendance_service.save_with_qr_code_string(ids, qr_code_string, datetime.now())
     # TODO: give some sort of success page

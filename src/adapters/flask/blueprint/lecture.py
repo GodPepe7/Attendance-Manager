@@ -19,7 +19,7 @@ def save(course_id: int, lecture_service: LectureService = Provide[Container.lec
     prof_id = g.user.id
     date = request.form.get('lecture-date')
     datetime.strptime(date, '%Y-%m-%d')
-    lecture_data = Lecture.create(course_id=course_id, date=date)
+    lecture_data = Lecture.factory(course_id=course_id, date=date)
     lecture_service.save(lecture=lecture_data, professor_id=prof_id)
     return redirect(url_for('course.get_by_id', course_id=course_id))
 
