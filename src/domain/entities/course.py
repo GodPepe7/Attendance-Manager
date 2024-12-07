@@ -26,5 +26,5 @@ class Course:
             name=self.name,
             professor=self.professor.to_dto(),
             lectures=[lecture.to_dto() for lecture in self.lectures],
-            enrolled_students=[student.to_dto() for student in self.enrolled_students]
+            enrolled_students=[enrollment.to_dto() for enrollment in self.enrolled_students]
         )

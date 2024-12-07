@@ -29,6 +29,6 @@ def get_by_id(course_id: int, course_service: CourseService = Provide[Container.
 
 
 # filter function used in jinja template
-@course.app_template_filter("is_attended")
-def is_attended(student_id, attended_students) -> bool:
-    return any(student_id == student.id for student in attended_students)
+@course.app_template_filter("has_attended")
+def has_attended(enrollment_id: int, attended_students) -> bool:
+    return any(enrollment_id == enrollment.id for enrollment in attended_students)

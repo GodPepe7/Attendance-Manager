@@ -1,6 +1,7 @@
 from typing import Optional
 
 from src.domain.dto import CourseDto
+from src.domain.entities.course import Course
 from src.domain.ports.course_repository import ICourseRepository
 
 
@@ -18,3 +19,6 @@ class CourseService:
         if course:
             return course.to_dto()
         return None
+
+    def save(self, course: Course) -> int:
+        return self.repo.save(course)

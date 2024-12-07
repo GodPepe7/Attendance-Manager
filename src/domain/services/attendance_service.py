@@ -22,16 +22,16 @@ class AttendanceService:
         self.authorizer = authorizer
         self.encryptor = encryptor
 
-    def save(self, ids: IdWrapper, student_id: int):
+    def save(self, ids: IdWrapper, enrollment_id: int):
         self.authorizer.is_professor_of_lecture(ids.user_id, ids.course_id, ids.lecture_id)
-        saved = self.repo.save(ids.lecture_id, student_id)
+        saved = self.repo.save(ids.lecture_id, enrollment_id)
         if not saved:
             raise NotFoundException(
                 f"Couldn't save attendance.")
 
-    def delete(self, ids: IdWrapper, student_id: int):
+    def delete(self, ids: IdWrapper, enrollment_id: int):
         self.authorizer.is_professor_of_lecture(ids.user_id, ids.course_id, ids.lecture_id)
-        deleted = self.repo.delete(ids.lecture_id, student_id)
+        deleted = self.repo.delete(ids.lecture_id, enrollment_id)
         if not deleted:
             raise NotFoundException(
                 f"Couldn't delete attendance. Student and lecture need to exist!")
@@ -45,7 +45,7 @@ class AttendanceService:
 
     def save_with_qr_code_string(self, ids: IdWrapper, qr_code_string: str,
                                  current_time: datetime):
-        self.authorizer.is_course_student(ids.user_id, ids.course_id)
+        self.authorizer.is_enrolled_course_student(ids.user_id, ids.course_id)
         expiration_time = self.encryptor.decrypt_date(qr_code_string)
         if current_time > expiration_time:
             raise QrCodeExpired("Didn't save attendance. QR Code is already expired")

@@ -5,7 +5,7 @@
 {% import "reusable/dialog.html" as dialog %}
 <!--TODO: split stuff up into multiple files-->
 {% call dialog.render("add-lecture", "Add Lecture") %}
-<form id="add-lecture-form" method="post" action="{{request.path}}lectures" xmlns:hx-on="http://www.w3.org/1999/xhtml">
+<form id="add-lecture-form" method="post" action="{{request.path}}lectures">
   <div class="mb-8">
     <label for="add-lecture-date" class="block text-left text-sm font-medium text-gray-700">Lecture Date</label>
     <input type="date" id="add-lecture-date" name="lecture-date" required
@@ -69,7 +69,7 @@
     <div class="mb-4">
       <label for="seconds" class="block text-left text-sm font-medium text-gray-700">Regeneration Time
         (seconds)</label>
-      <input type="number" id="qr-polling-rate-input" onchange="setQrPolling()" id="seconds" name="seconds" required
+      <input type="number" id="qr-polling-rate-input" onchange="setQrPolling()" name="seconds" required
              min="30"
              max="300"
              value="{{ default_seconds }}"
@@ -226,17 +226,17 @@
           </tr>
           </thead>
           <tbody>
-          {% for student in course.enrolled_students %}
+          {% for enrollment in course.enrolled_students %}
           <tr class="border-b border-gray-200 h-full">
             <td class="sticky left-0 z-20 bg-white px-6 py-4 whitespace-nowrap h-full">
               <div class="flex items-center">
-                <div class="text-sm font-semibold text-gray-900">{{student.name}}</div>
+                <div class="text-sm font-semibold text-gray-900">{{enrollment.student.name}}</div>
               </div>
             </td>
             {% for lecture in course.lectures %}
             <td class="p-0 h-full lecture-{{ lecture.id }}">
-              {% set has_attended = student.id | is_attended(lecture.attended_students) %}
-              {% set attendance_url = request.path ~ "lectures/" ~ lecture.id ~ "/attendance/" ~ student.id %}
+              {% set has_attended = enrollment.id | has_attended(lecture.attended_students) %}
+              {% set attendance_url = request.path ~ "lectures/" ~ lecture.id ~ "/attendance/" ~ enrollment.id %}
               {% import 'reusable/attendanceBtn.html' as attendance %}
               {{ attendance.button(has_attended, attendance_url) }}
             </td>

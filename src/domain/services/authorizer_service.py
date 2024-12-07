@@ -25,11 +25,12 @@ class AuthorizerService:
                 f"Lecture with ID '{lecture_id}' is not part of the course with ID: '{course_id}'!")
         self.is_professor_of_course(prof_id, course_id)
 
-    def is_course_student(self, student_id: int, course_id: int):
-        """Checks if the student is enrolled in the course and thus authorized. Will throw an UnauthorizedException otherwise"""
+    def is_enrolled_course_student(self, user_id: int, course_id: int):
+        """Checks if the user is enrolled in the course and thus authorized. Will throw an UnauthorizedException otherwise"""
 
         course = self.course_repo.get_by_id(course_id)
-        is_course_student = course and student_id in [student.id for student in course.enrolled_students]
-        if not is_course_student:
+        is_enrolled_course_student = course and user_id in [enrollment.student.id for enrollment in
+                                                            course.enrolled_students]
+        if not is_enrolled_course_student:
             raise UnauthorizedException(
                 "Only an enrolled student of the course is allowed to do this action!")

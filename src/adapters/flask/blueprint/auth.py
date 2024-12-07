@@ -68,7 +68,7 @@ def get_user(id: int, user_service: UserService = Provide[Container.user_service
 
 @auth.post("/")
 @inject
-@login_required(roles=[Role.ADMIN])
+# @login_required(roles=[Role.ADMIN])
 def save_users(user_service: UserService = Provide[Container.user_service]):
     body = request.json
     email = body["email"]

@@ -8,7 +8,6 @@ from src.domain.ports.course_repository import ICourseRepository
 
 
 class CourseRepository(ICourseRepository):
-
     def __init__(self, session: Session):
         self.session = session
 
@@ -19,3 +18,8 @@ class CourseRepository(ICourseRepository):
         stmt = select(Course).where(Course.professor_id == professor_id)
         courses = list(self.session.scalars(stmt).all())
         return courses
+
+    def save(self, course: Course) -> int:
+        self.session.add(course)
+        self.session.commit()
+        return course.id

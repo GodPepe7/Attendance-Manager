@@ -12,3 +12,7 @@ class ICourseRepository(ABC):
     @abstractmethod
     def get_all_by_professor_id(self, professor_id: int) -> list[Course]:
         pass
+
+    @abstractmethod
+    def save(self, course: Course) -> int:
+        pass
