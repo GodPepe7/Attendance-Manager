@@ -2,6 +2,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker, registry, relationship,
 
 from sqlalchemy import create_engine, Table, Column, Integer, String, Enum, ForeignKey, Date, event, MetaData
 from src.domain.entities.course import Course
+from src.domain.entities.enrollment import Enrollment
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
@@ -49,13 +50,14 @@ def _init_db_structure() -> MetaData:
         metadata,
         Column("id", Integer, primary_key=True, autoincrement=True),
         Column("name", String(50), nullable=False),
-        Column("professor_id", Integer, ForeignKey("user.id"), nullable=False)
+        Column("professor_id", Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     )
     enrollment_table = Table(
         "enrollment",
         metadata,
-        Column("student_id", Integer, ForeignKey("user.id"), primary_key=True, nullable=False),
-        Column("course_id", Integer, ForeignKey("course.id"), primary_key=True, nullable=False)
+        Column("id", Integer, primary_key=True, autoincrement=True),
+        Column("student_id", Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False),
+        Column("course_id", Integer, ForeignKey("course.id", ondelete="CASCADE"), nullable=False)
     )
     lecture_table = Table(
         "lecture",
@@ -67,8 +69,9 @@ def _init_db_structure() -> MetaData:
     attendance_table = Table(
         "attendance",
         metadata,
-        Column("student_id", Integer, ForeignKey("user.id"), primary_key=True, nullable=False),
-        Column("lecture_id", Integer, ForeignKey("lecture.id"), primary_key=True, nullable=False)
+        Column("enrollment_id", Integer, ForeignKey("enrollment.id", ondelete="CASCADE"), primary_key=True,
+               nullable=False),
+        Column("lecture_id", Integer, ForeignKey("lecture.id", ondelete="CASCADE"), primary_key=True, nullable=False)
     )
 
     mapper_registry.map_imperatively(
@@ -79,19 +82,29 @@ def _init_db_structure() -> MetaData:
         }
     )
     mapper_registry.map_imperatively(
+        Enrollment,
+        enrollment_table,
+        properties={
+            "student": relationship("User")
+        }
+    )
+    mapper_registry.map_imperatively(
         Course,
         course_table,
         properties={
-            "professor": relationship("User", lazy="select"),
-            "lectures": relationship("Lecture", cascade="all, delete, delete-orphan", collection_class=set),
-            "enrolled_students": relationship("User", secondary=enrollment_table, collection_class=set)
+            "professor": relationship("User"),
+            "lectures": relationship("Lecture", cascade="all, delete",
+                                     collection_class=set),
+            "enrolled_students": relationship("Enrollment", cascade="all, delete",
+                                              collection_class=set)
         }
     )
     mapper_registry.map_imperatively(
         Lecture,
         lecture_table,
         properties={
-            "attended_students": relationship("User", secondary=attendance_table, collection_class=set)
+            "attended_students": relationship("Enrollment",
+                                              secondary=attendance_table, collection_class=set)
         }
     )
     return metadata

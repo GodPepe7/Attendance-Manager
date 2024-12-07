@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from src.domain.dto import LectureDto
-from src.domain.entities.user import User
+from src.domain.entities.enrollment import Enrollment
 from src.domain.exceptions import InvalidInputException
 
 
@@ -11,7 +11,7 @@ class Lecture:
     course_id: int
     date: datetime.date
     id: int = None
-    attended_students: set[User] = field(default_factory=set)
+    attended_students: set[Enrollment] = field(default_factory=set)
 
     def __repr__(self):
         return f"<Lecture {self.id} of {self.date}>"

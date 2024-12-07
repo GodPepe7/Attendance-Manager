@@ -9,10 +9,16 @@ class UserDto:
 
 
 @dataclass(frozen=True)
+class EnrollmentDto:
+    id: int
+    student: UserDto
+
+
+@dataclass(frozen=True)
 class LectureDto:
     id: int
     date: datetime.date
-    attended_students: list[UserDto] = field(compare=False)
+    attended_students: list[EnrollmentDto] = field(compare=False)
 
 
 @dataclass(frozen=True)
@@ -21,4 +27,4 @@ class CourseDto:
     name: str
     professor: UserDto
     lectures: list[LectureDto]
-    enrolled_students: list[UserDto] = field(compare=False)
+    enrolled_students: list[EnrollmentDto] = field(compare=False)
