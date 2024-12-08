@@ -11,6 +11,18 @@ Problems so far:
 Testing:
 
 - Entity tests super simple, not much to do here as they barely have functionality
+- when using sql alchemy ORM, creating instances of classes has to happen *after* the classes are mapped to the orm
+  -> solved by local importing which will only do the import when the function is called (look at )
+
+```
+sqlalchemy.orm.exc.UnmappedInstanceError: Class 'src.domain.entities.course.Course' is mapped, 
+but this instance lacks instrumentation.  This occurs when the instance is created before 
+sqlalchemy.orm.mapper(src.domain.entities.course.Course) was called.
+```
+
+- tests shouldn't affect each other, so always gotta rollback. sql-alchemy has
+  this: https://docs.sqlalchemy.org/en/20/orm/session_transaction.html#joining-a-session-into-an-external-transaction-such-as-for-test-suites
+-
 
 TODO:
 
