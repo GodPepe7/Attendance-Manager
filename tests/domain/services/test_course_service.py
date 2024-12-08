@@ -3,6 +3,8 @@ import pytest
 from src.adapters.repositories.course_repository_impl import CourseRepository
 from src.domain.dto import CourseDto
 from src.domain.entities.course import Course
+from src.domain.entities.role import Role
+from src.domain.entities.user import User
 from src.domain.services.course_service import CourseService
 from tests.conftest import engine, tables, db_session_with_data
 
@@ -14,7 +16,7 @@ class TestCourseService:
         session = db_session_with_data
         course_repo = CourseRepository(session)
         course_service = CourseService(course_repo)
-        return course_service
+        return session, course_service
 
     @staticmethod
     def assert_dto_is_equal_to_course(dto: CourseDto, course: Course):
@@ -48,6 +50,7 @@ class TestCourseService:
                 assert attended_student.student.name == attended_student_dto.student.name
 
     def test_get_by_valid_id(self, course_service):
+        _, course_service = course_service
         from tests.test_data import courses
         course = courses[0]
 
@@ -56,15 +59,30 @@ class TestCourseService:
         self.assert_dto_is_equal_to_course(dto, course)
 
     def test_get_by_not_existing_id(self, course_service):
+        _, course_service = course_service
+
         dto = course_service.get_by_id(999999)
 
         assert not dto
 
     def test_get_courses_by_prof_id(self, course_service):
         from tests.test_data import courses
+        _, course_service = course_service
 
         course_dtos = course_service.get_courses_by_prof_id(2)
 
         assert len(course_dtos) == 2
         for course, course_dto in zip(courses[:1], course_dtos):
             self.assert_dto_is_equal_to_course(course_dto, course)
+
+    def test_save(self, course_service):
+        from tests.test_data import users
+        session, course_service = course_service
+        course = Course("test", User("test_user", "1@test.com", "test", Role.PROFESSOR))
+
+        course_id = course_service.save(course)
+
+        assert course_id
+        fetched_course = session.get(Course, course_id)
+        assert fetched_course
+        self.assert_dto_is_equal_to_course(fetched_course, course)
