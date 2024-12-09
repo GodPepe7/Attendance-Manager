@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from src.domain.exceptions import NotFoundException, QrCodeExpired
 from src.domain.ports.attendance_repository import IAttendanceRepository
+from src.domain.ports.enrollment_repository import IEnrollmentRepository
 from src.domain.services.authorizer_service import AuthorizerService
 from src.domain.services.encryption_service import EncryptionService
 
@@ -15,10 +16,15 @@ class IdWrapper:
 
 
 class AttendanceService:
-    def __init__(self, attendance_repo: IAttendanceRepository,
-                 authorizer: AuthorizerService,
-                 encryptor: EncryptionService):
+    def __init__(
+            self,
+            attendance_repo: IAttendanceRepository,
+            enrollment_repo: IEnrollmentRepository,
+            authorizer: AuthorizerService,
+            encryptor: EncryptionService
+    ):
         self.repo = attendance_repo
+        self.enrollment_repo = enrollment_repo
         self.authorizer = authorizer
         self.encryptor = encryptor
 
@@ -37,7 +43,7 @@ class AttendanceService:
                 f"Couldn't delete attendance. Attendancy for the given lecture doesn't exist!")
 
     def generate_qr_code_string(self, ids: IdWrapper, seconds: int,
-                                current_time: datetime):
+                                current_time: datetime) -> str:
         self.authorizer.is_professor_of_lecture(ids.user_id, ids.course_id, ids.lecture_id)
         expiration_time = current_time + timedelta(seconds=seconds)
         encrypted_time = self.encryptor.encrypt_date(expiration_time)
@@ -49,7 +55,8 @@ class AttendanceService:
         expiration_time = self.encryptor.decrypt_date(qr_code_string)
         if current_time > expiration_time:
             raise QrCodeExpired("Didn't save attendance. QR Code is already expired")
-        saved = self.repo.save(ids.lecture_id, ids.user_id)
+        enrollment = self.enrollment_repo.get_by_course_id_and_user_id(ids.course_id, ids.user_id)
+        saved = self.repo.save(ids.lecture_id, enrollment.id)
         if not saved:
             raise NotFoundException(
                 f"Couldn't save attendance. Student and lecture need to exist!")
