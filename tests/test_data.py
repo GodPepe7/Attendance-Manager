@@ -9,9 +9,10 @@ from src.domain.entities.role import Role
 from src.domain.entities.user import User
 
 users = [
-    User("alex", "alex@abc.de", generate_password_hash("1234"), Role.STUDENT, 1),
-    User("bob", "bob@baumeister.de", generate_password_hash("1234"), Role.PROFESSOR, 2),
-    User("unmei", "unmei@gmail.com", generate_password_hash("1234"), Role.STUDENT, 3)
+    User(name="alex", email="alex@abc.de", password_hash=generate_password_hash("1234"), role=Role.STUDENT, id=1),
+    User(name="bob", email="bob@baumeister.de", password_hash=generate_password_hash("1234"), role=Role.PROFESSOR,
+         id=2),
+    User(name="unmei", email="unmei@gmail.com", password_hash=generate_password_hash("1234"), role=Role.STUDENT, id=3)
 ]
 
 enrollments = [

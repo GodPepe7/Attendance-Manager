@@ -1,19 +1,17 @@
-from sys import exception
-
 import pytest
 
 from src.adapters.repositories.course_repository_impl import CourseRepository
 from src.adapters.repositories.lecture_repository_impl import LectureRepository
 from src.domain.exceptions import UnauthorizedException, NotFoundException
 from src.domain.services.authorizer_service import AuthorizerService
-from tests.conftest import engine, tables, db_session_with_data
+from tests.conftest import engine, tables, add_data, db_session
 
 
 class TestAuthorizerService:
     @pytest.fixture
-    def authorizer(self, db_session_with_data):
-        course_repo = CourseRepository(db_session_with_data)
-        lecture_repo = LectureRepository(db_session_with_data)
+    def authorizer(self, db_session):
+        course_repo = CourseRepository(db_session)
+        lecture_repo = LectureRepository(db_session)
         authorizer = AuthorizerService(course_repo, lecture_repo)
         return authorizer
 
