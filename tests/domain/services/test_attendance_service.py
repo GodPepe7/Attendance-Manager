@@ -6,7 +6,7 @@ import pytest
 from src.adapters.repositories.attendance_repository_impl import AttendanceRepository
 from src.adapters.repositories.course_repository_impl import CourseRepository
 from src.adapters.repositories.lecture_repository_impl import LectureRepository
-from src.domain.entities.lecture import Lecture
+from src.domain.entities.enrollment import Enrollment
 from src.domain.exceptions import NotFoundException
 from src.domain.services.attendance_service import AttendanceService, IdWrapper
 from src.domain.services.authorizer_service import AuthorizerService
@@ -36,8 +36,8 @@ class TestAttendanceService:
 
         attendance_service.save(ids, random_enrollment.id)
 
-        fetched_lecture = session.get(Lecture, random_lecture.id)
-        assert random_enrollment in list(fetched_lecture.attended_students)
+        fetched_enrollment = session.get(Enrollment, random_enrollment.id)
+        assert random_lecture in list(fetched_enrollment.attended_lectures)
 
     def test_save_not_enrolled_student(self, attendance_service):
         _, attendance_service = attendance_service
@@ -54,14 +54,14 @@ class TestAttendanceService:
     def test_delete(self, attendance_service):
         session, attendance_service = attendance_service
         existing_course = self.courses[0]
-        existing_lecture = list(existing_course.lectures)[0]
-        random_attendance = random.choice(list(existing_lecture.attended_students))
-        ids = IdWrapper(existing_course.professor.id, existing_course.id, existing_lecture.id)
+        existing_enrollment = list(existing_course.enrolled_students)[0]
+        random_lecture = random.choice(list(existing_enrollment.attended_lectures))
+        ids = IdWrapper(existing_course.professor.id, existing_course.id, random_lecture.id)
 
-        attendance_service.delete(ids, random_attendance.id)
+        attendance_service.delete(ids, existing_enrollment.id)
 
-        fetched_lecture = session.get(Lecture, existing_lecture.id)
-        assert random_attendance not in list(fetched_lecture.attended_students)
+        fetched_enrollment = session.get(Enrollment, existing_enrollment.id)
+        assert random_lecture not in list(fetched_enrollment.attended_lectures)
 
     def test_delete_non_existing(self, attendance_service):
         _, attendance_service = attendance_service

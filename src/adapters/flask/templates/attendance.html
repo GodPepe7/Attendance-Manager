@@ -235,7 +235,7 @@
             </td>
             {% for lecture in course.lectures %}
             <td class="p-0 h-full lecture-{{ lecture.id }}">
-              {% set has_attended = enrollment.id | has_attended(lecture.attended_students) %}
+              {% set has_attended = lecture.id | has_attended(enrollment.attended_lectures) %}
               {% set attendance_url = request.path ~ "lectures/" ~ lecture.id ~ "/attendance/" ~ enrollment.id %}
               {% import 'reusable/attendanceBtn.html' as attendance %}
               {{ attendance.button(has_attended, attendance_url) }}

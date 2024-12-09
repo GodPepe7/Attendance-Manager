@@ -1,6 +1,6 @@
 from sqlalchemy.orm import scoped_session, sessionmaker, registry, relationship, deferred, Session
 
-from sqlalchemy import create_engine, Table, Column, Integer, String, Enum, ForeignKey, Date, event, MetaData
+from sqlalchemy import create_engine, Table, Column, Integer, String, Enum, ForeignKey, Date, event
 from src.domain.entities.course import Course
 from src.domain.entities.enrollment import Enrollment
 from src.domain.entities.lecture import Lecture
@@ -36,19 +36,19 @@ course_table = Table(
     Column("name", String(50), nullable=False),
     Column("professor_id", Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
 )
-enrollment_table = Table(
-    "enrollment",
-    metadata,
-    Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("student_id", Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False),
-    Column("course_id", Integer, ForeignKey("course.id", ondelete="CASCADE"), nullable=False)
-)
 lecture_table = Table(
     "lecture",
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("course_id", Integer, ForeignKey("course.id", ondelete="CASCADE"), nullable=False),
     Column("date", Date, nullable=False)
+)
+enrollment_table = Table(
+    "enrollment",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("student_id", Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False),
+    Column("course_id", Integer, ForeignKey("course.id", ondelete="CASCADE"), nullable=False)
 )
 attendance_table = Table(
     "attendance",
@@ -65,13 +65,7 @@ mapper_registry.map_imperatively(
         "password_hash": deferred(user_table.c.password_hash)
     }
 )
-mapper_registry.map_imperatively(
-    Enrollment,
-    enrollment_table,
-    properties={
-        "student": relationship("User")
-    }
-)
+mapper_registry.map_imperatively(Lecture, lecture_table)
 mapper_registry.map_imperatively(
     Course,
     course_table,
@@ -84,10 +78,11 @@ mapper_registry.map_imperatively(
     }
 )
 mapper_registry.map_imperatively(
-    Lecture,
-    lecture_table,
+    Enrollment,
+    enrollment_table,
     properties={
-        "attended_students": relationship("Enrollment",
+        "student": relationship("User"),
+        "attended_lectures": relationship("Lecture",
                                           secondary=attendance_table, collection_class=set)
     }
 )

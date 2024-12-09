@@ -28,26 +28,24 @@ class TestCourseService:
 
         assert dto.id == course.id and dto.name == course.name
 
-        # assert enrolled students of course are equal in dto
-        assert len(enrolled_students) == len(enrolled_students)
-        for enrolled_student, enrolled_student_dto in zip(enrolled_students, enrolled_student_dtos):
-            assert enrolled_student.id == enrolled_student_dto.id
-            assert enrolled_student.student.id == enrolled_student_dto.student.id
-            assert enrolled_student.student.name == enrolled_student_dto.student.name
-
-        # assert lectures of course are equal in dto
+        # assert lectures of course are equal to dto
         assert len(lectures) == len(lecture_dtos)
         for lecture, lecture_dto in zip(lectures, lecture_dtos):
-            assert lecture.id == lecture_dto.id and lecture.date == lecture_dto.date
+            assert lecture.id == lecture_dto.id
+            assert lecture.date == lecture_dto.date
 
-            attended_students = sorted(lecture.attended_students, key=lambda a: a.id)
-            attended_student_dtos = sorted(lecture_dto.attended_students, key=lambda l: l.id)
-            # assert attended_students of lecture are equal in dto
-            assert len(attended_students) == len(attended_student_dtos)
-            for attended_student, attended_student_dto in zip(attended_students, attended_student_dtos):
-                assert attended_student.id == attended_student_dto.id
-                assert attended_student.student.id == attended_student_dto.student.id
-                assert attended_student.student.name == attended_student_dto.student.name
+        # assert enrolled_student of course are equal to dto
+        assert len(enrolled_students) == len(enrolled_student_dtos)
+        for enrollment, enrollment_dto in zip(enrolled_students, enrolled_student_dtos):
+            assert enrollment.id == enrollment_dto.id
+
+            attended_lectures = sorted(enrollment.attended_lectures, key=lambda lec: lec.id)
+            attended_lectures_dtos = sorted(enrollment_dto.attended_lectures, key=lambda lec: lec.id)
+            # assert attended_lectures of enrollment are equal to dto
+            assert len(attended_lectures) == len(attended_lectures_dtos)
+            for attended_lecture, attended_lecture_dto in zip(attended_lectures, attended_lectures_dtos):
+                assert attended_lecture.id == attended_lecture_dto.id
+                assert attended_lecture.date == attended_lecture_dto.date
 
     def test_get_by_valid_id(self, course_service):
         _, course_service = course_service

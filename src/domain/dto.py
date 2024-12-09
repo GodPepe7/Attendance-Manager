@@ -9,16 +9,16 @@ class UserDto:
 
 
 @dataclass(frozen=True)
-class EnrollmentDto:
-    id: int
-    student: UserDto
-
-
-@dataclass(frozen=True)
 class LectureDto:
     id: int
     date: datetime.date
-    attended_students: list[EnrollmentDto] = field(compare=False)
+
+
+@dataclass(frozen=True)
+class EnrollmentDto:
+    id: int
+    student: UserDto
+    attended_lectures: list[LectureDto]
 
 
 @dataclass(frozen=True)

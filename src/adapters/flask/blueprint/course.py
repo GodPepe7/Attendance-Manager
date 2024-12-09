@@ -25,10 +25,11 @@ def index(course_service: CourseService = Provide[Container.course_service]):
 def get_by_id(course_id: int, course_service: CourseService = Provide[Container.course_service]):
     course_data = course_service.get_by_id(course_id)
     course_data.lectures.sort(key=lambda lecture: lecture.date)
+    course_data.enrolled_students.sort(key=lambda enrollment: enrollment.student.name)
     return render_template("attendance.html", course=course_data)
 
 
 # filter function used in jinja template
 @course.app_template_filter("has_attended")
-def has_attended(enrollment_id: int, attended_students) -> bool:
-    return any(enrollment_id == enrollment.id for enrollment in attended_students)
+def has_attended(lecture_id: int, attended_lectures) -> bool:
+    return any(lecture_id == lecture.id for lecture in attended_lectures)

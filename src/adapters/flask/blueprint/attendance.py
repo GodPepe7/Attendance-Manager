@@ -12,19 +12,19 @@ attendance = Blueprint('attendance', __name__,
                        url_prefix="/courses/<int:course_id>/lectures/<int:lecture_id>/attendance")
 
 
-@attendance.post("/<int:student_id>")
+@attendance.post("/<int:enrollment_id>")
 @inject
 @login_required(roles=[Role.PROFESSOR])
 def save(
         course_id: int,
         lecture_id: int,
-        student_id: int,
+        enrollment_id: int,
         attendance_service: AttendanceService = Provide[Container.attendance_service]
 ):
     ids = IdWrapper(g.user.id, course_id, lecture_id)
-    attendance_service.save(ids, student_id)
+    attendance_service.save(ids, enrollment_id)
     delete_endpoint = url_for("attendance.delete", course_id=course_id, lecture_id=lecture_id,
-                              student_id=student_id)
+                              enrollment_id=enrollment_id)
     attendanceBtn = render_template_string(
         "{% import 'reusable/attendanceBtn.html' as attendance %}"
         "{{ attendance.button(has_attended, attendance_endpoint) }}",
@@ -33,17 +33,18 @@ def save(
     return attendanceBtn
 
 
-@attendance.delete("/<int:student_id>")
+@attendance.delete("/<int:enrollment_id>")
 @inject
 @login_required(roles=[Role.PROFESSOR])
 def delete(
         course_id: int,
-        lecture_id: int, student_id: int,
+        lecture_id: int,
+        enrollment_id: int,
         attendance_service: AttendanceService = Provide[Container.attendance_service]
 ):
     ids = IdWrapper(g.user.id, course_id, lecture_id)
-    attendance_service.delete(ids, student_id)
-    save_endpoint = url_for("attendance.save", course_id=course_id, lecture_id=lecture_id, student_id=student_id)
+    attendance_service.delete(ids, enrollment_id)
+    save_endpoint = url_for("attendance.save", course_id=course_id, lecture_id=lecture_id, enrollment_id=enrollment_id)
     attendanceBtn = render_template_string(
         "{% import 'reusable/attendanceBtn.html' as attendance %}"
         "{{ attendance.button(has_attended, attendance_endpoint) }}",
