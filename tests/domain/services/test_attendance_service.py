@@ -7,6 +7,7 @@ from src.adapters.repositories.attendance_repository_impl import AttendanceRepos
 from src.adapters.repositories.course_repository_impl import CourseRepository
 from src.adapters.repositories.lecture_repository_impl import LectureRepository
 from src.domain.entities.lecture import Lecture
+from src.domain.exceptions import NotFoundException
 from src.domain.services.attendance_service import AttendanceService, IdWrapper
 from src.domain.services.authorizer_service import AuthorizerService
 from src.domain.services.encryption_service import EncryptionService
@@ -38,6 +39,18 @@ class TestAttendanceService:
         fetched_lecture = session.get(Lecture, random_lecture.id)
         assert random_enrollment in list(fetched_lecture.attended_students)
 
+    def test_save_not_enrolled_student(self, attendance_service):
+        _, attendance_service = attendance_service
+        existing_course = self.courses[1]
+        existing_lecture = list(existing_course.lectures)[0]
+        not_enrolled_student = list(self.courses[0].enrolled_students)[0]
+        ids = IdWrapper(existing_course.professor.id, existing_course.id, existing_lecture.id)
+
+        with pytest.raises(NotFoundException) as exc:
+            attendance_service.save(ids, not_enrolled_student.id)
+
+        assert "Needs to be an enrolled student" in str(exc.value)
+
     def test_delete(self, attendance_service):
         session, attendance_service = attendance_service
         existing_course = self.courses[0]
@@ -49,3 +62,15 @@ class TestAttendanceService:
 
         fetched_lecture = session.get(Lecture, existing_lecture.id)
         assert random_attendance not in list(fetched_lecture.attended_students)
+
+    def test_delete_non_existing(self, attendance_service):
+        _, attendance_service = attendance_service
+
+        existing_course = self.courses[0]
+        existing_lecture = list(existing_course.lectures)[0]
+        ids = IdWrapper(existing_course.professor.id, existing_course.id, existing_lecture.id)
+
+        with pytest.raises(NotFoundException) as exc:
+            attendance_service.delete(ids, 1234)
+
+        assert "doesn't exist" in str(exc)

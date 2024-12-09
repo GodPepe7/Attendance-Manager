@@ -10,11 +10,11 @@ class AttendanceRepository(IAttendanceRepository):
         self.session = session
 
     def save(self, lecture_id: int, enrollment_id: int) -> bool:
-        attended_student = self.session.get(Enrollment, enrollment_id)
         lecture = self.session.get(Lecture, lecture_id)
-        if not attended_student or not lecture:
+        enrollment = self.session.get(Enrollment, enrollment_id)
+        if not enrollment or not lecture or not enrollment.course_id == lecture.course_id:
             return False
-        lecture.attended_students.add(attended_student)
+        lecture.attended_students.add(enrollment)
         self.session.commit()
         return True
 

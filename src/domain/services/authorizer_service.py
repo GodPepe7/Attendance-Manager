@@ -18,6 +18,7 @@ class AuthorizerService:
                 "Only the course professor is allowed to do this action!")
 
     def is_professor_of_lecture(self, prof_id: int, course_id: int, lecture_id: int):
+        # FIXME: is this needed?
         lecture = self.lecture_repo.get_by_id(lecture_id)
         is_course_lecture = lecture and lecture.course_id == course_id
         if not is_course_lecture:

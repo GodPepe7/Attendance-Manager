@@ -27,14 +27,14 @@ class AttendanceService:
         saved = self.repo.save(ids.lecture_id, enrollment_id)
         if not saved:
             raise NotFoundException(
-                f"Couldn't save attendance.")
+                f"Couldn't save attendance. Needs to be an enrolled student of the given lecture's course")
 
     def delete(self, ids: IdWrapper, enrollment_id: int):
         self.authorizer.is_professor_of_lecture(ids.user_id, ids.course_id, ids.lecture_id)
         deleted = self.repo.delete(ids.lecture_id, enrollment_id)
         if not deleted:
             raise NotFoundException(
-                f"Couldn't delete attendance. Student and lecture need to exist!")
+                f"Couldn't delete attendance. Attendancy for the given lecture doesn't exist!")
 
     def generate_qr_code_string(self, ids: IdWrapper, seconds: int,
                                 current_time: datetime):
