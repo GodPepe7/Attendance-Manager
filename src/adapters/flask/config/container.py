@@ -3,6 +3,7 @@ from dependency_injector import containers, providers
 from src.adapters.flask.config.sqlalchemy import get_db_session
 from src.adapters.repositories.attendance_repository_impl import AttendanceRepository
 from src.adapters.repositories.course_repository_impl import CourseRepository
+from src.adapters.repositories.enrollment_repository_impl import EnrollmentRepository
 from src.adapters.repositories.lecture_repository_impl import LectureRepository
 from src.adapters.repositories.user_repository_impl import UserRepository
 from src.domain.services.attendance_service import AttendanceService
@@ -37,6 +38,11 @@ class Container(containers.DeclarativeContainer):
         session=db_session
     )
 
+    enrollment_repository = providers.Factory(
+        EnrollmentRepository,
+        session=db_session
+    )
+
     encryption_service = providers.Factory(
         EncryptionService,
         fernet_key=config.encryption_key
@@ -51,6 +57,7 @@ class Container(containers.DeclarativeContainer):
     attendance_service = providers.Factory(
         AttendanceService,
         attendance_repo=attendance_repo,
+        enrollment_repo=enrollment_repository,
         authorizer=authorizer_service,
         encryptor=encryption_service
     )

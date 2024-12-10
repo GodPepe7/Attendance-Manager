@@ -22,7 +22,7 @@
 </dialog>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    htmx.onLoad(() => {
         const dialog = document.getElementById("{{ dialog_id }}");
         const closeDialogBtn = document.getElementById('close-{{dialog_id}}');
 
@@ -35,6 +35,6 @@
                 dialog.close();
             }
         });
-    });
+    })
 </script>
 {%- endmacro %}

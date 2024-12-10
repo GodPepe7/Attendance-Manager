@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from dependency_injector.wiring import inject, Provide
-from flask import Blueprint, request, g, url_for, redirect
+from flask import Blueprint, request, g, url_for, redirect, Response
 
 from src.adapters.flask.blueprint.login_wrapper import login_required
 from src.adapters.flask.config.container import Container
@@ -30,4 +30,6 @@ def save(course_id: int, lecture_service: LectureService = Provide[Container.lec
 def delete(course_id: int, lecture_id: int, lecture_service: LectureService = Provide[Container.lecture_service]):
     prof_id = g.user.id
     lecture_service.delete(id=lecture_id, professor_id=prof_id, course_id=course_id)
-    return "", 204
+    response = Response("Deleted lecture")
+    response.headers["HX-Location"] = url_for('course.get_by_id', course_id=course_id)
+    return response
