@@ -14,6 +14,17 @@ Testing:
 - when using sql alchemy ORM, creating instances of classes has to happen *after* the classes are mapped to the orm
   -> solved by local importing which will only do the import when the function is called (look at )
 
+- 2 sides:
+    - Driver Side: the user interacting with the domain via the Driver Ports (humans, automated tests)
+    - Driven side: the domain interacting with the Driven Ports that are implemented by the Driven Adapters (
+      repositories, external services, etc.)
+      -> 4 test constellations:
+    - TEST DRIVER ADAPTERS / MOCK DRIVEN ADAPTERS
+    - REAL DRIVER ADAPTERS / MOCK DRIVEN ADAPTERS (for example web ui)
+    - TEST DRIVER ADAPTERS / REAL DRIVEN ADAPTERS (integration tests)
+    - REAL DRIVER ADAPTERS / REAL DRIVEN ADAPTERS (e2e)
+    - Using real driver pots -> real domain
+
 ```
 sqlalchemy.orm.exc.UnmappedInstanceError: Class 'src.domain.entities.course.Course' is mapped, 
 but this instance lacks instrumentation.  This occurs when the instance is created before 
@@ -32,7 +43,7 @@ TODO:
 - Course Management
 - ~~Frontend~~
 - Tests
-- DI
+- ~~DI~~
 
 - Hexagonal Softwarearchitekturen sollen besonders geeignet hinsichtlich automatischer Tests sein.
 - Im Rahmen der BA soll dies für die Programmiersprache Python exemplarisch anhand einer objektorientiert zu

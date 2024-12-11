@@ -82,8 +82,9 @@ mapper_registry.map_imperatively(
     enrollment_table,
     properties={
         "student": relationship("User"),
-        "attended_lectures": relationship("Lecture",
-                                          secondary=attendance_table, collection_class=set)
+        "attended_lectures": relationship("Lecture", backref="lecture",
+                                          secondary=attendance_table, cascade="all, delete", passive_deletes=True,
+                                          collection_class=set)
     }
 )
 
