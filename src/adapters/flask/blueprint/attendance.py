@@ -1,14 +1,14 @@
 from datetime import datetime
 
 from dependency_injector.wiring import Provide, inject
-from flask import Blueprint, g, request, render_template_string, url_for
+from flask import Blueprint, g, request, render_template_string, url_for, redirect, render_template
 
 from src.adapters.flask.blueprint.login_wrapper import login_required
 from src.adapters.flask.config.container import Container
 from src.domain.entities.role import Role
 from src.domain.services.attendance_service import IdWrapper, AttendanceService
 
-attendance = Blueprint('attendance', __name__,
+attendance = Blueprint('attendance', __name__, template_folder="../templates",
                        url_prefix="/courses/<int:course_id>/lectures/<int:lecture_id>/attendance")
 
 
@@ -86,5 +86,4 @@ def save_with_qr_code_string(
 ):
     ids = IdWrapper(g.user.id, course_id, lecture_id)
     attendance_service.save_with_qr_code_string(ids, qr_code_string, datetime.now())
-    # TODO: give some sort of success page
-    return "", 204
+    return render_template("success.html")
