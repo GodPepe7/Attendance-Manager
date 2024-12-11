@@ -22,11 +22,11 @@ class TestAuthorizerService:
     def test_authorized_course_professor(self, authorizer):
         random_course = random.choice(self.courses)
 
-        authorizer.is_professor_of_course(random_course.professor.id, random_course.id)
+        authorizer.check_if_professor_of_course(random_course.professor.id, random_course.id)
 
     def test_not_course_professor(self, authorizer):
         with pytest.raises(UnauthorizedException) as exc:
-            authorizer.is_professor_of_course(1, 1)
+            authorizer.check_if_professor_of_course(1, 1)
 
         assert "Only the course professor" in str(exc.value)
 
@@ -34,25 +34,25 @@ class TestAuthorizerService:
         random_course = random.choice(self.courses)
         random_lecture = random.choice(list(random_course.lectures))
 
-        authorizer.is_professor_of_lecture(random_course.professor.id, random_course.id, random_lecture.id)
+        authorizer.check_if_professor_of_lecture(random_course.professor.id, random_course.id, random_lecture.id)
 
     def test_not_lecture_professor(self, authorizer):
         with pytest.raises(UnauthorizedException) as exc:
-            authorizer.is_professor_of_lecture(1, 2, 3)
+            authorizer.check_if_professor_of_lecture(1, 2, 3)
 
         assert "Only the course professor" in str(exc.value)
 
     def test_not_course_lecture(self, authorizer):
         with pytest.raises(NotFoundException) as exc:
-            authorizer.is_professor_of_lecture(1, 1, 3)
+            authorizer.check_if_professor_of_lecture(1, 1, 3)
 
         assert "not part of the course" in str(exc.value)
 
     def test_authorized_enrolled_course_student(self, authorizer):
-        authorizer.is_enrolled_course_student(1, 1)
+        authorizer.check_if_enrolled_course_student(1, 1)
 
     def test_not_enrolled_student(self, authorizer):
         with pytest.raises(UnauthorizedException) as exc:
-            authorizer.is_enrolled_course_student(3, 2)
+            authorizer.check_if_enrolled_course_student(3, 2)
 
         assert "Only an enrolled student" in str(exc.value)

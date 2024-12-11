@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -23,5 +24,13 @@ class LectureRepository(ILectureRepository):
         if not lecture:
             return False
         self.session.delete(lecture)
+        self.session.commit()
+        return True
+
+    def update(self, id: int, new_date: datetime.date) -> bool:
+        lecture = self.session.get(Lecture, id)
+        if not lecture:
+            return False
+        lecture.date = new_date
         self.session.commit()
         return True

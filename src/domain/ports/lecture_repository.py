@@ -1,3 +1,4 @@
+import datetime
 from abc import ABC, abstractmethod
 from typing import Optional
 
@@ -15,4 +16,8 @@ class ILectureRepository(ABC):
 
     @abstractmethod
     def delete(self, id: int) -> bool:
+        pass
+
+    @abstractmethod
+    def update(self, id: int, new_date: datetime.date):
         pass

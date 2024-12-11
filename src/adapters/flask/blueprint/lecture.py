@@ -33,3 +33,19 @@ def delete(course_id: int, lecture_id: int, lecture_service: LectureService = Pr
     response = Response("Deleted lecture")
     response.headers["HX-Location"] = url_for('course.get_by_id', course_id=course_id)
     return response
+
+
+@lecture.patch("/<int:lecture_id>")
+@inject
+@login_required(roles=[Role.PROFESSOR])
+def update(course_id: int, lecture_id: int, lecture_service: LectureService = Provide[Container.lecture_service]):
+    prof_id = g.user.id
+    new_date = request.form.get("date")
+    try:
+        parsed_date = datetime.strptime(new_date, "%Y-%m-%d")
+        lecture_service.update(lecture_id, course_id, prof_id, parsed_date)
+        response = Response("Updated lecture")
+        response.headers["HX-Location"] = url_for('course.get_by_id', course_id=course_id)
+        return response
+    except ValueError:
+        return "Invalid date", 400

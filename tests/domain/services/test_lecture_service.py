@@ -6,6 +6,7 @@ import pytest
 from src.adapters.repositories.course_repository_impl import CourseRepository
 from src.adapters.repositories.lecture_repository_impl import LectureRepository
 from src.domain.entities.lecture import Lecture
+from src.domain.exceptions import NotFoundException
 from src.domain.services.authorizer_service import AuthorizerService
 from src.domain.services.lecture_service import LectureService
 from tests.conftest import engine, tables, add_data, db_session
@@ -37,6 +38,18 @@ class TestLectureService:
         assert fetched_lecture
         assert fetched_lecture == lecture
 
+    def test_save_to_non_existing_course(self, lecture_service):
+        session, lecture_service = lecture_service
+        lecture = Lecture(
+            course_id=234234,
+            date=datetime.date.today(),
+        )
+
+        with pytest.raises(NotFoundException) as exc:
+            lecture_service.save(lecture, 1)
+
+        assert "doesn't exist" in str(exc.value)
+
     def test_delete(self, lecture_service):
         session, lecture_service = lecture_service
         random_course = random.choice(self.courses)
@@ -46,3 +59,12 @@ class TestLectureService:
 
         fetched_lecture = session.get(Lecture, random_lecture.id)
         assert not fetched_lecture
+
+    def test_delete_non_existing(self, lecture_service):
+        _, lecture_service = lecture_service
+        random_course = random.choice(self.courses)
+
+        with pytest.raises(NotFoundException) as exc:
+            lecture_service.delete(32424, random_course.id, random_course.professor.id)
+
+        assert str(exc.value)
