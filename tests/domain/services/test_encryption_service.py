@@ -8,7 +8,7 @@ from src.domain.services.encryption_service import EncryptionService
 class TestEncryptionService:
     encryptor = EncryptionService(fernet_key=fernet.Fernet.generate_key())
 
-    def test_encrypt_and_decrypt_back(self):
+    def test_encrypt_date_and_decrypt_back_gives_orginal_date_back(self):
         now = datetime.datetime.now().replace(microsecond=0)
         now_str = now.strftime("%Y-%m-%d %H:%M:%S")
 

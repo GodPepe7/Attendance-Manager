@@ -10,7 +10,7 @@ class AdminService:
     def get_all_professors(self) -> list[User]:
         return self.user_repo.get_all_professors()
 
-    def delete_professor(self, professor_id: int):
+    def delete_professor(self, professor_id: int) -> None:
         successfully_deleted = self.user_repo.delete(professor_id)
         if not successfully_deleted:
             raise NotFoundException(f"Professor with ID: {professor_id} doesn't exist")

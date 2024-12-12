@@ -1,7 +1,6 @@
-from typing import Optional
-
 from src.domain.dto import CourseDto
 from src.domain.entities.course import Course
+from src.domain.exceptions import NotFoundException, UnauthorizedException
 from src.domain.ports.course_repository import ICourseRepository
 
 
@@ -14,11 +13,14 @@ class CourseService:
         course_dtos = [course.to_dto() for course in courses]
         return course_dtos
 
-    def get_by_id(self, id: int) -> Optional[CourseDto]:
+    def get_by_id(self, user_id: int, id: int) -> CourseDto:
         course = self.repo.get_by_id(id)
-        if course:
-            return course.to_dto()
-        return None
+        if not course:
+            raise NotFoundException(f"Course with ID: {id} doesn't exist")
+        is_course_professor = course.professor.id == user_id
+        if not is_course_professor:
+            raise UnauthorizedException(f"Only the professor of course with ID: {id} is allowed to do this action")
+        return course.to_dto()
 
     def save(self, course: Course) -> int:
         return self.repo.save(course)

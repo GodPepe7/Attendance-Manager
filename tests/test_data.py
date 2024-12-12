@@ -12,7 +12,9 @@ users = [
     User(name="alex", email="alex@abc.de", password_hash=generate_password_hash("1234"), role=Role.STUDENT, id=1),
     User(name="bob", email="bob@baumeister.de", password_hash=generate_password_hash("1234"), role=Role.PROFESSOR,
          id=2),
-    User(name="unmei", email="unmei@gmail.com", password_hash=generate_password_hash("1234"), role=Role.STUDENT, id=3)
+    User(name="unmei", email="unmei@gmail.com", password_hash=generate_password_hash("1234"), role=Role.STUDENT, id=3),
+    User(name="don", email="odore@gmail.com", password_hash=generate_password_hash("1234"), role=Role.PROFESSOR, id=4),
+    User(name="giri", email="giri@gmail.com", password_hash=generate_password_hash("1234"), role=Role.PROFESSOR, id=5)
 ]
 
 lectures = [

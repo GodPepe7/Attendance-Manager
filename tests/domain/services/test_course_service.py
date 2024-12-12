@@ -1,3 +1,5 @@
+import random
+
 import pytest
 
 from src.adapters.repositories.course_repository_impl import CourseRepository
@@ -5,14 +7,16 @@ from src.domain.dto import CourseDto
 from src.domain.entities.course import Course
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
+from src.domain.exceptions import NotFoundException, UnauthorizedException
 from src.domain.services.course_service import CourseService
 from tests.conftest import engine, tables, add_data, db_session
-from tests.test_data import courses
+from tests.test_data import courses, users
 
 
 class TestCourseService:
     @pytest.fixture
     def course_service(self, db_session):
+        self.users = [db_session.merge(user) for user in users]
         self.courses = [db_session.merge(course) for course in courses]
         course_repo = CourseRepository(db_session)
         course_service = CourseService(course_repo)
@@ -47,38 +51,51 @@ class TestCourseService:
                 assert attended_lecture.id == attended_lecture_dto.id
                 assert attended_lecture.date == attended_lecture_dto.date
 
-    def test_get_by_valid_id(self, course_service):
+    def test_get_by_id_with_existing_course_id_and_user_is_the_course_professor_returns_course(self, course_service):
         _, course_service = course_service
-        expected_course = self.courses[0]
+        existing_course = random.choice(self.courses)
 
-        dto = course_service.get_by_id(1)
+        dto = course_service.get_by_id(existing_course.professor.id, existing_course.id)
 
-        self.assert_dto_is_equal_to_course(dto, expected_course)
+        self.assert_dto_is_equal_to_course(dto, existing_course)
 
-    def test_get_by_not_existing_id(self, course_service):
+    def test_get_by_id_with_existing_course_id_and_user_is_not_the_course_professor_raises(self, course_service):
         _, course_service = course_service
+        existing_course = random.choice(self.courses)
 
-        dto = course_service.get_by_id(999999)
+        with pytest.raises(UnauthorizedException) as exc:
+            course_service.get_by_id(existing_course.professor.id + 1, existing_course.id)
 
-        assert not dto
+        assert "Only the professor" in str(exc.value)
 
-    def test_get_courses_by_prof_id(self, course_service):
+    def test_get_by_non_existing_course_id_raises(self, course_service):
+        _, course_service = course_service
+        non_existing_course_id = 123456789
+
+        with pytest.raises(NotFoundException) as exc:
+            course_service.get_by_id(1234, non_existing_course_id)
+
+        assert "doesn't exist" in str(exc.value)
+
+    def test_get_courses_by_prof_id_returns_all_courses_of_professor(self, course_service):
         session, course_service = course_service
-        expected_courses = self.courses[:1]
+        existing_professor = random.choice([user for user in self.users if user.role == Role.PROFESSOR])
+        expected_courses = [course for course in self.courses if course.professor.id == existing_professor.id]
 
-        course_dtos = course_service.get_courses_by_prof_id(2)
+        course_dtos = course_service.get_courses_by_prof_id(existing_professor.id)
 
-        assert len(course_dtos) == 2
+        assert len(course_dtos) == len(expected_courses)
+        course_dtos.sort(key=lambda course: course.id)
         for course, course_dto in zip(expected_courses, course_dtos):
             self.assert_dto_is_equal_to_course(course_dto, course)
 
-    def test_save(self, course_service):
+    def test_save_course_persists_to_db(self, course_service):
         session, course_service = course_service
-        new_course = Course(name="test", professor=User("test_user", "1@test.com", "test", Role.PROFESSOR), id=1234)
+        new_course = Course(name="test", professor=User("test_user", "1@test.com", "test", Role.PROFESSOR))
 
         course_id = course_service.save(new_course)
 
-        assert course_id and course_id == 1234
+        assert course_id
         fetched_course = session.get(Course, course_id)
         assert fetched_course
         assert new_course == fetched_course

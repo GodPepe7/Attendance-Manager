@@ -23,7 +23,7 @@ class TestLectureService:
         lecture_service = LectureService(lecture_repo, authorizer)
         return db_session, lecture_service
 
-    def test_save(self, lecture_service):
+    def test_save_lecture_persists_in_db(self, lecture_service):
         session, lecture_service = lecture_service
         random_course = random.choice(self.courses)
         lecture = Lecture(
@@ -38,10 +38,10 @@ class TestLectureService:
         assert fetched_lecture
         assert fetched_lecture == lecture
 
-    def test_save_to_non_existing_course(self, lecture_service):
+    def test_save_to_non_existing_course_raises(self, lecture_service):
         session, lecture_service = lecture_service
         lecture = Lecture(
-            course_id=234234,
+            course_id=len(self.courses) + 100,
             date=datetime.date.today(),
         )
 
@@ -50,7 +50,7 @@ class TestLectureService:
 
         assert "doesn't exist" in str(exc.value)
 
-    def test_delete(self, lecture_service):
+    def test_deleting_existing_lecture_removes_from_db(self, lecture_service):
         session, lecture_service = lecture_service
         random_course = random.choice(self.courses)
         random_lecture = random.choice(list(random_course.lectures))
@@ -60,7 +60,7 @@ class TestLectureService:
         fetched_lecture = session.get(Lecture, random_lecture.id)
         assert not fetched_lecture
 
-    def test_delete_non_existing(self, lecture_service):
+    def test_delete_non_existing_lecture_raises(self, lecture_service):
         _, lecture_service = lecture_service
         random_course = random.choice(self.courses)
 
