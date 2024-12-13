@@ -6,6 +6,8 @@ import pytest
 from src.adapters.repositories.course_repository_impl import CourseRepository
 from src.adapters.repositories.lecture_repository_impl import LectureRepository
 from src.domain.entities.lecture import Lecture
+from src.domain.entities.role import Role
+from src.domain.entities.user import User
 from src.domain.exceptions import NotFoundException
 from src.domain.services.authorizer_service import AuthorizerService
 from src.domain.services.lecture_service import LectureService
@@ -31,7 +33,7 @@ class TestLectureService:
             date=datetime.date.today(),
         )
 
-        lecture_id = lecture_service.save(lecture, random_course.professor.id)
+        lecture_id = lecture_service.save(random_course.professor, lecture)
 
         assert lecture_id
         fetched_lecture = session.get(Lecture, lecture_id)
@@ -40,13 +42,14 @@ class TestLectureService:
 
     def test_save_to_non_existing_course_raises(self, lecture_service):
         session, lecture_service = lecture_service
+        test_prof = User("test", "test@test.test", "test", Role.PROFESSOR)
         lecture = Lecture(
-            course_id=len(self.courses) + 100,
+            course_id=69420,
             date=datetime.date.today(),
         )
 
         with pytest.raises(NotFoundException) as exc:
-            lecture_service.save(lecture, 1)
+            lecture_service.save(test_prof, lecture)
 
         assert "doesn't exist" in str(exc.value)
 
@@ -55,16 +58,18 @@ class TestLectureService:
         random_course = random.choice(self.courses)
         random_lecture = random.choice(list(random_course.lectures))
 
-        lecture_service.delete(random_lecture.id, random_lecture.course_id, random_course.professor.id)
+        lecture_service.delete(random_course.professor, random_lecture.course_id, random_lecture.id)
 
         fetched_lecture = session.get(Lecture, random_lecture.id)
         assert not fetched_lecture
 
     def test_delete_non_existing_lecture_raises(self, lecture_service):
         _, lecture_service = lecture_service
+        test_prof = User("test", "test@test.test", "test", Role.PROFESSOR)
         random_course = random.choice(self.courses)
+        non_existing_lecture = 69420
 
         with pytest.raises(NotFoundException) as exc:
-            lecture_service.delete(32424, random_course.id, random_course.professor.id)
+            lecture_service.delete(test_prof, random_course.id, non_existing_lecture)
 
-        assert str(exc.value)
+        assert "doesn't exist" in str(exc.value)

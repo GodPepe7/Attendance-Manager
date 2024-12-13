@@ -55,7 +55,7 @@ def logout():
 
 @auth.get("/")
 @inject
-@login_required(roles=[Role.PROFESSOR])
+@login_required()
 def get_users(user_service: UserService = Provide[Container.user_service]):
     return user_service.get_all()
 
@@ -68,7 +68,7 @@ def get_user(id: int, user_service: UserService = Provide[Container.user_service
 
 @auth.post("/")
 @inject
-# @login_required(roles=[Role.ADMIN])
+@login_required()
 def save_users(user_service: UserService = Provide[Container.user_service]):
     body = request.json
     email = body["email"]

@@ -64,7 +64,8 @@ class Container(containers.DeclarativeContainer):
 
     course_service = providers.Factory(
         CourseService,
-        repo=course_repo
+        repo=course_repo,
+        authorizer=authorizer_service
     )
 
     lecture_service = providers.Factory(

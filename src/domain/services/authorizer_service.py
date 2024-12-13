@@ -1,3 +1,5 @@
+from src.domain.entities.role import Role
+from src.domain.entities.user import User
 from src.domain.exceptions import UnauthorizedException, NotFoundException
 from src.domain.ports.course_repository import ICourseRepository
 from src.domain.ports.lecture_repository import ILectureRepository
@@ -8,26 +10,31 @@ class AuthorizerService:
         self.course_repo = course_repo
         self.lecture_repo = lecture_repo
 
-    def check_if_professor_of_course(self, prof_id: int, course_id: int):
+    @staticmethod
+    def check_if_role(user, role: Role):
+        if not user.role == role:
+            raise UnauthorizedException(f"Only users with the role: '{role.value}' can do this action")
+
+    def check_if_professor_of_course(self, user: User, course_id: int):
         """
         Checks if the user is the professor of the course and thus authorized.
         Will throw an UnauthorizedException otherwise
         """
-
+        self.check_if_role(user, Role.PROFESSOR)
         course = self.course_repo.get_by_id(course_id)
         if not course:
             raise NotFoundException(f"Course with ID: {id} doesn't exist")
-        is_course_professor = course.professor.id == prof_id
+        is_course_professor = course.professor.id == user.id
         if not is_course_professor:
             raise UnauthorizedException(
                 "Only the course professor is allowed to do this action!")
 
-    def check_if_professor_of_lecture(self, user_id: int, course_id: int, lecture_id: int):
+    def check_if_professor_of_lecture(self, user: User, course_id: int, lecture_id: int):
         """
         Checks if the user is the professor of the lecture's course and thus authorized.
         Will throw an UnauthorizedException otherwise
         """
-
+        self.check_if_role(user, Role.PROFESSOR)
         lecture = self.lecture_repo.get_by_id(lecture_id)
         if not lecture:
             raise NotFoundException(
@@ -36,18 +43,18 @@ class AuthorizerService:
         if not is_course_lecture:
             raise NotFoundException(
                 f"Lecture with ID '{lecture_id}' is not part of the course with ID: '{course_id}'!")
-        self.check_if_professor_of_course(user_id, course_id)
+        self.check_if_professor_of_course(user, course_id)
 
-    def check_if_enrolled_course_student(self, user_id: int, course_id: int):
+    def check_if_enrolled_course_student(self, user: User, course_id: int):
         """
         Checks if the user is enrolled in the course and thus authorized.
         Will throw an UnauthorizedException otherwise
         """
-
+        self.check_if_role(user, Role.STUDENT)
         course = self.course_repo.get_by_id(course_id)
         if not course:
             raise NotFoundException(f"Course with ID: {id} doesn't exist")
-        is_enrolled_course_student = user_id in [enrollment.student.id for enrollment in
+        is_enrolled_course_student = user.id in [enrollment.student.id for enrollment in
                                                  course.enrolled_students]
         if not is_enrolled_course_student:
             raise UnauthorizedException(

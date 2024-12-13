@@ -35,9 +35,8 @@ class TestAttendanceService:
         random_course = random.choice(self.courses)
         random_lecture = random.choice(list(random_course.lectures))
         random_enrollment = random.choice(list(random_course.enrolled_students))
-        ids = IdWrapper(random_course.professor.id, random_course.id, random_lecture.id)
 
-        attendance_service.save(ids, random_enrollment.id)
+        attendance_service.save(random_course.professor, random_course.id, random_lecture.id, random_enrollment.id)
 
         fetched_enrollment = session.get(Enrollment, random_enrollment.id)
         assert random_lecture in list(fetched_enrollment.attended_lectures)
@@ -47,21 +46,21 @@ class TestAttendanceService:
         existing_course = self.courses[1]
         existing_lecture = list(existing_course.lectures)[0]
         not_enrolled_student = list(self.courses[0].enrolled_students)[0]
-        ids = IdWrapper(existing_course.professor.id, existing_course.id, existing_lecture.id)
 
         with pytest.raises(NotFoundException) as exc:
-            attendance_service.save(ids, not_enrolled_student.id)
+            attendance_service.save(existing_course.professor, existing_course.id, existing_lecture.id,
+                                    not_enrolled_student.id)
 
-        assert "Needs to be an enrolled student" in str(exc.value)
+        assert "doesn't exist" in str(exc.value)
 
     def test_delete(self, attendance_service):
         session, attendance_service = attendance_service
         existing_course = self.courses[0]
         existing_enrollment = list(existing_course.enrolled_students)[0]
         random_lecture = random.choice(list(existing_enrollment.attended_lectures))
-        ids = IdWrapper(existing_course.professor.id, existing_course.id, random_lecture.id)
 
-        attendance_service.delete(ids, existing_enrollment.id)
+        attendance_service.delete(existing_course.professor, existing_course.id, random_lecture.id,
+                                  existing_enrollment.id)
 
         fetched_enrollment = session.get(Enrollment, existing_enrollment.id)
         assert random_lecture not in list(fetched_enrollment.attended_lectures)
@@ -71,10 +70,9 @@ class TestAttendanceService:
 
         existing_course = self.courses[0]
         existing_lecture = list(existing_course.lectures)[0]
-        ids = IdWrapper(existing_course.professor.id, existing_course.id, existing_lecture.id)
 
         with pytest.raises(NotFoundException) as exc:
-            attendance_service.delete(ids, 1234)
+            attendance_service.delete(existing_course.professor, existing_course.id, existing_lecture.id, 1234)
 
         assert "doesn't exist" in str(exc)
 
@@ -83,14 +81,14 @@ class TestAttendanceService:
         course = self.courses[1]
         enrollment = list(course.enrolled_students)[0]
         lecture = list(course.lectures)[0]
-        professor_ids = IdWrapper(course.professor.id, course.id, lecture.id)
-        student_ids = IdWrapper(enrollment.student.id, course.id, lecture.id)
         EXPIRATION_TIME = 30
         assert lecture not in list(enrollment.attended_lectures)
 
-        qr_code_str = attendance_service.generate_qr_code_string(professor_ids, EXPIRATION_TIME,
+        qr_code_str = attendance_service.generate_qr_code_string(course.professor, course.id, lecture.id,
+                                                                 EXPIRATION_TIME,
                                                                  datetime.datetime.now())
-        attendance_service.save_with_qr_code_string(student_ids, qr_code_str, datetime.datetime.now())
+        attendance_service.save_with_qr_code_string(enrollment.student, course.id, lecture.id, qr_code_str,
+                                                    datetime.datetime.now())
 
         updated_enrollment = session.get(Enrollment, enrollment.id)
         assert lecture in list(updated_enrollment.attended_lectures)
@@ -100,14 +98,14 @@ class TestAttendanceService:
         course = self.courses[1]
         enrollment = list(course.enrolled_students)[0]
         lecture = list(course.lectures)[0]
-        professor_ids = IdWrapper(course.professor.id, course.id, lecture.id)
-        student_ids = IdWrapper(enrollment.student.id, course.id, lecture.id)
         EXPIRATION_TIME = 30
         now = datetime.datetime.now()
         thirty_one_seconds_after = now + datetime.timedelta(seconds=31)
 
-        qr_code_str = attendance_service.generate_qr_code_string(professor_ids, EXPIRATION_TIME, now)
+        qr_code_str = attendance_service.generate_qr_code_string(course.professor, course.id, lecture.id,
+                                                                 EXPIRATION_TIME, now)
         with pytest.raises(QrCodeExpired) as exc:
-            attendance_service.save_with_qr_code_string(student_ids, qr_code_str, thirty_one_seconds_after)
+            attendance_service.save_with_qr_code_string(enrollment.student, course.id, lecture.id, qr_code_str,
+                                                        thirty_one_seconds_after)
 
         assert "expired" in str(exc.value)

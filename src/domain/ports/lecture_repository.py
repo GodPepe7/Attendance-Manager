@@ -7,17 +7,17 @@ from src.domain.entities.lecture import Lecture
 
 class ILectureRepository(ABC):
     @abstractmethod
-    def get_by_id(self, id: int) -> Optional[Lecture]:
+    def get_by_id(self, lecture_id: int) -> Optional[Lecture]:
         pass
 
     @abstractmethod
-    def save(self, lecture: Lecture, professor_id: int) -> int:
+    def save(self, lecture: Lecture) -> int:
         pass
 
     @abstractmethod
-    def delete(self, id: int) -> bool:
+    def delete(self, lecture_id: int) -> bool:
         pass
 
     @abstractmethod
-    def update(self, id: int, new_date: datetime.date):
+    def update(self, lecture_id: int, new_date: datetime.date) -> bool:
         pass
