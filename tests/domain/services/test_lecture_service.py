@@ -73,3 +73,14 @@ class TestLectureService:
             lecture_service.delete(test_prof, random_course.id, non_existing_lecture)
 
         assert "doesn't exist" in str(exc.value)
+
+    def test_update_existing_lecture_persists_in_db(self, lecture_service):
+        session, lecture_service = lecture_service
+        random_course = random.choice(self.courses)
+        random_lecture = random.choice(list(random_course.lectures))
+        new_date = datetime.datetime.now().date()
+
+        lecture_service.update(random_course.professor, random_course.id, random_lecture.id, new_date)
+
+        fetched_lecture = session.get(Lecture, random_lecture.id)
+        assert fetched_lecture.date == new_date

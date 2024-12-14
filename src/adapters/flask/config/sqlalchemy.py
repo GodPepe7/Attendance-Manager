@@ -34,7 +34,7 @@ course_table = Table(
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("name", String(50), nullable=False),
-    Column("professor_id", Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    Column("professor_id", Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
 )
 lecture_table = Table(
     "lecture",

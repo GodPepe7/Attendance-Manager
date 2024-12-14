@@ -1,7 +1,7 @@
 from src.domain.dto import UserDto
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
-from src.domain.exceptions import NotFoundException, UnauthorizedException
+from src.domain.exceptions import NotFoundException, UnauthorizedException, InvalidInputException
 from src.domain.ports.user_repository import IUserRepository
 
 
@@ -27,6 +27,9 @@ class AdminService:
 
     def update_professor(self, user: User, user_dto: UserDto) -> None:
         self._raise_if_not_admin(user)
+        user = self.user_repo.get_by_email(user_dto.email)
+        if user:
+            raise InvalidInputException(f"Email '{user_dto.email}' is already in use. Choose another one")
         successfully_updated = self.user_repo.update_prof(user_dto)
         if not successfully_updated:
             raise NotFoundException(f"Professor with ID: {user_dto.id} doesn't exist")
