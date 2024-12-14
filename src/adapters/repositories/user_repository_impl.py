@@ -33,10 +33,10 @@ class UserRepository(IUserRepository):
         self.session.commit()
 
     def delete_prof(self, user_id: int) -> bool:
-        stmt = delete(User).where(User.id == user_id, User.role == Role.PROFESSOR).returning(User.id)
-        user = self.session.execute(stmt).one_or_none()
-        if not user:
+        user = self.session.get(User, user_id)
+        if not user or user.role != Role.PROFESSOR:
             return False
+        self.session.delete(user)
         self.session.commit()
         return True
 

@@ -37,9 +37,14 @@ class User:
         email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if not re.match(email_pattern, email):
             raise InvalidInputException("Invalid email. A valid email looks like 'example@host.com'")
-        password_hash = generate_password_hash(password)
+
         role = get_enum_by_value(role_input)
         if not role:
             raise InvalidInputException(
                 f"Invalid role \'{role_input}\'. Needs to be one of: {[role.value for role in Role]}")
+
+        if len(password) < 8:
+            raise InvalidInputException("Password too weak. Needs to be atleast 8 characters long")
+        password_hash = generate_password_hash(password)
+
         return cls(name=name, email=email, password_hash=password_hash, role=role)

@@ -25,7 +25,7 @@ user_table = Table(
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("name", String(50), nullable=False),
-    Column("email", String(30), nullable=False, unique=True),
+    Column("email", String(30), nullable=False, unique=True, index=True),
     Column("password_hash", String(100), nullable=False),
     Column("role", Enum(Role), nullable=False)
 )
