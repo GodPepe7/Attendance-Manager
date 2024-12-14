@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+from src.domain.dto import UserDto
 from src.domain.entities.user import User
 
 
@@ -26,5 +27,9 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    def delete(self, id: int) -> bool:
+    def delete_prof(self, user_id: int) -> bool:
+        pass
+
+    @abstractmethod
+    def update_prof(self, user_dto: UserDto) -> bool:
         pass

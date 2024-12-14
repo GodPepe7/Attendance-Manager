@@ -3,13 +3,13 @@ from typing import Optional
 from sqlalchemy import select, delete
 from sqlalchemy.orm import Session
 
+from src.domain.dto import UserDto
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.ports.user_repository import IUserRepository
 
 
 class UserRepository(IUserRepository):
-
     def __init__(self, session: Session):
         self.session = session
 
@@ -21,8 +21,8 @@ class UserRepository(IUserRepository):
         stmt = select(User).where(User.role == Role.PROFESSOR)
         return list(self.session.scalars(stmt).all())
 
-    def get_by_id(self, id: int) -> Optional[User]:
-        return self.session.get(User, id)
+    def get_by_id(self, user_id: int) -> Optional[User]:
+        return self.session.get(User, user_id)
 
     def get_by_email(self, email: str) -> Optional[User]:
         stmt = select(User).where(User.email == email)
@@ -32,10 +32,19 @@ class UserRepository(IUserRepository):
         self.session.add(user)
         self.session.commit()
 
-    def delete(self, id: int) -> bool:
-        stmt = delete(User).where(User.id == id, User.role == Role.PROFESSOR).returning(User.id)
+    def delete_prof(self, user_id: int) -> bool:
+        stmt = delete(User).where(User.id == user_id, User.role == Role.PROFESSOR).returning(User.id)
         user = self.session.execute(stmt).one_or_none()
         if not user:
             return False
+        self.session.commit()
+        return True
+
+    def update_prof(self, user_dto: UserDto) -> bool:
+        user = self.session.get(User, user_dto.id)
+        if not user or user.role != Role.PROFESSOR:
+            return False
+        user.name = user_dto.name
+        user.email = user_dto.email
         self.session.commit()
         return True

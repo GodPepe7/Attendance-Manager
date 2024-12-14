@@ -115,7 +115,7 @@
         qrLectureOptions.forEach(option => {
             const triggerValue = option.getAttribute("hx-trigger")
             const split = triggerValue.split(" ")
-            split[1] = pollingRate + "s"
+            split[2] = pollingRate + "s"
             const updatedTriggerValue = split.join(" ")
             option.setAttribute("hx-trigger", updatedTriggerValue)
             htmx.process(option)

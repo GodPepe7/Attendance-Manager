@@ -5,7 +5,7 @@ from flask import Blueprint, g, request, render_template_string, url_for, render
 
 from src.adapters.flask.blueprint.login_wrapper import login_required
 from src.adapters.flask.config.container import Container
-from src.domain.services.attendance_service import IdWrapper, AttendanceService
+from src.domain.services.attendance_service import AttendanceService
 
 attendance = Blueprint('attendance', __name__, template_folder="../templates",
                        url_prefix="/courses/<int:course_id>/lectures/<int:lecture_id>/attendance")

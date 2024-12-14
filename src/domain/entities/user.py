@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -29,10 +30,13 @@ class User:
         return check_password_hash(self.password_hash, password)
 
     def to_dto(self):
-        return UserDto(id=self.id, name=self.name)
+        return UserDto(id=self.id, name=self.name, email=self.email)
 
     @classmethod
     def factory(cls, name: str, email: str, password: str, role_input: str) -> "User":
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, email):
+            raise InvalidInputException("Invalid email. A valid email looks like 'example@host.com'")
         password_hash = generate_password_hash(password)
         role = get_enum_by_value(role_input)
         if not role:

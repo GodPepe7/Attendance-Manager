@@ -100,7 +100,7 @@ class TestCourseService:
         existing_prof = random.choice([user for user in self.users if user.role == Role.PROFESSOR])
         new_course = Course(name="test", professor=existing_prof)
 
-        course_id = course_service.save(new_course)
+        course_id = course_service.save(existing_prof, new_course)
 
         assert course_id
         fetched_course = session.get(Course, course_id)

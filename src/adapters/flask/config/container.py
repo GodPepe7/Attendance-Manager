@@ -6,6 +6,7 @@ from src.adapters.repositories.course_repository_impl import CourseRepository
 from src.adapters.repositories.enrollment_repository_impl import EnrollmentRepository
 from src.adapters.repositories.lecture_repository_impl import LectureRepository
 from src.adapters.repositories.user_repository_impl import UserRepository
+from src.domain.services.admin_service import AdminService
 from src.domain.services.attendance_service import AttendanceService
 from src.domain.services.authorizer_service import AuthorizerService
 from src.domain.services.course_service import CourseService
@@ -77,4 +78,9 @@ class Container(containers.DeclarativeContainer):
     user_service = providers.Factory(
         UserService,
         repo=user_repository
+    )
+
+    admin_service = providers.Factory(
+        AdminService,
+        user_repo=user_repository
     )

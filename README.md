@@ -18,12 +18,6 @@ Testing:
     - Driver Side: the user interacting with the domain via the Driver Ports (humans, automated tests)
     - Driven side: the domain interacting with the Driven Ports that are implemented by the Driven Adapters (
       repositories, external services, etc.)
-      -> 4 test constellations:
-    - TEST DRIVER ADAPTERS / MOCK DRIVEN ADAPTERS
-    - REAL DRIVER ADAPTERS / MOCK DRIVEN ADAPTERS (for example web ui)
-    - TEST DRIVER ADAPTERS / REAL DRIVEN ADAPTERS (integration tests)
-    - REAL DRIVER ADAPTERS / REAL DRIVEN ADAPTERS (e2e)
-    - Using real driver pots -> real domain
 
 ```
 sqlalchemy.orm.exc.UnmappedInstanceError: Class 'src.domain.entities.course.Course' is mapped, 

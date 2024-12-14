@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container p-8">
+  <header class="w-full bg-white shadow-md p-4 mb-4 flex justify-between items-center">
+    <h1 class="font-bold text-xl">Admin Dashboard</h1>
+  </header>
+  <div class="w-full bg-white shadow-md p-4 mb-4 overflow-x-auto rounded">
+    <table class="w-full text-md bg-white shadow-md rounded-md">
+      <tbody>
+      <tr class="border-b bg-gray-100 rounded">
+        <th class="text-left p-3 px-5 w-30">ID</th>
+        <th class="text-left p-3 px-5">Name</th>
+        <th class="text-left p-3 px-5">Email</th>
+        <th></th>
+      </tr>
+      {% for professor in professors %}
+      <tr class="border-b">
+        <td class="p-3 px-5"><p class="bg-transparent">{{ professor.id }}</p></td>
+        <td class="p-3 px-5"><input type="text" id="name-{{ professor.id }}" name="name" value="{{ professor.name }}"
+                                    class="bg-transparent"></td>
+        <td class="p-3 px-5"><input type="text" id="email-{{ professor.id }}" name="email" value="{{ professor.email }}"
+                                    class="bg-transparent"></td>
+        <td class="p-3 px-5 flex justify-end">
+          <button type="button" hx-patch="{{ url_for('admin.update_professor', user_id=professor.id) }}"
+                  hx-include="#name-{{ professor.id }}, #email-{{ professor.id }}"
+                  hx-trigger="click"
+                  class="mr-3 text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+            Edit
+          </button>
+          <button type="button" hx-delete="{{ url_for('admin.update_professor', user_id=professor.id) }}"
+                  hx-trigger="click"
+                  class="text-sm bg-red-500 hover:bg-red-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+            Delete
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

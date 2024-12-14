@@ -4,7 +4,6 @@ from flask import (request, Blueprint, jsonify, g, session, redirect, url_for, r
 
 from src.adapters.flask.blueprint.login_wrapper import login_required
 from src.adapters.flask.config.container import Container
-from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import InvalidCredentialsException
 from src.domain.services.user_service import UserService
@@ -53,23 +52,10 @@ def logout():
     return "", 200
 
 
-@auth.get("/")
-@inject
-@login_required()
-def get_users(user_service: UserService = Provide[Container.user_service]):
-    return user_service.get_all()
-
-
-@auth.get("/<int:id>/")
-@inject
-def get_user(id: int, user_service: UserService = Provide[Container.user_service]):
-    return jsonify(user_service.get_by_id(id))
-
-
 @auth.post("/")
 @inject
-@login_required()
-def save_users(user_service: UserService = Provide[Container.user_service]):
+# @login_required()
+def save_user(user_service: UserService = Provide[Container.user_service]):
     body = request.json
     email = body["email"]
     name = body["name"]
