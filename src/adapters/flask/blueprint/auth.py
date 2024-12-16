@@ -2,7 +2,6 @@ from dependency_injector.wiring import Provide, inject
 from flask import (request, Blueprint, jsonify, g, session, redirect, url_for, render_template, Response,
                    render_template_string)
 
-from src.adapters.flask.blueprint.login_wrapper import login_required
 from src.adapters.flask.config.container import Container
 from src.domain.entities.user import User
 from src.domain.exceptions import InvalidCredentialsException
@@ -35,10 +34,9 @@ def login(user_service: UserService = Provide[Container.user_service]):
         try:
             user = user_service.authenticate(email, password)
             session["user_id"] = user.id
-            next_page = session.get('next')
-            session.pop('next', None)
+            next_page = session.pop('next', url_for('course.index'))
             response = Response("Logged in")
-            response.headers["HX-Redirect"] = next_page or url_for('course.index')
+            response.headers["HX-Location"] = next_page
             return response
         except InvalidCredentialsException as e:
             return render_template_string(f"<p>{e}<p>")
