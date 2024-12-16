@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from src.adapters.flask.config.sqlalchemy import metadata
+from src.adapters.flask.config.tables import metadata
 from tests.test_data import courses
 
 

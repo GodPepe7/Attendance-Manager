@@ -1,6 +1,8 @@
+from os import environ
+
 from dependency_injector import containers, providers
 
-from src.adapters.flask.config.sqlalchemy import get_db_session
+from src.adapters.flask.config.db import DB
 from src.adapters.repositories.attendance_repository_impl import AttendanceRepository
 from src.adapters.repositories.course_repository_impl import CourseRepository
 from src.adapters.repositories.enrollment_repository_impl import EnrollmentRepository
@@ -16,8 +18,11 @@ from src.domain.services.user_service import UserService
 
 
 class Container(containers.DeclarativeContainer):
-    db_session = providers.Factory(get_db_session)
     config = providers.Configuration()
+
+    db_uri = environ.get("DB_URI")
+    db = providers.Singleton(DB, db_uri=environ.get("DB_URI"))
+    db_session = providers.Factory(db.provided.get_db_session())
 
     attendance_repo = providers.Factory(
         AttendanceRepository,
@@ -46,7 +51,7 @@ class Container(containers.DeclarativeContainer):
 
     encryption_service = providers.Factory(
         EncryptionService,
-        fernet_key=config.encryption_key
+        fernet_key=environ.get("ENCRYPTION_KEY").encode()
     )
 
     authorizer_service = providers.Factory(

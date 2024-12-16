@@ -30,7 +30,7 @@ def login(user_service: UserService = Provide[Container.user_service]):
         return redirect(url_for("course.index"))
 
     if request.method == "POST":
-        email = request.form.get('username')
+        email = request.form.get('email')
         password = request.form.get('password')
         try:
             user = user_service.authenticate(email, password)

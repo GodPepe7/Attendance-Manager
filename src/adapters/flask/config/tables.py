@@ -1,21 +1,11 @@
-from sqlalchemy.orm import scoped_session, sessionmaker, registry, relationship, deferred, Session
+from sqlalchemy import Table, Column, Integer, String, Enum, ForeignKey, Date
+from sqlalchemy.orm import registry, deferred, relationship
 
-from sqlalchemy import create_engine, Table, Column, Integer, String, Enum, ForeignKey, Date, event
 from src.domain.entities.course import Course
 from src.domain.entities.enrollment import Enrollment
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
-
-db_session: scoped_session[Session]
-
-
-def get_db_session():
-    global db_session
-    if db_session is None:
-        raise RuntimeError("Database not initialized. Call init_db first.")
-    return db_session
-
 
 mapper_registry = registry()
 metadata = mapper_registry.metadata
@@ -87,17 +77,3 @@ mapper_registry.map_imperatively(
                                           collection_class=set)
     }
 )
-
-
-def init_db(database_uri: str):
-    global db_session
-    engine = create_engine(database_uri, echo=False)
-    db_session = scoped_session(sessionmaker(bind=engine))
-    metadata.create_all(engine)
-
-    # enforce foreign keys constraints on sqlite
-    @event.listens_for(engine, "connect")
-    def enable_sqlite_fks(dbapi_connection, connection_record):
-        cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA foreign_keys=ON")
-        cursor.close()

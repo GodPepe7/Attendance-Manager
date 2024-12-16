@@ -7,64 +7,53 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100">
-<div id="qr-code-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
-     aria-hidden="true">
-  <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-    <div class="mt-3 text-center">
-      <h3 class="text-lg leading-6 font-medium text-gray-900">QR Code Generator</h3>
-      <div class="mt-2 px-7 py-3">
-        <form id="qr-code-form">
-          <div class="mb-4">
-            <label for="lecture-select" class="block text-left text-sm font-medium text-gray-700">Select Lecture</label>
-            <select id="lecture-select" name="lecture-select" required
-                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-              <option value="">Choose a lecture</option>
-              <!-- Lecture options will be dynamically populated here -->
-            </select>
-          </div>
-          <div class="mb-4">
-            <label for="regeneration-time" class="block text-left text-sm font-medium text-gray-700">Regeneration Time
-              (seconds)</label>
-            <input type="number" pattern="\d+" id="regeneration-time" name="regeneration-time" required min="1"
-                   value="60"
-                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-          </div>
-          <div class="mb-4">
-            <button type="submit"
-                    class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              Generate QR Code
-            </button>
-          </div>
-        </form>
-        <div id="qr-code-display" class="mt-4 hidden">
-          <div class="flex flex-col items-center space-y-2">
-            <div id="qr-code-image" class="w-48 h-48 bg-gray-200 flex items-center justify-center">
-              <!-- QR code will be inserted here -->
-            </div>
-            <p class="text-sm text-gray-500">
-              QR Code will regenerate every <span id="regeneration-time-display">30</span> seconds
-            </p>
-            <div class="flex items-center space-x-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24"
-                   stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
-              </svg>
-              <span id="qr-code-value" class="text-sm font-mono"></span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="items-center px-4 py-3">
-        <button id="close-qr-modal"
-                class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
-          Close
-        </button>
-      </div>
-    </div>
+<body class="bg-gray-100 flex justify-center min-h-screen">
+<div class="container p-8">
+  <header class="w-full bg-white shadow-md p-4 mb-4 flex justify-between items-center">
+    <h1 class="font-bold text-xl">Admin Dashboard</h1>
+  </header>
+  <div class="w-full bg-white shadow-md p-4 mb-4 overflow-x-auto rounded">
+    <table class="w-full text-md bg-white shadow-md rounded-md">
+      <tbody>
+      <tr class="border-b bg-gray-100 rounded">
+        <th class="text-left p-3 px-5 w-30">ID</th>
+        <th class="text-left p-3 px-5">Name</th>
+        <th class="text-left p-3 px-5">Email</th>
+        <th></th>
+      </tr>
+      <tr class="border-b">
+        <td class="p-3 px-5"><p class="bg-transparent">1</p></td>
+        <td class="p-3 px-5"><input type="text" value="Alexander Mai" class="bg-transparent"></td>
+        <td class="p-3 px-5"><input type="text" value="Alexander.Mai@htw-berlin.de" class="bg-transparent"></td>
+        <td class="p-3 px-5 flex justify-end">
+          <button type="button"
+                  class="mr-3 text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+            Edit
+          </button>
+          <button type="button"
+                  class="text-sm bg-red-500 hover:bg-red-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+            Delete
+          </button>
+        </td>
+      </tr>
+      <tr class="border-b">
+        <td class="p-3 px-5"><p class="bg-transparent">2</p></td>
+        <td class="p-3 px-5"><input type="text" value="John Wick 2" class="bg-transparent"></td>
+        <td class="p-3 px-5"><input type="email" value="JohnWick2@revenge.de" class="bg-transparent"></td>
+        <td class="p-3 px-5 flex justify-end">
+          <button type="button"
+                  class="mr-3 text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+            Edit
+          </button>
+          <button type="button"
+                  class="text-sm bg-red-500 hover:bg-red-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+            Delete
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
   </div>
 </div>
 </body>
 </html>
-
