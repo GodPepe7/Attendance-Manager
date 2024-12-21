@@ -15,9 +15,9 @@ class ILectureRepository(ABC):
         pass
 
     @abstractmethod
-    def delete(self, lecture_id: int) -> bool:
+    def delete(self, lecture: Lecture) -> None:
         pass
 
     @abstractmethod
-    def update(self, lecture_id: int, new_date: datetime.date) -> bool:
+    def update(self, lecture: Lecture) -> None:
         pass

@@ -5,7 +5,6 @@ import fernet
 import pytest
 from sqlalchemy import select
 
-from src.adapters.repositories.attendance_repository_impl import AttendanceRepository
 from src.adapters.repositories.course_repository_impl import CourseRepository
 from src.adapters.repositories.enrollment_repository_impl import EnrollmentRepository
 from src.adapters.repositories.lecture_repository_impl import LectureRepository
@@ -13,10 +12,9 @@ from src.domain.entities.enrollment import Enrollment
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import NotFoundException, QrCodeExpired
-from src.domain.services.attendance_service import AttendanceService, IdWrapper
-from src.domain.services.authorizer_service import AuthorizerService
+from src.domain.services.attendance_service import AttendanceService
 from src.domain.services.encryption_service import EncryptionService
-from tests.conftest import engine, tables, add_data, db_session
+from tests.conftest import db_session
 from tests.test_data import courses
 
 
@@ -24,13 +22,11 @@ class TestAttendanceService:
     @pytest.fixture
     def attendance_service(self, db_session):
         self.courses = [db_session.merge(course) for course in courses]
-        attendance_repo = AttendanceRepository(db_session)
         enrollment_repo = EnrollmentRepository(db_session)
         course_repo = CourseRepository(db_session)
         lecture_repo = LectureRepository(db_session)
-        authorizer = AuthorizerService(course_repo, lecture_repo)
         encryptor = EncryptionService(fernet_key=fernet.Fernet.generate_key())
-        attendance_service = AttendanceService(attendance_repo, enrollment_repo, authorizer, encryptor)
+        attendance_service = AttendanceService(enrollment_repo, lecture_repo, course_repo, encryptor)
         return db_session, attendance_service
 
     def test_save(self, attendance_service):
@@ -54,7 +50,7 @@ class TestAttendanceService:
             attendance_service.save(existing_course.professor, existing_course.id, existing_lecture.id,
                                     not_enrolled_student.id)
 
-        assert "doesn't exist" in str(exc.value)
+        assert "not part of the course" in str(exc.value)
 
     def test_delete(self, attendance_service):
         session, attendance_service = attendance_service

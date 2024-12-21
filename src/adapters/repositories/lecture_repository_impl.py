@@ -19,18 +19,9 @@ class LectureRepository(ILectureRepository):
         self.session.commit()
         return lecture.id
 
-    def delete(self, lecture_id: int) -> bool:
-        lecture = self.session.get(Lecture, lecture_id)
-        if not lecture:
-            return False
+    def delete(self, lecture: Lecture) -> None:
         self.session.delete(lecture)
         self.session.commit()
-        return True
 
-    def update(self, lecture_id: int, new_date: datetime.date) -> bool:
-        lecture = self.session.get(Lecture, lecture_id)
-        if not lecture:
-            return False
-        lecture.date = new_date
+    def update(self, lecture: Lecture) -> None:
         self.session.commit()
-        return True

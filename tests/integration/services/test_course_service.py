@@ -3,15 +3,13 @@ import random
 import pytest
 
 from src.adapters.repositories.course_repository_impl import CourseRepository
-from src.adapters.repositories.lecture_repository_impl import LectureRepository
 from src.domain.dto import CourseDto
 from src.domain.entities.course import Course
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import NotFoundException, UnauthorizedException
-from src.domain.services.authorizer_service import AuthorizerService
 from src.domain.services.course_service import CourseService
-from tests.conftest import engine, tables, add_data, db_session
+from tests.conftest import db_session
 from tests.test_data import courses, users
 
 
@@ -21,9 +19,7 @@ class TestCourseService:
         self.users = [db_session.merge(user) for user in users]
         self.courses = [db_session.merge(course) for course in courses]
         course_repo = CourseRepository(db_session)
-        lecture_repo = LectureRepository(db_session)
-        authorizer = AuthorizerService(course_repo, lecture_repo)
-        course_service = CourseService(course_repo, authorizer)
+        course_service = CourseService(course_repo)
         return db_session, course_service
 
     @staticmethod
@@ -71,7 +67,7 @@ class TestCourseService:
         with pytest.raises(UnauthorizedException) as exc:
             course_service.get_by_id(new_prof, existing_course.id)
 
-        assert "Only the professor" in str(exc.value)
+        assert "Only the course professor" in str(exc.value)
 
     def test_get_by_non_existing_course_id_raises(self, course_service):
         _, course_service = course_service

@@ -1,7 +1,9 @@
 class InvalidCredentialsException(Exception):
-    def __init__(self):
-        self.message = "Invalid Credentials."
-        super().__init__(self.message)
+    """Invalid Credentials."""
+
+
+class InvalidCoursePassword(Exception):
+    """Wrong password"""
 
 
 class InvalidInputException(Exception):

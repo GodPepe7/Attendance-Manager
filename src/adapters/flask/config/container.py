@@ -3,14 +3,12 @@ from os import environ
 from dependency_injector import containers, providers
 
 from src.adapters.flask.config.db import DB
-from src.adapters.repositories.attendance_repository_impl import AttendanceRepository
 from src.adapters.repositories.course_repository_impl import CourseRepository
 from src.adapters.repositories.enrollment_repository_impl import EnrollmentRepository
 from src.adapters.repositories.lecture_repository_impl import LectureRepository
 from src.adapters.repositories.user_repository_impl import UserRepository
 from src.domain.services.admin_service import AdminService
 from src.domain.services.attendance_service import AttendanceService
-from src.domain.services.authorizer_service import AuthorizerService
 from src.domain.services.course_service import CourseService
 from src.domain.services.encryption_service import EncryptionService
 from src.domain.services.lecture_service import LectureService
@@ -23,11 +21,6 @@ class Container(containers.DeclarativeContainer):
     db_uri = environ.get("DB_URI")
     db = providers.Singleton(DB, db_uri=environ.get("DB_URI"))
     db_session = providers.Factory(db.provided.get_db_session())
-
-    attendance_repo = providers.Factory(
-        AttendanceRepository,
-        session=db_session
-    )
 
     course_repo = providers.Factory(
         CourseRepository,
@@ -54,30 +47,23 @@ class Container(containers.DeclarativeContainer):
         fernet_key=environ.get("ENCRYPTION_KEY").encode()
     )
 
-    authorizer_service = providers.Factory(
-        AuthorizerService,
-        course_repo=course_repo,
-        lecture_repo=lecture_repo
-    )
-
     attendance_service = providers.Factory(
         AttendanceService,
-        attendance_repo=attendance_repo,
         enrollment_repo=enrollment_repository,
-        authorizer=authorizer_service,
+        lecture_repo=lecture_repo,
+        course_repo=course_repo,
         encryptor=encryption_service
     )
 
     course_service = providers.Factory(
         CourseService,
         repo=course_repo,
-        authorizer=authorizer_service
     )
 
     lecture_service = providers.Factory(
         LectureService,
         repo=lecture_repo,
-        authorizer=authorizer_service
+        course_repo=course_repo,
     )
 
     user_service = providers.Factory(

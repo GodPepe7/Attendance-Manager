@@ -31,7 +31,7 @@ class TestAdminService:
         with pytest.raises(UnauthorizedException) as exc:
             admin_service.get_all_professors(non_admin)
 
-        assert "'Admin' can do this" in str(exc.value)
+        assert "'admin' can do this" in str(exc.value)
 
     def test_get_all_professors_only_returns_professors(self, admin_service):
         _, admin_service = admin_service
@@ -53,7 +53,7 @@ class TestAdminService:
         with pytest.raises(UnauthorizedException) as exc:
             admin_service.delete_professor(non_admin, existing_professor)
 
-        assert "'Admin' can do this" in str(exc.value)
+        assert "'admin' can do this" in str(exc.value)
 
     def test_deleting_existing_professor_works(self, admin_service):
         session, admin_service = admin_service

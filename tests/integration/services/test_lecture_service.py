@@ -9,9 +9,8 @@ from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import NotFoundException
-from src.domain.services.authorizer_service import AuthorizerService
 from src.domain.services.lecture_service import LectureService
-from tests.conftest import engine, tables, add_data, db_session
+from tests.conftest import db_session
 from tests.test_data import courses
 
 
@@ -21,8 +20,7 @@ class TestLectureService:
         self.courses = [db_session.merge(course) for course in courses]
         lecture_repo = LectureRepository(db_session)
         course_repo = CourseRepository(db_session)
-        authorizer = AuthorizerService(course_repo, lecture_repo)
-        lecture_service = LectureService(lecture_repo, authorizer)
+        lecture_service = LectureService(lecture_repo, course_repo)
         return db_session, lecture_service
 
     def test_save_lecture_persists_in_db(self, lecture_service):
