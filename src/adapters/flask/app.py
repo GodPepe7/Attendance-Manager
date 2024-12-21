@@ -3,12 +3,12 @@ import traceback
 
 from flask import Flask, jsonify, redirect, url_for
 
-from src.adapters.flask.blueprint import attendance, auth, course, lecture, admin
+from src.adapters.flask.blueprint import attendance, auth, course, lecture, user
 from src.adapters.flask.blueprint.attendance import attendance as attendance_bp
 from src.adapters.flask.blueprint.auth import auth as auth_bp
 from src.adapters.flask.blueprint.course import course as course_bp
 from src.adapters.flask.blueprint.lecture import lecture as lecture_bp
-from src.adapters.flask.blueprint.admin import admin as admin_bp
+from src.adapters.flask.blueprint.user import user as user_bp
 from src.adapters.flask.config.container import Container
 from src.adapters.flask.config.exception_handler import EXCEPTION_DICT
 
@@ -17,7 +17,7 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.config.from_pyfile("config/config.py")
     container = Container()
-    container.wire(modules=[attendance, auth, course, lecture, admin])
+    container.wire(modules=[attendance, auth, course, lecture, user])
     app.container = container
     db = Container.db()
     db.create_tables()
@@ -42,7 +42,7 @@ def create_app() -> Flask:
     app.register_blueprint(course_bp)
     app.register_blueprint(lecture_bp)
     app.register_blueprint(attendance_bp)
-    app.register_blueprint(admin_bp)
+    app.register_blueprint(user_bp)
     app.add_url_rule("/", "index", lambda: redirect(url_for("course.index")))
 
     return app

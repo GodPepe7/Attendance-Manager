@@ -3,12 +3,15 @@ import random
 
 import fernet
 import pytest
+from sqlalchemy import select
 
 from src.adapters.repositories.attendance_repository_impl import AttendanceRepository
 from src.adapters.repositories.course_repository_impl import CourseRepository
 from src.adapters.repositories.enrollment_repository_impl import EnrollmentRepository
 from src.adapters.repositories.lecture_repository_impl import LectureRepository
 from src.domain.entities.enrollment import Enrollment
+from src.domain.entities.role import Role
+from src.domain.entities.user import User
 from src.domain.exceptions import NotFoundException, QrCodeExpired
 from src.domain.services.attendance_service import AttendanceService, IdWrapper
 from src.domain.services.authorizer_service import AuthorizerService
@@ -82,13 +85,14 @@ class TestAttendanceService:
         enrollment = list(course.enrolled_students)[0]
         lecture = list(course.lectures)[0]
         EXPIRATION_TIME = 30
+        now = datetime.datetime.now()
         assert lecture not in list(enrollment.attended_lectures)
 
         qr_code_str = attendance_service.generate_qr_code_string(course.professor, course.id, lecture.id,
                                                                  EXPIRATION_TIME,
-                                                                 datetime.datetime.now())
+                                                                 now)
         attendance_service.save_with_qr_code_string(enrollment.student, course.id, lecture.id, qr_code_str,
-                                                    datetime.datetime.now())
+                                                    now)
 
         updated_enrollment = session.get(Enrollment, enrollment.id)
         assert lecture in list(updated_enrollment.attended_lectures)
@@ -109,3 +113,26 @@ class TestAttendanceService:
                                                         thirty_one_seconds_after)
 
         assert "expired" in str(exc.value)
+
+    def test_generate_qr_then_scan_with_not_yet_enrolled_student_also_works(self, attendance_service):
+        session, attendance_service = attendance_service
+        new_user = User("new", "new@new.de", "hash", Role.STUDENT)
+        session.add(new_user)
+        session.commit()
+        session.refresh(new_user)
+        existing_course = random.choice(self.courses)
+        existing_lecture = random.choice(list(existing_course.lectures))
+        EXPIRATION_TIME = 30
+        now = datetime.datetime.now()
+
+        qr_code_str = attendance_service.generate_qr_code_string(existing_course.professor, existing_course.id,
+                                                                 existing_lecture.id,
+                                                                 EXPIRATION_TIME, now)
+        attendance_service.save_with_qr_code_string(new_user, existing_course.id, existing_lecture.id, qr_code_str,
+                                                    now)
+
+        stmt = select(Enrollment).where(Enrollment.course_id == existing_course.id,
+                                        Enrollment.student_id == new_user.id)
+        updated_enrollment = session.execute(stmt).scalar()
+        assert updated_enrollment
+        assert existing_lecture in list(updated_enrollment.attended_lectures)

@@ -3,7 +3,9 @@ from dataclasses import dataclass, field
 from src.domain.dto import CourseDto
 from src.domain.entities.enrollment import Enrollment
 from src.domain.entities.lecture import Lecture
+from src.domain.entities.role import Role
 from src.domain.entities.user import User
+from src.domain.exceptions import UnauthorizedException
 
 
 @dataclass
@@ -28,3 +30,9 @@ class Course:
             lectures=[lecture.to_dto() for lecture in self.lectures],
             enrolled_students=[enrollment.to_dto() for enrollment in self.enrolled_students]
         )
+
+    @classmethod
+    def factory(cls, name: str, user: User) -> "Course":
+        if user.role != Role.PROFESSOR:
+            raise UnauthorizedException("Only a professor can do this action")
+        return cls(name=name, professor=user)

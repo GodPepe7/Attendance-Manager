@@ -6,5 +6,9 @@ from src.domain.entities.enrollment import Enrollment
 
 class IEnrollmentRepository(ABC):
     @abstractmethod
-    def get_by_course_id_and_user_id(self, course_id: int, user_id: int) -> Optional[Enrollment]:
+    def get_by_course_id_and_student_id(self, course_id: int, student_id: int) -> Optional[Enrollment]:
+        pass
+
+    @abstractmethod
+    def save_by_course_id_and_student_id(self, course_id: int, student_id: int) -> Enrollment:
         pass

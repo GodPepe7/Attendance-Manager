@@ -44,18 +44,3 @@ class AuthorizerService:
             raise NotFoundException(
                 f"Lecture with ID '{lecture_id}' is not part of the course with ID: '{course_id}'!")
         self.check_if_professor_of_course(user, course_id)
-
-    def check_if_enrolled_course_student(self, user: User, course_id: int):
-        """
-        Checks if the user is enrolled in the course and thus authorized.
-        Will throw an UnauthorizedException otherwise
-        """
-        self.check_if_role(user, Role.STUDENT)
-        course = self.course_repo.get_by_id(course_id)
-        if not course:
-            raise NotFoundException(f"Course with ID: {id} doesn't exist")
-        is_enrolled_course_student = user.id in [enrollment.student.id for enrollment in
-                                                 course.enrolled_students]
-        if not is_enrolled_course_student:
-            raise UnauthorizedException(
-                "Only an enrolled student of the course is allowed to do this action!")

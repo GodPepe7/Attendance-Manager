@@ -21,6 +21,9 @@ class UserService:
             raise NotFoundException(f"User with ID: {id} doesn't exist")
         return user
 
+    def get_students_by_name_starting_with(self, name_prefix: str):
+        return [student.to_dto() for student in self.get_students_by_name_starting_with(name_prefix)]
+
     def authenticate(self, email: str, password: str) -> User:
         """
         Checks if the passed in credentials are correct and returns the User if so.

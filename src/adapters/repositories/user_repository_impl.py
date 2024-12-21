@@ -28,6 +28,10 @@ class UserRepository(IUserRepository):
         stmt = select(User).where(User.email == email)
         return self.session.scalar(stmt)
 
+    def get_students_by_name_starting_with(self, name_prefix: str) -> list[User]:
+        stmt = select(User).where(User.name.startswith(name_prefix), User.role == Role.STUDENT)
+        return list(self.session.scalars(stmt).all())
+
     def save(self, user: User) -> None:
         self.session.add(user)
         self.session.commit()

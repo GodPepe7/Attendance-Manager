@@ -6,10 +6,10 @@ from src.adapters.flask.config.container import Container
 from src.domain.dto import UserDto
 from src.domain.services.admin_service import AdminService
 
-admin = Blueprint('admin', __name__, url_prefix="/professors", template_folder="../templates")
+user = Blueprint('admin', __name__, url_prefix="/professors", template_folder="../templates")
 
 
-@admin.get("/")
+@user.get("/")
 @inject
 @login_required()
 def get_professors(admin_service: AdminService = Provide[Container.admin_service]):
@@ -17,7 +17,7 @@ def get_professors(admin_service: AdminService = Provide[Container.admin_service
     return render_template("admin.html", professors=all_professors)
 
 
-@admin.delete("/<int:user_id>")
+@user.delete("/<int:user_id>")
 @inject
 @login_required()
 def delete_professor(user_id: int, admin_service: AdminService = Provide[Container.admin_service]):
@@ -27,7 +27,7 @@ def delete_professor(user_id: int, admin_service: AdminService = Provide[Contain
     return response
 
 
-@admin.patch("/<int:user_id>")
+@user.patch("/<int:user_id>")
 @inject
 @login_required()
 def update_professor(user_id: int, admin_service: AdminService = Provide[Container.admin_service]):

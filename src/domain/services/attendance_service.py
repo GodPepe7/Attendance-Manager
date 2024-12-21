@@ -1,10 +1,13 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
+from src.domain.entities.enrollment import Enrollment
+from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import NotFoundException, QrCodeExpired
 from src.domain.ports.attendance_repository import IAttendanceRepository
 from src.domain.ports.enrollment_repository import IEnrollmentRepository
+from src.domain.ports.user_repository import IUserRepository
 from src.domain.services.authorizer_service import AuthorizerService
 from src.domain.services.encryption_service import EncryptionService
 
@@ -51,13 +54,15 @@ class AttendanceService:
         return encrypted_time
 
     def save_with_qr_code_string(self, user: User, course_id: int, lecture_id: int, qr_code_string: str,
-                                 current_time: datetime):
-        self.authorizer.check_if_enrolled_course_student(user, course_id)
+                                 current_time: datetime) -> None:
+        self.authorizer.check_if_role(user, Role.STUDENT)
         expiration_time = self.encryptor.decrypt_date(qr_code_string)
         if current_time > expiration_time:
             raise QrCodeExpired("Didn't save attendance. QR Code is already expired")
-        enrollment = self.enrollment_repo.get_by_course_id_and_user_id(course_id, user.id)
+        enrollment = self.enrollment_repo.get_by_course_id_and_student_id(course_id, user.id)
+        if not enrollment:
+            enrollment = self.enrollment_repo.save_by_course_id_and_student_id(course_id, user.id)
         saved = self.repo.save(lecture_id, enrollment.id)
         if not saved:
             raise NotFoundException(
-                f"Couldn't save attendance. Student and lecture need to exist!")
+                f"Lecture with ID: {lecture_id} doesn't exist")

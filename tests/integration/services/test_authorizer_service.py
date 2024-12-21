@@ -67,18 +67,3 @@ class TestAuthorizerService:
             authorizer.check_if_professor_of_lecture(random_course.professor, 342124, random_lecture.id)
 
         assert "not part of the course" in str(exc.value)
-
-    def test_check_if_enrolled_course_student_with_enrolled_student_does_not_raise(self, authorizer):
-        random_course = random.choice(self.courses)
-        random_enrolled_student = random.choice(list(random_course.enrolled_students)).student
-
-        authorizer.check_if_enrolled_course_student(random_enrolled_student, random_course.id)
-
-    def test_check_if_enrolled_course_student_with_non_enrolled_student_raises(self, authorizer):
-        random_course = random.choice(self.courses)
-        not_enrolled_student = User("test", "test@test.test", "test", Role.STUDENT, 69420)
-
-        with pytest.raises(UnauthorizedException) as exc:
-            authorizer.check_if_enrolled_course_student(not_enrolled_student, random_course.id)
-
-        assert "Only an enrolled student" in str(exc.value)
