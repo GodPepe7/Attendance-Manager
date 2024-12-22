@@ -14,7 +14,7 @@ from src.adapters.flask.config.exception_handler import EXCEPTION_DICT
 
 
 def create_app() -> Flask:
-    app = Flask(__name__)
+    app = Flask(__name__, static_url_path='/static')
     app.config.from_pyfile("config/config.py")
     container = Container()
     container.wire(modules=[attendance, auth, course, lecture, user])
