@@ -3,11 +3,22 @@ from flask import (request, Blueprint, jsonify, g, session, redirect, url_for, r
                    render_template_string)
 
 from src.adapters.flask.config.container import Container
+from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import InvalidCredentialsException
 from src.domain.services.user_service import UserService
 
 auth = Blueprint('auth', __name__, url_prefix="/auth", template_folder="../templates")
+
+
+def _get_fallback_page(user: User) -> str:
+    match user.role:
+        case Role.PROFESSOR:
+            return url_for("course.index")
+        case Role.ADMIN:
+            return url_for("user.get_professors")
+        case Role.STUDENT:
+            return ""
 
 
 @auth.before_app_request
@@ -26,7 +37,7 @@ def load_logged_in_user(user_service: UserService = Provide[Container.user_servi
 @inject
 def login(user_service: UserService = Provide[Container.user_service]):
     if g.user is not None:
-        return redirect(url_for("course.index"))
+        return _get_fallback_page(g.user)
 
     if request.method == "POST":
         email = request.form.get('email')
@@ -34,7 +45,7 @@ def login(user_service: UserService = Provide[Container.user_service]):
         try:
             user = user_service.authenticate(email, password)
             session["user_id"] = user.id
-            next_page = session.pop('next', url_for('course.index'))
+            next_page = session.pop('next', _get_fallback_page(user))
             response = Response("Logged in")
             response.headers["HX-Location"] = next_page
             return response

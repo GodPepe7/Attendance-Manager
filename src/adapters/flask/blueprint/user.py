@@ -6,7 +6,7 @@ from src.adapters.flask.config.container import Container
 from src.domain.dto import UserDto
 from src.domain.services.admin_service import AdminService
 
-user = Blueprint('admin', __name__, url_prefix="/professors", template_folder="../templates")
+user = Blueprint('user', __name__, url_prefix="/professors", template_folder="../templates")
 
 
 @user.get("/")

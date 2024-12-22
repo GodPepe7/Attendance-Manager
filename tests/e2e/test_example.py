@@ -16,8 +16,8 @@ def authenticated_page(new_context, storage):
         context = new_context()
         page = context.new_page()
         page.goto("127.0.0.1:5000")
-        page.get_by_label("Email").fill("p@htw.de")
-        page.get_by_label("Password").fill("test1234")
+        page.get_by_label("Email").fill("prof@htw.de")
+        page.get_by_label("Password").fill("test")
         page.get_by_role("button", name="Login").click()
 
         expect(page.get_by_role("heading", name="Your Courses")).to_be_visible()

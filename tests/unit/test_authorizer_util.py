@@ -2,7 +2,6 @@ import datetime
 import random
 import pytest
 
-from src.domain.entities.course import Course
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User

@@ -12,7 +12,8 @@ def login_required():
         @functools.wraps(view)
         def wrapped_view(**kwargs):
             if g.user is None:
-                session['next'] = request.url
+                if request.endpoint != "index":
+                    session['next'] = request.url
                 return redirect(url_for('auth.login'))
 
             return view(**kwargs)
