@@ -1,14 +1,14 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from src.domain.entities.enrollment import Enrollment
+from src.domain.entities.course_student import CourseStudent
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import NotFoundException, QrCodeExpired
 from src.domain.ports.attendance_repository import IAttendanceRepository
 from src.domain.ports.course_repository import ICourseRepository
-from src.domain.ports.enrollment_repository import IEnrollmentRepository
+from src.domain.ports.course_student_repository import ICourseStudentRepository
 from src.domain.ports.lecture_repository import ILectureRepository
 from src.domain.authorizer_utils import AuthorizerUtils
 from src.domain.services.encryption_service import EncryptionService
@@ -24,7 +24,7 @@ class IdWrapper:
 class AttendanceService:
     def __init__(
             self,
-            enrollment_repo: IEnrollmentRepository,
+            enrollment_repo: ICourseStudentRepository,
             lecture_repo: ILectureRepository,
             course_repo: ICourseRepository,
             encryptor: EncryptionService
@@ -35,21 +35,18 @@ class AttendanceService:
         self.encryptor = encryptor
 
     def _get_enrollment_and_lecture(self, user: User, course_id: int, lecture_id: int, enrollment_id: int) -> (
-            Enrollment, Lecture):
+            CourseStudent, Lecture):
         course = self.course_repo.get_by_id(course_id)
         lecture = self.lecture_repo.get_by_id(lecture_id)
         AuthorizerUtils.check_if_professor_of_lecture(user, course, lecture)
         enrollment = self.enrollment_repo.get_by_id(enrollment_id)
         if not enrollment:
             raise NotFoundException("Enrollment doesn't exist")
-        if enrollment.course_id != course.id:
-            raise NotFoundException(
-                f"Enrollment with ID '{enrollment.id}' is not part of the course with ID: '{course.id}'!")
         return enrollment, lecture
 
     def save(self, user: User, course_id: int, lecture_id: int, enrollment_id: int):
         enrollment, lecture = self._get_enrollment_and_lecture(user, course_id, lecture_id, enrollment_id)
-        enrollment.attended_lectures.add(lecture)
+        enrollment.add_lecture(lecture)
         self.enrollment_repo.update(enrollment)
 
     def delete(self, user: User, course_id: int, lecture_id: int, enrollment_id: int):

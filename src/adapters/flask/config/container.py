@@ -4,7 +4,7 @@ from dependency_injector import containers, providers
 
 from src.adapters.flask.config.db import DB
 from src.adapters.repositories.course_repository_impl import CourseRepository
-from src.adapters.repositories.enrollment_repository_impl import EnrollmentRepository
+from src.adapters.repositories.enrollment_repository_impl import CourseStudentRepository
 from src.adapters.repositories.lecture_repository_impl import LectureRepository
 from src.adapters.repositories.user_repository_impl import UserRepository
 from src.domain.services.admin_service import AdminService
@@ -38,7 +38,7 @@ class Container(containers.DeclarativeContainer):
     )
 
     enrollment_repository = providers.Factory(
-        EnrollmentRepository,
+        CourseStudentRepository,
         session=db_session
     )
 

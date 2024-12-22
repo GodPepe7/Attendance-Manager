@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 from src.domain.dto import CourseDto
-from src.domain.entities.enrollment import Enrollment
+from src.domain.entities.course_student import CourseStudent
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
@@ -14,7 +14,7 @@ class Course:
     professor: User
     id: int = None
     lectures: set[Lecture] = field(default_factory=set)
-    enrolled_students: set[Enrollment] = field(default_factory=set)
+    students: set[CourseStudent] = field(default_factory=set)
 
     def __repr__(self):
         return f"<Course {self.id} {self.name}>"
@@ -28,7 +28,7 @@ class Course:
             name=self.name,
             professor=self.professor.to_dto(),
             lectures=[lecture.to_dto() for lecture in self.lectures],
-            enrolled_students=[enrollment.to_dto() for enrollment in self.enrolled_students]
+            students=[enrollment.to_dto() for enrollment in self.students]
         )
 
     @classmethod

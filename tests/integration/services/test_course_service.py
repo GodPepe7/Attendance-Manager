@@ -9,7 +9,7 @@ from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import NotFoundException, UnauthorizedException
 from src.domain.services.course_service import CourseService
-from tests.conftest import db_session
+from tests.conftest import engine, tables, add_data, db_session
 from tests.test_data import courses, users
 
 
@@ -27,8 +27,8 @@ class TestCourseService:
         # sort to ensure we're iterating over the same element
         lectures = sorted(course.lectures, key=lambda l: l.id)
         lecture_dtos = sorted(dto.lectures, key=lambda l: l.id)
-        enrolled_students = sorted(course.enrolled_students, key=lambda es: es.id)
-        enrolled_student_dtos = sorted(dto.enrolled_students, key=lambda es: es.id)
+        course_students = sorted(course.students, key=lambda es: es.id)
+        course_students_dtos = sorted(dto.students, key=lambda es: es.id)
 
         assert dto.id == course.id and dto.name == course.name
 
@@ -39,8 +39,8 @@ class TestCourseService:
             assert lecture.date == lecture_dto.date
 
         # assert enrolled_student of course are equal to dto
-        assert len(enrolled_students) == len(enrolled_student_dtos)
-        for enrollment, enrollment_dto in zip(enrolled_students, enrolled_student_dtos):
+        assert len(course_students) == len(course_students_dtos)
+        for enrollment, enrollment_dto in zip(course_students, course_students_dtos):
             assert enrollment.id == enrollment_dto.id
 
             attended_lectures = sorted(enrollment.attended_lectures, key=lambda lec: lec.id)

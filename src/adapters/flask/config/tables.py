@@ -2,7 +2,7 @@ from sqlalchemy import Table, Column, Integer, String, Enum, ForeignKey, Date
 from sqlalchemy.orm import registry, deferred, relationship
 
 from src.domain.entities.course import Course
-from src.domain.entities.enrollment import Enrollment
+from src.domain.entities.course_student import CourseStudent
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
@@ -33,8 +33,8 @@ lecture_table = Table(
     Column("course_id", Integer, ForeignKey("course.id", ondelete="CASCADE"), nullable=False),
     Column("date", Date, nullable=False)
 )
-enrollment_table = Table(
-    "enrollment",
+course_student_table = Table(
+    "course_student",
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("student_id", Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False),
@@ -43,7 +43,7 @@ enrollment_table = Table(
 attendance_table = Table(
     "attendance",
     metadata,
-    Column("enrollment_id", Integer, ForeignKey("enrollment.id", ondelete="CASCADE"), primary_key=True,
+    Column("course_student_id", Integer, ForeignKey("course_student.id", ondelete="CASCADE"), primary_key=True,
            nullable=False),
     Column("lecture_id", Integer, ForeignKey("lecture.id", ondelete="CASCADE"), primary_key=True, nullable=False)
 )
@@ -63,13 +63,13 @@ mapper_registry.map_imperatively(
         "professor": relationship("User"),
         "lectures": relationship("Lecture", cascade="all, delete",
                                  collection_class=set),
-        "enrolled_students": relationship("Enrollment", cascade="all, delete",
-                                          collection_class=set)
+        "students": relationship("CourseStudent", cascade="all, delete",
+                                 collection_class=set)
     }
 )
 mapper_registry.map_imperatively(
-    Enrollment,
-    enrollment_table,
+    CourseStudent,
+    course_student_table,
     properties={
         "student": relationship("User"),
         "attended_lectures": relationship("Lecture", backref="lecture",

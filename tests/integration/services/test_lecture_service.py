@@ -10,7 +10,7 @@ from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import NotFoundException
 from src.domain.services.lecture_service import LectureService
-from tests.conftest import db_session
+from tests.conftest import engine, tables, add_data, db_session
 from tests.test_data import courses
 
 
@@ -61,14 +61,13 @@ class TestLectureService:
         fetched_lecture = session.get(Lecture, random_lecture.id)
         assert not fetched_lecture
 
-    def test_delete_non_existing_lecture_raises(self, lecture_service):
+    def test_delete_lecture_not_belonging_to_course_raises(self, lecture_service):
         _, lecture_service = lecture_service
-        test_prof = User("test", "test@test.test", "test", Role.PROFESSOR)
         random_course = random.choice(self.courses)
         non_existing_lecture = 69420
 
         with pytest.raises(NotFoundException) as exc:
-            lecture_service.delete(test_prof, random_course.id, non_existing_lecture)
+            lecture_service.delete(random_course.professor, random_course.id, non_existing_lecture)
 
         assert "doesn't exist" in str(exc.value)
 

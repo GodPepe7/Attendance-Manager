@@ -14,7 +14,7 @@ course = Blueprint('course', __name__, url_prefix="/courses", template_folder=".
 @login_required()
 def index(course_service: CourseService = Provide[Container.course_service]):
     courses = course_service.get_courses_by_prof(g.user)
-    courses = [{"id": c.id, "name": c.name, "amount_students": len(c.enrolled_students)} for c in courses]
+    courses = [{"id": c.id, "name": c.name, "amount_students": len(c.students)} for c in courses]
     return render_template("course.html", courses=courses)
 
 
@@ -24,7 +24,7 @@ def index(course_service: CourseService = Provide[Container.course_service]):
 def get_by_id(course_id: int, course_service: CourseService = Provide[Container.course_service]):
     course_data = course_service.get_by_id(user=g.user, course_id=course_id)
     course_data.lectures.sort(key=lambda lecture: lecture.date)
-    course_data.enrolled_students.sort(key=lambda enrollment: enrollment.student.name)
+    course_data.students.sort(key=lambda enrollment: enrollment.student.name)
     return render_template("attendance.html", course=course_data)
 
 

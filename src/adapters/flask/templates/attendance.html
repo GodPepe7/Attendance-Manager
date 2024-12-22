@@ -220,17 +220,17 @@
           </tr>
           </thead>
           <tbody>
-          {% for enrollment in course.enrolled_students %}
+          {% for course_student in course.students %}
           <tr class="border-b border-gray-200 h-full">
             <td class="sticky left-0 z-20 bg-white px-6 py-4 whitespace-nowrap h-full">
               <div class="flex items-center">
-                <div class="text-sm font-semibold text-gray-900">{{enrollment.student.name}}</div>
+                <div class="text-sm font-semibold text-gray-900">{{course_student.student.name}}</div>
               </div>
             </td>
             {% for lecture in course.lectures %}
             <td class="p-0 h-full lecture-{{ lecture.id }}">
-              {% set has_attended = lecture.id | has_attended(enrollment.attended_lectures) %}
-              {% set attendance_url = request.path ~ "lectures/" ~ lecture.id ~ "/attendance/" ~ enrollment.id %}
+              {% set has_attended = lecture.id | has_attended(course_student.attended_lectures) %}
+              {% set attendance_url = request.path ~ "lectures/" ~ lecture.id ~ "/attendance/" ~ course_student.id %}
               {% import 'reusable/attendanceBtn.html' as attendance %}
               {{ attendance.button(has_attended, attendance_url) }}
             </td>
