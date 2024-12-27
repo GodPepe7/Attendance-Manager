@@ -1,3 +1,8 @@
+# fix windows registry stuff
+import mimetypes
+
+mimetypes.add_type('application/javascript', '.js')
+
 import logging
 import traceback
 
@@ -30,8 +35,7 @@ def create_app() -> Flask:
     def handle_exception(error):
         for exc_type, code in EXCEPTION_DICT.items():
             if isinstance(error, exc_type):
-                response = {"error": exc_type.__name__, "message": str(error)}
-                return jsonify(response), code
+                return str(error), code
 
         response = {"error": "InternalServerError"}
         logging.error(error)

@@ -23,11 +23,13 @@
         <td class="p-3 px-5"><input type="text" id="name-{{ professor.id }}" name="name" value="{{ professor.name }}"
                                     class="bg-transparent"></td>
         <td class="p-3 px-5"><input type="text" id="email-{{ professor.id }}" name="email" value="{{ professor.email }}"
-                                    class="bg-transparent"></td>
+                                    class="bg-transparent">test
+        </td>
         <td class="p-3 px-5 flex justify-end">
           <button type="button" hx-patch="{{ url_for('user.update_professor', user_id=professor.id) }}"
                   hx-include="#name-{{ professor.id }}, #email-{{ professor.id }}"
                   hx-trigger="click" hx-confirm="Are you sure you want to save these changes?"
+                  hx-target-4*=""
                   class="mr-3 text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
             Edit
           </button>

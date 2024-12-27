@@ -19,7 +19,10 @@ class CourseService:
     def get_by_id(self, user: User, course_id: int) -> CourseDto:
         course = self.repo.get_by_id(course_id)
         AuthorizerUtils.check_if_professor_of_course(user, course)
-        return course.to_dto()
+        course_dtos = course.to_dto()
+        course_dtos.lectures.sort(key=lambda lecture: lecture.date)
+        course_dtos.students.sort(key=lambda enrollment: enrollment.student.name)
+        return course_dtos
 
     def save(self, user: User, course: Course) -> int:
         AuthorizerUtils.check_if_role(user, Role.PROFESSOR)

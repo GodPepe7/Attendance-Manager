@@ -87,8 +87,7 @@ class TestAttendanceService:
         qr_code_str = attendance_service.generate_qr_code_string(course.professor, course.id, lecture.id,
                                                                  EXPIRATION_TIME,
                                                                  now)
-        attendance_service.save_with_qr_code_string(enrollment.student, course.id, lecture.id, qr_code_str,
-                                                    now)
+        attendance_service.save_with_qr_code_string(enrollment.student, qr_code_str, now)
 
         updated_enrollment = session.get(CourseStudent, enrollment.id)
         assert lecture in list(updated_enrollment.attended_lectures)
@@ -105,7 +104,7 @@ class TestAttendanceService:
         qr_code_str = attendance_service.generate_qr_code_string(course.professor, course.id, lecture.id,
                                                                  EXPIRATION_TIME, now)
         with pytest.raises(QrCodeExpired) as exc:
-            attendance_service.save_with_qr_code_string(enrollment.student, course.id, lecture.id, qr_code_str,
+            attendance_service.save_with_qr_code_string(enrollment.student, qr_code_str,
                                                         thirty_one_seconds_after)
 
         assert "expired" in str(exc.value)
@@ -124,8 +123,7 @@ class TestAttendanceService:
         qr_code_str = attendance_service.generate_qr_code_string(existing_course.professor, existing_course.id,
                                                                  existing_lecture.id,
                                                                  EXPIRATION_TIME, now)
-        attendance_service.save_with_qr_code_string(new_user, existing_course.id, existing_lecture.id, qr_code_str,
-                                                    now)
+        attendance_service.save_with_qr_code_string(new_user, qr_code_str, now)
 
         stmt = select(CourseStudent).where(CourseStudent.course_id == existing_course.id,
                                            CourseStudent.student_id == new_user.id)

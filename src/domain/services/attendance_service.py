@@ -60,20 +60,19 @@ class AttendanceService:
         lecture = self.lecture_repo.get_by_id(lecture_id)
         AuthorizerUtils.check_if_professor_of_lecture(user, course, lecture)
         expiration_time = current_time + timedelta(seconds=seconds)
-        encrypted_time = self.encryptor.encrypt_date(expiration_time)
+        encrypted_time = self.encryptor.encrypt_lecture_and_time(lecture_id, expiration_time)
         return encrypted_time
 
-    def save_with_qr_code_string(self, user: User, course_id: int, lecture_id: int, qr_code_string: str,
-                                 current_time: datetime) -> None:
+    def save_with_qr_code_string(self, user: User, qr_code_string: str, current_time: datetime) -> None:
         AuthorizerUtils.check_if_role(user, Role.STUDENT)
-        expiration_time = self.encryptor.decrypt_date(qr_code_string)
-        if current_time > expiration_time:
-            raise QrCodeExpired("Didn't save attendance. QR Code is already expired")
+        lecture_id, expiration_time = self.encryptor.decrypt_to_lecture_and_time(qr_code_string)
         lecture = self.lecture_repo.get_by_id(lecture_id)
         if not lecture:
             raise NotFoundException("Lecture doesn't exist")
-        enrollment = self.enrollment_repo.get_by_course_id_and_student_id(course_id, user.id)
+        if current_time > expiration_time:
+            raise QrCodeExpired("Didn't save attendance. QR Code is already expired")
+        enrollment = self.enrollment_repo.get_by_course_id_and_student_id(lecture.course_id, user.id)
         if not enrollment:
-            enrollment = self.enrollment_repo.save_by_course_id_and_user_id(course_id, user.id)
+            enrollment = self.enrollment_repo.save_by_course_id_and_user_id(lecture.course_id, user.id)
         enrollment.attended_lectures.add(lecture)
         self.enrollment_repo.update(enrollment)

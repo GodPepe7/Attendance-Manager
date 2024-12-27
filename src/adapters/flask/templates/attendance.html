@@ -126,7 +126,7 @@
 
     function generateQrCode(event) {
         if (!event.detail.successful) return
-        const qrString = window.location.hostname + event.detail.xhr.response
+        const qrString = window.location.host + event.detail.xhr.response
         const canvas = document.getElementById("qr-canvas")
         new QRious({
             element: canvas,

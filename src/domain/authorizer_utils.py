@@ -3,8 +3,6 @@ from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import UnauthorizedException, NotFoundException
-from src.domain.ports.course_repository import ICourseRepository
-from src.domain.ports.lecture_repository import ILectureRepository
 
 
 class AuthorizerUtils:

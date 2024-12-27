@@ -1,11 +1,9 @@
 from dependency_injector.wiring import Provide, inject
-from flask import (request, Blueprint, jsonify, g, session, redirect, url_for, render_template, Response,
-                   render_template_string)
+from flask import (request, Blueprint, jsonify, g, session, url_for, render_template, redirect)
 
 from src.adapters.flask.config.container import Container
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
-from src.domain.exceptions import InvalidCredentialsException
 from src.domain.services.user_service import UserService
 
 auth = Blueprint('auth', __name__, url_prefix="/auth", template_folder="../templates")
@@ -37,20 +35,15 @@ def load_logged_in_user(user_service: UserService = Provide[Container.user_servi
 @inject
 def login(user_service: UserService = Provide[Container.user_service]):
     if g.user is not None:
-        return _get_fallback_page(g.user)
+        return redirect(_get_fallback_page(g.user))
 
     if request.method == "POST":
         email = request.form.get('email')
         password = request.form.get('password')
-        try:
-            user = user_service.authenticate(email, password)
-            session["user_id"] = user.id
-            next_page = session.pop('next', _get_fallback_page(user))
-            response = Response("Logged in")
-            response.headers["HX-Location"] = next_page
-            return response
-        except InvalidCredentialsException as e:
-            return render_template_string(f"<p>{e}<p>")
+        user = user_service.authenticate(email, password)
+        session["user_id"] = user.id
+        next_page = session.pop('next', _get_fallback_page(user))
+        return redirect(next_page)
 
     return render_template("login.html")
 

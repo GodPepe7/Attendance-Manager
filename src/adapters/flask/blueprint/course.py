@@ -23,8 +23,6 @@ def index(course_service: CourseService = Provide[Container.course_service]):
 @login_required()
 def get_by_id(course_id: int, course_service: CourseService = Provide[Container.course_service]):
     course_data = course_service.get_by_id(user=g.user, course_id=course_id)
-    course_data.lectures.sort(key=lambda lecture: lecture.date)
-    course_data.students.sort(key=lambda enrollment: enrollment.student.name)
     return render_template("attendance.html", course=course_data)
 
 

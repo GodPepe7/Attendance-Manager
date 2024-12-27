@@ -19,7 +19,15 @@ class TestAuthorizerService:
 
         AuthorizerUtils.check_if_professor_of_course(existing_course.professor, existing_course)
 
-    def test_check_if_professor_of_course_with_not_course_professor(self):
+    def test_check_if_professor_of_course_with_none_raises(self):
+        some_professor = User("test", "test@test.test", "test", Role.PROFESSOR, 69420)
+
+        with pytest.raises(NotFoundException) as exc:
+            AuthorizerUtils.check_if_professor_of_course(some_professor, None)
+
+        assert exc.value
+
+    def test_check_if_professor_of_course_with_not_course_professor_raises(self):
         random_course = random.choice(self.courses)
         not_course_professor = User("test", "test@test.test", "test", Role.PROFESSOR, 69420)
 
@@ -34,7 +42,24 @@ class TestAuthorizerService:
 
         AuthorizerUtils.check_if_professor_of_lecture(random_course.professor, random_course, random_lecture)
 
-    def test_check_if_professor_of_lecture_with_non_lecture_professor_raises(self):
+    def test_check_if_professor_of_lecture_with_none_course_raises(self):
+        random_course = random.choice(self.courses)
+        random_lecture = random.choice(list(random_course.lectures))
+
+        with pytest.raises(NotFoundException) as exc:
+            AuthorizerUtils.check_if_professor_of_lecture(random_course.professor, None, random_lecture)
+
+        assert exc.value
+
+    def test_check_if_professor_of_lecture_with_none_lecture_raises(self):
+        random_course = random.choice(self.courses)
+
+        with pytest.raises(NotFoundException) as exc:
+            AuthorizerUtils.check_if_professor_of_lecture(random_course.professor, random_course, None)
+
+        assert exc.value
+
+    def test_check_if_professor_of_lecture_with_not_lecture_professor_raises(self):
         random_course = random.choice(self.courses)
         random_lecture = random.choice(list(random_course.lectures))
         not_course_professor = User("test", "test@test.test", "test", Role.PROFESSOR, 69420)

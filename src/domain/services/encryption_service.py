@@ -3,6 +3,7 @@ from typing import Optional
 
 from fernet import Fernet
 
+from src.domain.entities.lecture import Lecture
 from src.domain.exceptions import InvalidInputException
 
 
@@ -10,14 +11,17 @@ class EncryptionService:
     def __init__(self, fernet_key: bytes):
         self.cipher_suite = Fernet(fernet_key)
 
-    def encrypt_date(self, date_time: datetime) -> str:
-        datetime_string = date_time.strftime("%Y-%m-%d %H:%M:%S")
-        return self.cipher_suite.encrypt(datetime_string.encode()).decode()
+    def encrypt_lecture_and_time(self, lecture_id: int, date_time: datetime) -> str:
+        datetime_str = date_time.strftime("%Y-%m-%d %H:%M:%S")
+        lecture_and_time_str = str(lecture_id) + "," + datetime_str
+        return self.cipher_suite.encrypt(lecture_and_time_str.encode()).decode()
 
-    def decrypt_date(self, encrypted_str: str) -> Optional[datetime]:
+    def decrypt_to_lecture_and_time(self, encrypted_str: str) -> (int, datetime):
         try:
-            decrypted_str = self.cipher_suite.decrypt(encrypted_str.encode()).decode()
-            date_time = datetime.strptime(decrypted_str, "%Y-%m-%d %H:%M:%S")
-            return date_time
+            lecture_and_time_str = self.cipher_suite.decrypt(encrypted_str.encode()).decode()
+            lecture_and_time = lecture_and_time_str.split(",")
+            lecture_id = int(lecture_and_time[0])
+            date_time = datetime.strptime(lecture_and_time[1], "%Y-%m-%d %H:%M:%S")
+            return lecture_id, date_time
         except Exception:
             raise InvalidInputException("Qr Code String is not valid")

@@ -74,6 +74,17 @@ class TestAdminService:
 
         assert "doesn't exist" in str(exc.value)
 
+    def test_updating_with_non_admin_raises(self, admin_service):
+        _, admin_service = admin_service
+        non_admin = User("foo", "foo@bar.de", "1234", random.choice([Role.PROFESSOR, Role.STUDENT]), 69420)
+        random_professor = random.choice([user for user in self.users if user.role == Role.PROFESSOR])
+        update_professor_dto = UserDto(random_professor.id, "Super Professor", "goat69@htw.de")
+
+        with pytest.raises(UnauthorizedException) as exc:
+            admin_service.update_professor(non_admin, update_professor_dto)
+
+        assert "'admin' can do this" in str(exc.value)
+
     def test_updating_existing_professor_persists_to_db(self, admin_service):
         session, admin_service = admin_service
         existing_professor = random.choice([user for user in self.users if user.role == Role.PROFESSOR])

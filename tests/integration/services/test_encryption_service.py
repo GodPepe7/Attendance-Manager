@@ -1,4 +1,6 @@
 import datetime
+import random
+from random import choice
 
 import fernet
 
@@ -8,12 +10,13 @@ from src.domain.services.encryption_service import EncryptionService
 class TestEncryptionService:
     encryptor = EncryptionService(fernet_key=fernet.Fernet.generate_key())
 
-    def test_encrypt_date_and_decrypt_back_gives_orginal_date_back(self):
+    def test_encrypt_lecture_and_time_and_decrypt_back_gives_orginal_back(self):
         now = datetime.datetime.now().replace(microsecond=0)
+        lecture_id = random.randint(1, 999999)
         now_str = now.strftime("%Y-%m-%d %H:%M:%S")
 
-        encrypted = self.encryptor.encrypt_date(now)
-        decrypted = self.encryptor.decrypt_date(encrypted)
+        encrypted = self.encryptor.encrypt_lecture_and_time(lecture_id, now)
+        decrypted_lecture_id, decrypted_expiration_time = self.encryptor.decrypt_to_lecture_and_time(encrypted)
 
-        assert now != encrypted and now_str != encrypted
-        assert now == decrypted
+        assert f"{lecture_id},{now_str}" != encrypted
+        assert lecture_id == decrypted_lecture_id and now == decrypted_expiration_time
