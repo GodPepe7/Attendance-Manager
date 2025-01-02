@@ -3,7 +3,6 @@ import random
 import pytest
 
 from src.adapters.repositories.user_repository_impl import UserRepository
-from src.domain.dto import UserDto
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import InvalidCredentialsException, NotFoundException

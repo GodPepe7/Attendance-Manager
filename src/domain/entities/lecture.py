@@ -3,7 +3,7 @@ from datetime import datetime
 
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from src.domain.dto import LectureDto
+from src.domain.dto import LectureResponseDto
 from src.domain.exceptions import InvalidInputException
 
 
@@ -26,8 +26,8 @@ class Lecture:
     def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
 
-    def to_dto(self) -> LectureDto:
-        return LectureDto(
+    def to_dto(self) -> LectureResponseDto:
+        return LectureResponseDto(
             id=self.id,
             date=self.date,
         )

@@ -1,12 +1,13 @@
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Optional
 
 from src.domain.exceptions import InvalidInputException
 
 
 @dataclass(frozen=True)
-class UserDto:
+class UserResponseDto:
     id: int
     name: str
     email: str
@@ -20,22 +21,30 @@ class UserDto:
 
 
 @dataclass(frozen=True)
-class LectureDto:
+class LectureResponseDto:
     id: int
     date: datetime.date
 
 
 @dataclass(frozen=True)
-class CourseStudentDto:
-    id: int
-    student: UserDto
-    attended_lectures: list[LectureDto]
+class UpdateLectureRequestDto:
+    lecture_id: int
+    course_id: int
+    date: datetime.date
+    password: Optional[str] = None
 
 
 @dataclass(frozen=True)
-class CourseDto:
+class CourseStudentResponseDto:
+    id: int
+    student: UserResponseDto
+    attended_lectures: list[LectureResponseDto]
+
+
+@dataclass(frozen=True)
+class CourseResponseDto:
     id: int
     name: str
-    professor: UserDto
-    lectures: list[LectureDto]
-    students: list[CourseStudentDto] = field(compare=False)
+    professor: UserResponseDto
+    lectures: list[LectureResponseDto]
+    students: list[CourseStudentResponseDto] = field(compare=False)

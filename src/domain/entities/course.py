@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from src.domain.dto import CourseDto
+from src.domain.dto import CourseResponseDto
 from src.domain.entities.course_student import CourseStudent
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
@@ -22,8 +22,8 @@ class Course:
     def __hash__(self):
         return hash((self.name, self.id, self.professor))
 
-    def to_dto(self) -> CourseDto:
-        return CourseDto(
+    def to_dto(self) -> CourseResponseDto:
+        return CourseResponseDto(
             id=self.id,
             name=self.name,
             professor=self.professor.to_dto(),

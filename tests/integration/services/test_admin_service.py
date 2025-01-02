@@ -3,7 +3,7 @@ import random
 import pytest
 
 from src.adapters.repositories.user_repository_impl import UserRepository
-from src.domain.dto import UserDto
+from src.domain.dto import UserResponseDto
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import NotFoundException, UnauthorizedException, InvalidInputException
@@ -21,7 +21,7 @@ class TestAdminService:
         return db_session, admin_service
 
     @staticmethod
-    def _assert_dto_equals_user(dto: UserDto, user: User):
+    def _assert_dto_equals_user(dto: UserResponseDto, user: User):
         assert dto.id == user.id and dto.name == user.name and dto.email == user.email
 
     def test_get_all_professors_with_non_admin_raises(self, admin_service):
@@ -78,7 +78,7 @@ class TestAdminService:
         _, admin_service = admin_service
         non_admin = User("foo", "foo@bar.de", "1234", random.choice([Role.PROFESSOR, Role.STUDENT]), 69420)
         random_professor = random.choice([user for user in self.users if user.role == Role.PROFESSOR])
-        update_professor_dto = UserDto(random_professor.id, "Super Professor", "goat69@htw.de")
+        update_professor_dto = UserResponseDto(random_professor.id, "Super Professor", "goat69@htw.de")
 
         with pytest.raises(UnauthorizedException) as exc:
             admin_service.update_professor(non_admin, update_professor_dto)
@@ -88,7 +88,7 @@ class TestAdminService:
     def test_updating_existing_professor_persists_to_db(self, admin_service):
         session, admin_service = admin_service
         existing_professor = random.choice([user for user in self.users if user.role == Role.PROFESSOR])
-        update_professor_dto = UserDto(existing_professor.id, "Super Professor", "goat69@htw.de")
+        update_professor_dto = UserResponseDto(existing_professor.id, "Super Professor", "goat69@htw.de")
         test_admin = User("admin", "admin@admin.de", "admin", Role.ADMIN, 69420)
 
         admin_service.update_professor(test_admin, update_professor_dto)
@@ -101,7 +101,7 @@ class TestAdminService:
         professors = [user for user in self.users if user.role == Role.PROFESSOR]
         existing_professor = professors[0]
         existing_professor2 = professors[1]
-        update_professor_dto = UserDto(existing_professor.id, "Super Professor", existing_professor2.email)
+        update_professor_dto = UserResponseDto(existing_professor.id, "Super Professor", existing_professor2.email)
         test_admin = User("admin", "admin@admin.de", "admin", Role.ADMIN, 69420)
 
         with pytest.raises(InvalidInputException) as exc:

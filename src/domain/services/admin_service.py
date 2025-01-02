@@ -1,4 +1,4 @@
-from src.domain.dto import UserDto
+from src.domain.dto import UserResponseDto
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import NotFoundException, InvalidInputException
@@ -10,7 +10,7 @@ class AdminService:
     def __init__(self, user_repo: IUserRepository):
         self.user_repo = user_repo
 
-    def get_all_professors(self, user: User) -> list[UserDto]:
+    def get_all_professors(self, user: User) -> list[UserResponseDto]:
         AuthorizerUtils.check_if_role(user, Role.ADMIN)
         professors = self.user_repo.get_all_professors()
         return [prof.to_dto() for prof in professors]
@@ -21,7 +21,7 @@ class AdminService:
         if not successfully_deleted:
             raise NotFoundException(f"Professor doesn't exist")
 
-    def update_professor(self, user: User, user_dto: UserDto) -> None:
+    def update_professor(self, user: User, user_dto: UserResponseDto) -> None:
         AuthorizerUtils.check_if_role(user, Role.ADMIN)
         user = self.user_repo.get_by_email(user_dto.email)
         if user:

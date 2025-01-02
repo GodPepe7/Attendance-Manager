@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy import select, delete
 from sqlalchemy.orm import Session
 
-from src.domain.dto import UserDto
+from src.domain.dto import UserResponseDto
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.ports.user_repository import IUserRepository
@@ -44,7 +44,7 @@ class UserRepository(IUserRepository):
         self.session.commit()
         return True
 
-    def update_prof(self, user_dto: UserDto) -> bool:
+    def update_prof(self, user_dto: UserResponseDto) -> bool:
         user = self.session.get(User, user_dto.id)
         if not user or user.role != Role.PROFESSOR:
             return False

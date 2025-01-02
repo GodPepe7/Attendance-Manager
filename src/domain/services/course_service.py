@@ -1,4 +1,4 @@
-from src.domain.dto import CourseDto
+from src.domain.dto import CourseResponseDto
 from src.domain.entities.course import Course
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
@@ -10,13 +10,13 @@ class CourseService:
     def __init__(self, repo: ICourseRepository):
         self.repo = repo
 
-    def get_courses_by_prof(self, user: User) -> list[CourseDto]:
+    def get_courses_by_prof(self, user: User) -> list[CourseResponseDto]:
         AuthorizerUtils.check_if_role(user, Role.PROFESSOR)
         courses = self.repo.get_all_by_professor_id(user.id)
         course_dtos = [course.to_dto() for course in courses]
         return course_dtos
 
-    def get_by_id(self, user: User, course_id: int) -> CourseDto:
+    def get_by_id(self, user: User, course_id: int) -> CourseResponseDto:
         course = self.repo.get_by_id(course_id)
         AuthorizerUtils.check_if_professor_of_course(user, course)
         course_dtos = course.to_dto()

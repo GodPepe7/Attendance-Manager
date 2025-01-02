@@ -5,6 +5,7 @@ import pytest
 
 from src.adapters.repositories.course_repository_impl import CourseRepository
 from src.adapters.repositories.lecture_repository_impl import LectureRepository
+from src.domain.dto import UpdateLectureRequestDto
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
@@ -76,8 +77,21 @@ class TestLectureService:
         random_course = random.choice(self.courses)
         random_lecture = random.choice(list(random_course.lectures))
         new_date = datetime.datetime.now().date()
+        updated_lecture_dto = UpdateLectureRequestDto(random_lecture.id, random_lecture.course_id, new_date)
 
-        lecture_service.update(random_course.professor, random_course.id, random_lecture.id, new_date)
+        lecture_service.update(random_course.professor, updated_lecture_dto)
 
         fetched_lecture = session.get(Lecture, random_lecture.id)
-        assert fetched_lecture.date == new_date
+        assert fetched_lecture.date == new_date and fetched_lecture.password_hash is None
+
+    def test_update_existing_lecture_password_doesnt_persist_new_password_in_db_as_cleartext(self, lecture_service):
+        session, lecture_service = lecture_service
+        random_course = random.choice(self.courses)
+        random_lecture = random.choice(list(random_course.lectures))
+        updated_lecture_dto = UpdateLectureRequestDto(random_lecture.id, random_lecture.course_id, random_lecture.date,
+                                                      "test1234")
+
+        lecture_service.update(random_course.professor, updated_lecture_dto)
+
+        fetched_lecture = session.get(Lecture, random_lecture.id)
+        assert fetched_lecture.password_hash != "test1234" and fetched_lecture.check_password("test1234")

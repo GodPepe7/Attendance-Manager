@@ -3,7 +3,7 @@ import random
 import pytest
 
 from src.adapters.repositories.course_repository_impl import CourseRepository
-from src.domain.dto import CourseDto
+from src.domain.dto import CourseResponseDto
 from src.domain.entities.course import Course
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
@@ -23,7 +23,7 @@ class TestCourseService:
         return db_session, course_service
 
     @staticmethod
-    def assert_dto_is_equal_to_course(dto: CourseDto, course: Course):
+    def assert_dto_is_equal_to_course(dto: CourseResponseDto, course: Course):
         # sort to ensure we're iterating over the same element
         lectures = sorted(course.lectures, key=lambda l: l.id)
         lecture_dtos = sorted(dto.lectures, key=lambda l: l.id)

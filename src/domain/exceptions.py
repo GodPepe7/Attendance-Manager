@@ -4,7 +4,7 @@ class InvalidCredentialsException(Exception):
         super().__init__(self.message)
 
 
-class InvalidCoursePassword(Exception):
+class InvalidPassword(Exception):
     """Wrong password"""
 
 

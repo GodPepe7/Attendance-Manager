@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from src.domain.dto import UserDto
+from src.domain.dto import UserResponseDto
 from src.domain.entities.user import User
 
 
@@ -31,5 +31,5 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    def update_prof(self, user_dto: UserDto) -> bool:
+    def update_prof(self, user_dto: UserResponseDto) -> bool:
         pass
