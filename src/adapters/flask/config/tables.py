@@ -31,7 +31,8 @@ lecture_table = Table(
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("course_id", Integer, ForeignKey("course.id", ondelete="CASCADE"), nullable=False),
-    Column("date", Date, nullable=False)
+    Column("date", Date, nullable=False),
+    Column("password_hash", String(100))
 )
 course_student_table = Table(
     "course_student",

@@ -76,3 +76,14 @@ class AttendanceService:
             enrollment = self.enrollment_repo.save_by_course_id_and_user_id(lecture.course_id, user.id)
         enrollment.attended_lectures.add(lecture)
         self.enrollment_repo.update(enrollment)
+
+    def save_with_password(self, user: User, lecture_id: int, password: str) -> None:
+        AuthorizerUtils.check_if_role(user, Role.STUDENT)
+        lecture = self.lecture_repo.get_by_id(lecture_id)
+        if not lecture:
+            raise NotFoundException("Lecture doesn't exist")
+        enrollment = self.enrollment_repo.get_by_course_id_and_student_id(lecture.course_id, user.id)
+        if not enrollment:
+            enrollment = self.enrollment_repo.save_by_course_id_and_user_id(lecture.course_id, user.id)
+        enrollment.add_lecture(lecture, password)
+        self.enrollment_repo.update(enrollment)

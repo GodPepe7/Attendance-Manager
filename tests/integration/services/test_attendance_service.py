@@ -9,9 +9,10 @@ from src.adapters.repositories.course_repository_impl import CourseRepository
 from src.adapters.repositories.enrollment_repository_impl import CourseStudentRepository
 from src.adapters.repositories.lecture_repository_impl import LectureRepository
 from src.domain.entities.course_student import CourseStudent
+from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
-from src.domain.exceptions import NotFoundException, QrCodeExpired
+from src.domain.exceptions import NotFoundException, QrCodeExpired, InvalidPassword
 from src.domain.services.attendance_service import AttendanceService
 from src.domain.services.encryption_service import EncryptionService
 from tests.conftest import engine, tables, add_data, db_session
@@ -129,4 +130,43 @@ class TestAttendanceService:
                                            CourseStudent.student_id == new_user.id)
         updated_enrollment = session.execute(stmt).scalar()
         assert updated_enrollment
-        assert existing_lecture in list(updated_enrollment.attended_lectures)
+        assert existing_lecture in updated_enrollment.attended_lectures
+
+    def test_save_with_correct_password_saves_to_db(self, attendance_service):
+        session, attendance_service = attendance_service
+        existing_course = random.choice(self.courses)
+        new_lecture = Lecture(existing_course.id, datetime.datetime.now())
+        password = "test"
+        new_lecture.set_password(password)
+        new_user = User("new", "new@new.de", "hash", Role.STUDENT)
+        session.add(new_user)
+        session.add(new_lecture)
+        session.commit()
+        session.refresh(new_user)
+        session.refresh(new_lecture)
+
+        attendance_service.save_with_password(new_user, new_lecture.id, password)
+
+        stmt = select(CourseStudent).where(CourseStudent.course_id == existing_course.id,
+                                           CourseStudent.student_id == new_user.id)
+        updated_enrollment = session.execute(stmt).scalar()
+        assert updated_enrollment
+        assert new_lecture in updated_enrollment.attended_lectures
+
+    def test_save_with_wrong_password_raises(self, attendance_service):
+        session, attendance_service = attendance_service
+        existing_course = random.choice(self.courses)
+        new_lecture = Lecture(existing_course.id, datetime.datetime.now())
+        password = "test"
+        new_lecture.set_password(password)
+        new_user = User("new", "new@new.de", "hash", Role.STUDENT)
+        session.add(new_user)
+        session.add(new_lecture)
+        session.commit()
+        session.refresh(new_user)
+        session.refresh(new_lecture)
+
+        with pytest.raises(InvalidPassword) as exc:
+            attendance_service.save_with_password(new_user, new_lecture.id, "WrongPassword")
+
+        assert exc
