@@ -26,9 +26,9 @@ class CourseStudentRepository(ICourseStudentRepository):
         """Raises NotFoundException if student or course doesn't exist"""
 
         user = self.session.get(User, user_id)
-        course = self.session.get(Course, course_id)
         if not user:
             raise NotFoundException(f"User with ID: {user_id} doesn't exist")
+        course = self.session.get(Course, course_id)
         if not course:
             raise NotFoundException(f"Course with ID: {course_id} doesn't exist")
         new_enrollment = CourseStudent.factory(user, course_id)

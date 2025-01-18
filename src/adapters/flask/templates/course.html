@@ -18,10 +18,9 @@
   </div>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for course in courses %}
-    <!-- Course Card 1 -->
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+    <div class="bg-white shadow-md rounded-lg overflow-hidden" data-testid="course-card">
       <div class="p-6">
-        <h2 class="text-xl font-semibold mb-2 h-14 line-clamp-2">{{ course.name }}</h2>
+        <h2 class="text-xl font-semibold mb-2 h-14 line-clamp-2" data-testid="course-title">{{ course.name }}</h2>
         <div class="space-y-2 mb-4">
           <div class="flex items-center text-sm text-gray-600">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">

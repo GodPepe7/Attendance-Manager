@@ -30,7 +30,7 @@ class User:
         return check_password_hash(self.password_hash, password)
 
     def to_dto(self):
-        return UserResponseDto(id=self.id, name=self.name, email=self.email)
+        return UserResponseDto.factory(user_id=self.id, name=self.name, email=self.email)
 
     @classmethod
     def factory(cls, name: str, email: str, password: str, role_input: str) -> "User":
