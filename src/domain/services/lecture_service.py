@@ -22,11 +22,9 @@ class LectureService:
         AuthorizerUtils.check_if_professor_of_lecture(user, course, lecture)
         self.repo.delete(lecture)
 
-    def update(self, user: User, updated_lecture_dto: UpdateLectureRequestDto) -> None:
+    def update(self, user: User, updated_lecture_dto: UpdateLectureRequestDto) -> bool:
         lecture = self.repo.get_by_id(updated_lecture_dto.lecture_id)
         course = self.course_repo.get_by_id(updated_lecture_dto.course_id)
         AuthorizerUtils.check_if_professor_of_lecture(user, course, lecture)
         lecture.date = updated_lecture_dto.date
-        if updated_lecture_dto.password:
-            lecture.set_password(updated_lecture_dto.password)
-        self.repo.update(lecture)
+        return self.repo.update(lecture)

@@ -82,16 +82,4 @@ class TestLectureService:
         lecture_service.update(random_course.professor, updated_lecture_dto)
 
         fetched_lecture = session.get(Lecture, random_lecture.id)
-        assert fetched_lecture.date == new_date and fetched_lecture.password_hash is None
-
-    def test_update_existing_lecture_password_doesnt_persist_new_password_in_db_as_cleartext(self, lecture_service):
-        session, lecture_service = lecture_service
-        random_course = random.choice(self.courses)
-        random_lecture = random.choice(list(random_course.lectures))
-        updated_lecture_dto = UpdateLectureRequestDto(random_lecture.id, random_lecture.course_id, random_lecture.date,
-                                                      "test1234")
-
-        lecture_service.update(random_course.professor, updated_lecture_dto)
-
-        fetched_lecture = session.get(Lecture, random_lecture.id)
-        assert fetched_lecture.password_hash != "test1234" and fetched_lecture.check_password("test1234")
+        assert fetched_lecture.date == new_date

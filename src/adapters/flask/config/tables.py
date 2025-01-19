@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, String, Enum, ForeignKey, Date
+from sqlalchemy import Table, Column, Integer, String, Enum, ForeignKey, Date, DateTime
 from sqlalchemy.orm import registry, deferred, relationship
 
 from src.domain.entities.course import Course
@@ -24,15 +24,16 @@ course_table = Table(
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("name", String(50), nullable=False),
-    Column("professor_id", Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
+    Column("professor_id", Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True),
+    Column("password_hash", String(100)),
+    Column("password_expiration_time", DateTime)
 )
 lecture_table = Table(
     "lecture",
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("course_id", Integer, ForeignKey("course.id", ondelete="CASCADE"), nullable=False),
-    Column("date", Date, nullable=False),
-    Column("password_hash", String(100))
+    Column("date", Date, nullable=False)
 )
 course_student_table = Table(
     "course_student",

@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, date
 
 from werkzeug.security import generate_password_hash
 
@@ -21,17 +21,17 @@ lectures = [
     Lecture(
         id=1,
         course_id=1,
-        date=datetime.date(2024, 12, 24),
+        date=date(2024, 12, 24),
     ),
     Lecture(
         id=2,
         course_id=1,
-        date=datetime.date(2024, 12, 25),
+        date=date(2024, 12, 25),
     ),
     Lecture(
         id=3,
         course_id=2,
-        date=datetime.date(2024, 12, 31),
+        date=date(2024, 12, 31),
     ),
 ]
 course_students = [
@@ -46,13 +46,17 @@ courses = [
         name="Software Engineering",
         professor=users[1],
         students={course_students[0], course_students[1]},
-        lectures={lectures[0], lectures[1]}
+        lectures={lectures[0], lectures[1]},
+        password_hash=generate_password_hash("1234"),
+        password_expiration_time=datetime(2024, 12, 25, 15, 30)
     ),
     Course(
         id=2,
         name="Projectmanagement",
         professor=users[1],
         students={course_students[2]},
-        lectures={lectures[2]}
+        lectures={lectures[2]},
+        password_hash=generate_password_hash("1234"),
+        password_expiration_time=datetime(2024, 12, 31, 15, 30)
     )
 ]

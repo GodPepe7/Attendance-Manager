@@ -11,6 +11,10 @@ class ILectureRepository(ABC):
         pass
 
     @abstractmethod
+    def get_by_course_id_and_date(self, course_id: int, date: datetime.date) -> Optional[Lecture]:
+        pass
+
+    @abstractmethod
     def save(self, lecture: Lecture) -> int:
         pass
 
@@ -19,5 +23,5 @@ class ILectureRepository(ABC):
         pass
 
     @abstractmethod
-    def update(self, lecture: Lecture) -> None:
+    def update(self, lecture: Lecture) -> bool:
         pass

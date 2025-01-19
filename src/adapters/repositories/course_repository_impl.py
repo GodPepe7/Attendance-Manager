@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import select
+from sqlalchemy import select, false
 from sqlalchemy.orm import Session
 
 from src.domain.entities.course import Course
@@ -23,3 +23,10 @@ class CourseRepository(ICourseRepository):
         self.session.add(course)
         self.session.commit()
         return course.id
+
+    def update(self, updated_course: Course) -> bool:
+        try:
+            self.session.commit()
+            return True
+        except Exception as e:
+            return False

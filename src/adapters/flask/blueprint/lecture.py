@@ -32,15 +32,14 @@ def delete(course_id: int, lecture_id: int, lecture_service: LectureService = Pr
     return response
 
 
-@lecture.patch("/<int:lecture_id>")
+@lecture.put("/<int:lecture_id>")
 @inject
 @login_required()
 def update(course_id: int, lecture_id: int, lecture_service: LectureService = Provide[Container.lecture_service]):
     new_date = request.form.get("date")
     try:
         parsed_date = datetime.strptime(new_date, "%Y-%m-%d")
-        password = request.form.get("password")
-        lecture_request_dto = UpdateLectureRequestDto(lecture_id, course_id, parsed_date, password)
+        lecture_request_dto = UpdateLectureRequestDto(lecture_id, course_id, parsed_date)
         lecture_service.update(g.user, lecture_request_dto)
         response = Response("Updated lecture")
         response.headers["HX-Location"] = url_for('course.get_by_id', course_id=course_id)

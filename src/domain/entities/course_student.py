@@ -4,7 +4,7 @@ from src.domain.dto import CourseStudentResponseDto
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User, InvalidRoleException
-from src.domain.exceptions import InvalidPassword, NotFoundException
+from src.domain.exceptions import NotFoundException
 
 
 @dataclass
@@ -17,15 +17,13 @@ class CourseStudent:
     def __hash__(self):
         return hash((self.id, self.student, self.course_id))
 
-    def add_lecture(self, lecture: Lecture, password: str = None) -> None:
+    def add_lecture(self, lecture: Lecture) -> None:
         """
         Will add to the CourseStudent if it's a course lecture.
         If a password is passed in, it will also check if it matches the lecture's password.
         """
         if self.course_id != lecture.course_id:
             raise NotFoundException("Lecture does not belong to the same course as student")
-        if lecture.password_hash and password is not None and not lecture.check_password(password):
-            raise InvalidPassword()
         self.attended_lectures.add(lecture)
 
     def to_dto(self):

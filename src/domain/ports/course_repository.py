@@ -16,3 +16,7 @@ class ICourseRepository(ABC):
     @abstractmethod
     def save(self, course: Course) -> int:
         pass
+
+    @abstractmethod
+    def update(self, updated_course: Course) -> bool:
+        pass

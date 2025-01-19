@@ -1,7 +1,8 @@
-from src.domain.dto import CourseResponseDto
+from src.domain.dto import CourseResponseDto, UpdateCoursePasswordRequestDto
 from src.domain.entities.course import Course
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
+from src.domain.exceptions import InvalidInputException
 from src.domain.ports.course_repository import ICourseRepository
 from src.domain.authorizer_utils import AuthorizerUtils
 
@@ -27,3 +28,10 @@ class CourseService:
     def save(self, user: User, course: Course) -> int:
         AuthorizerUtils.check_if_role(user, Role.PROFESSOR)
         return self.repo.save(course)
+
+    def update_password(self, user: User, update_password_dto: UpdateCoursePasswordRequestDto) -> bool:
+        course = self.repo.get_by_id(update_password_dto.course_id)
+        AuthorizerUtils.check_if_professor_of_course(user, course)
+        course.set_password(update_password_dto.password)
+        course.password_validity_time = update_password_dto.password_validty_time
+        return self.repo.update(course)

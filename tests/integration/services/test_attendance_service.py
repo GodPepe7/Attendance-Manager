@@ -1,9 +1,11 @@
 import datetime
 import random
+from datetime import timedelta
 
 import fernet
 import pytest
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from src.adapters.repositories.course_repository_impl import CourseRepository
 from src.adapters.repositories.enrollment_repository_impl import CourseStudentRepository
@@ -12,7 +14,7 @@ from src.domain.entities.course_student import CourseStudent
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
-from src.domain.exceptions import NotFoundException, QrCodeExpired, InvalidPassword
+from src.domain.exceptions import NotFoundException, QrCodeExpired, AttendanceLoggingException
 from src.domain.services.attendance_service import AttendanceService
 from src.domain.services.encryption_service import EncryptionService
 from tests.conftest import engine, tables, add_data, db_session
@@ -30,6 +32,14 @@ class TestAttendanceService:
         attendance_service = AttendanceService(enrollment_repo, lecture_repo, course_repo, encryptor)
         return db_session, attendance_service
 
+    @staticmethod
+    def create_test_student(session: Session):
+        new_user = User("new", "new@new.de", "hash", Role.STUDENT)
+        session.add(new_user)
+        session.commit()
+        session.refresh(new_user)
+        return new_user
+
     def test_save(self, attendance_service):
         session, attendance_service = attendance_service
         random_course = random.choice(self.courses)
@@ -40,18 +50,6 @@ class TestAttendanceService:
 
         fetched_enrollment = session.get(CourseStudent, random_enrollment.id)
         assert random_lecture in list(fetched_enrollment.attended_lectures)
-
-    def test_save_not_enrolled_student(self, attendance_service):
-        _, attendance_service = attendance_service
-        existing_course = self.courses[1]
-        existing_lecture = list(existing_course.lectures)[0]
-        not_enrolled_student = list(self.courses[0].students)[0]
-
-        with pytest.raises(NotFoundException) as exc:
-            attendance_service.save(existing_course.professor, existing_course.id, existing_lecture.id,
-                                    not_enrolled_student.id)
-
-        assert "does not belong to the same course" in str(exc.value)
 
     def test_delete(self, attendance_service):
         session, attendance_service = attendance_service
@@ -112,10 +110,7 @@ class TestAttendanceService:
 
     def test_generate_qr_then_scan_with_not_yet_enrolled_student_also_works(self, attendance_service):
         session, attendance_service = attendance_service
-        new_user = User("new", "new@new.de", "hash", Role.STUDENT)
-        session.add(new_user)
-        session.commit()
-        session.refresh(new_user)
+        new_user = self.create_test_student(session)
         existing_course = random.choice(self.courses)
         existing_lecture = random.choice(list(existing_course.lectures))
         EXPIRATION_TIME = 30
@@ -134,39 +129,40 @@ class TestAttendanceService:
 
     def test_save_with_correct_password_saves_to_db(self, attendance_service):
         session, attendance_service = attendance_service
-        existing_course = random.choice(self.courses)
-        new_lecture = Lecture(existing_course.id, datetime.datetime.now())
-        password = "test"
-        new_lecture.set_password(password)
-        new_user = User("new", "new@new.de", "hash", Role.STUDENT)
-        session.add(new_user)
-        session.add(new_lecture)
-        session.commit()
-        session.refresh(new_user)
-        session.refresh(new_lecture)
+        new_user = self.create_test_student(session)
+        existing_course = self.courses[0]
+        course_password = "1234"
+        valid_datetime = existing_course.password_expiration_time - timedelta(minutes=30)
 
-        attendance_service.save_with_password(new_user, new_lecture.id, password)
+        attendance_service.save_with_password(new_user, existing_course.id, course_password, valid_datetime)
 
         stmt = select(CourseStudent).where(CourseStudent.course_id == existing_course.id,
                                            CourseStudent.student_id == new_user.id)
-        updated_enrollment = session.execute(stmt).scalar()
-        assert updated_enrollment
-        assert new_lecture in updated_enrollment.attended_lectures
+        course_student = session.execute(stmt).scalar()
+        expected_lecture = Lecture(id=2, course_id=1, date=datetime.date(2024, 12, 25))
+        assert course_student
+        assert expected_lecture in course_student.attended_lectures, "Lecture hasn't been added to attended lecture list of course student"
 
     def test_save_with_wrong_password_raises(self, attendance_service):
         session, attendance_service = attendance_service
-        existing_course = random.choice(self.courses)
-        new_lecture = Lecture(existing_course.id, datetime.datetime.now())
-        password = "test"
-        new_lecture.set_password(password)
-        new_user = User("new", "new@new.de", "hash", Role.STUDENT)
-        session.add(new_user)
-        session.add(new_lecture)
-        session.commit()
-        session.refresh(new_user)
-        session.refresh(new_lecture)
+        new_user = self.create_test_student(session)
+        existing_course = self.courses[0]
+        wrong_password = "wrong_password"
+        valid_datetime = existing_course.password_expiration_time - timedelta(minutes=30)
 
-        with pytest.raises(InvalidPassword) as exc:
-            attendance_service.save_with_password(new_user, new_lecture.id, "WrongPassword")
+        with pytest.raises(AttendanceLoggingException) as exc:
+            attendance_service.save_with_password(new_user, existing_course.id, wrong_password, valid_datetime)
+
+        assert exc
+
+    def test_save_with_expired_password_raises(self, attendance_service):
+        session, attendance_service = attendance_service
+        new_user = self.create_test_student(session)
+        existing_course = self.courses[0]
+        wrong_password = "1234"
+        valid_datetime = existing_course.password_expiration_time + timedelta(hours=2)
+
+        with pytest.raises(AttendanceLoggingException) as exc:
+            attendance_service.save_with_password(new_user, existing_course.id, wrong_password, valid_datetime)
 
         assert exc

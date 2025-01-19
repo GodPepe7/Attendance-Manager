@@ -1,9 +1,10 @@
+import datetime
 import random
 
 import pytest
 
 from src.adapters.repositories.course_repository_impl import CourseRepository
-from src.domain.dto import CourseResponseDto
+from src.domain.dto import CourseResponseDto, UpdateCoursePasswordRequestDto
 from src.domain.entities.course import Course
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
@@ -102,3 +103,14 @@ class TestCourseService:
         fetched_course = session.get(Course, course_id)
         assert fetched_course
         assert new_course == fetched_course
+
+    def test_update_password_not_saved_as_clear_text(self, course_service):
+        session, course_service = course_service
+        existing_course = random.choice(self.courses)
+        password = "1234"
+        course_dto = UpdateCoursePasswordRequestDto(existing_course.id, password, datetime.datetime.now())
+
+        course_service.update_password(existing_course.professor, course_dto)
+
+        fetched_course = session.get(Course, existing_course.id)
+        assert fetched_course.password_hash != password

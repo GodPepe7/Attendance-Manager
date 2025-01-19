@@ -1,7 +1,6 @@
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
 
 from src.domain.exceptions import InvalidInputException
 
@@ -31,7 +30,21 @@ class UpdateLectureRequestDto:
     lecture_id: int
     course_id: int
     date: datetime.date
-    password: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class UpdateCoursePasswordRequestDto:
+    course_id: int
+    password: str
+    password_validty_time: datetime
+
+    @classmethod
+    def factory(cls, course_id: int, password: str, password_validity_time: str) -> "UpdateCoursePasswordRequestDto":
+        try:
+            parsed_validity_time = datetime.strptime(password_validity_time, "%Y-%M-%d %H:%M")
+            return cls(course_id, password, parsed_validity_time)
+        except ValueError as e:
+            raise InvalidInputException("Datetime for password validity needs to be in format YYYY-MM-DD HH:MM")
 
 
 @dataclass(frozen=True)

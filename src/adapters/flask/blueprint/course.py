@@ -3,10 +3,11 @@ from flask import Blueprint, render_template, g, request, redirect, url_for
 
 from src.adapters.flask.blueprint.login_wrapper import login_required
 from src.adapters.flask.config.container import Container
+from src.domain.dto import UpdateCoursePasswordRequestDto
 from src.domain.entities.course import Course
 from src.domain.services.course_service import CourseService
 
-course = Blueprint('course', __name__, url_prefix="/courses", template_folder="../templates")
+course = Blueprint("course", __name__, url_prefix="/courses", template_folder="../templates")
 
 
 @course.get("/")
@@ -30,9 +31,21 @@ def get_by_id(course_id: int, course_service: CourseService = Provide[Container.
 @inject
 @login_required()
 def save(course_service: CourseService = Provide[Container.course_service]):
-    name = request.form.get('name')
+    name = request.form.get("name")
     new_course = Course.factory(name, g.user)
     course_service.save(g.user, new_course)
+    return redirect(url_for("course.index"))
+
+
+@course.patch("/<int:course_id>/")
+@inject
+@login_required()
+def update_password(course_id: int, course_service: CourseService = Provide[Container.course_service]):
+    password = request.form.get("password")
+    password_validity_time = request.form.get("password_validity_time")
+    if not password or not password_validity_time:
+        return 401, "Password and Password Validty Time are required"
+    UpdateCoursePasswordRequestDto.factory(course_id, password, password_validity_time)
     return redirect(url_for("course.index"))
 
 

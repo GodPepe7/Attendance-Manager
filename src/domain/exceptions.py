@@ -4,8 +4,8 @@ class InvalidCredentialsException(Exception):
         super().__init__(self.message)
 
 
-class InvalidPassword(Exception):
-    """Wrong password"""
+class AttendanceLoggingException(Exception):
+    pass
 
 
 class InvalidInputException(Exception):
@@ -21,4 +21,8 @@ class UnauthorizedException(Exception):
 
 
 class QrCodeExpired(Exception):
+    pass
+
+
+class InvalidActionException(Exception):
     pass
