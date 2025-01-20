@@ -8,7 +8,7 @@ from src.domain.entities.course_student import CourseStudent
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
-from src.domain.exceptions import UnauthorizedException, InvalidActionException
+from src.domain.exceptions import UnauthorizedException, NoPasswordAndExpirationYetException
 
 
 @dataclass
@@ -17,7 +17,7 @@ class Course:
     professor: User
     id: int = None
     password_hash: str = None
-    password_expiration_time: datetime = None
+    password_expiration_datetime: datetime = None
     lectures: set[Lecture] = field(default_factory=set)
     students: set[CourseStudent] = field(default_factory=set)
 
@@ -31,10 +31,10 @@ class Course:
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password: str, date_time: datetime) -> bool:
-        if not self.password_hash or not self.password_expiration_time:
-            raise InvalidActionException("No password or validity time has been set yet")
+        if not self.password_hash or not self.password_expiration_datetime:
+            raise NoPasswordAndExpirationYetException("The professor hasn't set a password or validity time yet")
         is_correct_password = check_password_hash(self.password_hash, password)
-        is_still_valid = self.password_expiration_time >= date_time
+        is_still_valid = self.password_expiration_datetime >= date_time
         return is_correct_password and is_still_valid
 
     def to_dto(self) -> CourseResponseDto:

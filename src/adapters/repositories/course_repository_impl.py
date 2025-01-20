@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import select, false
+from sqlalchemy import select, false, Select
 from sqlalchemy.orm import Session
 
 from src.domain.entities.course import Course
@@ -13,6 +13,11 @@ class CourseRepository(ICourseRepository):
 
     def get_by_id(self, id: int) -> Optional[Course]:
         return self.session.get(Course, id)
+
+    def get_all_by_name_like(self, name: str) -> list[Course]:
+        stmt = Select(Course).where(Course.name.contains(name))
+        courses = list(self.session.scalars(stmt).all())
+        return courses
 
     def get_all_by_professor_id(self, professor_id: int) -> list[Course]:
         stmt = select(Course).where(Course.professor_id == professor_id)

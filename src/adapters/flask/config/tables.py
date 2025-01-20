@@ -26,7 +26,7 @@ course_table = Table(
     Column("name", String(50), nullable=False, unique=True, index=True),
     Column("professor_id", Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True),
     Column("password_hash", String(100)),
-    Column("password_expiration_time", DateTime)
+    Column("password_expiration_datetime", DateTime)
 )
 lecture_table = Table(
     "lecture",

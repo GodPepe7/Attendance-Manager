@@ -1,4 +1,4 @@
-from src.domain.dto import CourseResponseDto, UpdateCoursePasswordRequestDto
+from src.domain.dto import CourseResponseDto, UpdateCoursePasswordRequestDto, CourseGetByNameReponseDto
 from src.domain.entities.course import Course
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
@@ -17,6 +17,11 @@ class CourseService:
         course_dtos = [course.to_dto() for course in courses]
         return course_dtos
 
+    def get_courses_by_name_like(self, name: str) -> list[CourseGetByNameReponseDto]:
+        courses = self.repo.get_all_by_name_like(name)
+        course_dtos = [CourseGetByNameReponseDto(course.id, course.name, course.professor.name) for course in courses]
+        return course_dtos
+
     def get_by_id(self, user: User, course_id: int) -> CourseResponseDto:
         course = self.repo.get_by_id(course_id)
         AuthorizerUtils.check_if_professor_of_course(user, course)
@@ -33,5 +38,5 @@ class CourseService:
         course = self.repo.get_by_id(update_password_dto.course_id)
         AuthorizerUtils.check_if_professor_of_course(user, course)
         course.set_password(update_password_dto.password)
-        course.password_validity_time = update_password_dto.password_validty_time
+        course.password_expiration_datetime = update_password_dto.password_validty_datetime
         return self.repo.update(course)

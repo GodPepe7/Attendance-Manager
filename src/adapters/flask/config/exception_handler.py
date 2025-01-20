@@ -1,5 +1,5 @@
 from src.domain.exceptions import InvalidInputException, InvalidCredentialsException, NotFoundException, QrCodeExpired, \
-    UnauthorizedException
+    UnauthorizedException, NoPasswordAndExpirationYetException
 
 EXCEPTION_DICT = {
     InvalidInputException: 400,
@@ -7,4 +7,5 @@ EXCEPTION_DICT = {
     UnauthorizedException: 403,
     QrCodeExpired: 403,
     NotFoundException: 404,
+    NoPasswordAndExpirationYetException: 404
 }

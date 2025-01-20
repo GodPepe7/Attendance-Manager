@@ -10,6 +10,10 @@ class ICourseRepository(ABC):
         pass
 
     @abstractmethod
+    def get_all_by_name_like(self, name: str) -> list[Course]:
+        pass
+
+    @abstractmethod
     def get_all_by_professor_id(self, professor_id: int) -> list[Course]:
         pass
 

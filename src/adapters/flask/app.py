@@ -1,6 +1,8 @@
 # fix windows registry stuff
 import mimetypes
 
+from src.adapters.flask.blueprint.student_bp import student_bp
+
 mimetypes.add_type('application/javascript', '.js')
 
 import logging
@@ -47,6 +49,7 @@ def create_app() -> Flask:
     app.register_blueprint(lecture_bp)
     app.register_blueprint(attendance_bp)
     app.register_blueprint(user_bp)
+    app.register_blueprint(student_bp)
     app.add_url_rule("/", "index", lambda: redirect(url_for("auth.login")))
 
     return app

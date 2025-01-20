@@ -36,7 +36,7 @@ class UpdateLectureRequestDto:
 class UpdateCoursePasswordRequestDto:
     course_id: int
     password: str
-    password_validty_time: datetime
+    password_validty_datetime: datetime
 
     @classmethod
     def factory(cls, course_id: int, password: str,
@@ -62,3 +62,10 @@ class CourseResponseDto:
     professor: UserResponseDto
     lectures: list[LectureResponseDto]
     students: list[CourseStudentResponseDto] = field(compare=False)
+
+
+@dataclass(frozen=True)
+class CourseGetByNameReponseDto:
+    id: int
+    name: str
+    professor_name: str

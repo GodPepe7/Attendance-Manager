@@ -24,5 +24,5 @@ class QrCodeExpired(Exception):
     pass
 
 
-class InvalidActionException(Exception):
+class NoPasswordAndExpirationYetException(Exception):
     pass

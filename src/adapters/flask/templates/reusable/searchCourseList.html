@@ -1,0 +1,14 @@
+{% macro course_list(courses) -%}
+<div id="course-list" class="absolute z-10 w-full p-2 bg-zinc-200 overflow-y-auto max-h-60 shadow-lg">
+  {% if courses|length == 0 %}
+  <p class="p-3 text-gray-500 italic">No courses found</p>
+  {% else %}
+  {% for course in courses %}
+  <div data-course-id="{{ course.id }}" data-course-name="{{ course.name }}" onclick="selectCourse(event)"
+       class="p-3 hover:bg-gray-100 cursor-pointer transition duration-300">
+    {{ course.name }} ({{ course.professor_name }})
+  </div>
+  {% endfor %}
+  {% endif %}
+</div>
+{%- endmacro %}

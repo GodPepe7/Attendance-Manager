@@ -86,17 +86,13 @@ def save_with_qr_code_string(
     return render_template("success.html")
 
 
-@attendance.post("/attendance")
+@attendance.post("/attendance/password")
 @inject
 @login_required()
-def save_with_password(
-        attendance_service: AttendanceService = Provide[Container.attendance_service]
-):
+def save_with_password(attendance_service: AttendanceService = Provide[Container.attendance_service]):
     password = request.form.get("password")
-    lecture_id = request.form.get("lecture_id", type=int)
-    if not password or lecture_id:
-        return "Need 'password' and 'lecture_id'", 400
-    if lecture_id >= 0:
-        return "'lecture_id' can only be numbers greater than 0", 400
-    attendance_service.save_with_password(g.user, lecture_id, password)
+    course_id = request.form.get("course_id", type=int)
+    if not password or not course_id:
+        return "Need password and lecture_id", 400
+    attendance_service.save_with_password(g.user, course_id, password)
     return render_template("success.html")

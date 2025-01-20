@@ -1,6 +1,7 @@
 from dependency_injector.wiring import Provide, inject
 from flask import (request, Blueprint, jsonify, g, session, url_for, render_template, redirect)
 
+from src.adapters.flask.blueprint.login_wrapper import login_required
 from src.adapters.flask.config.container import Container
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
@@ -16,7 +17,7 @@ def _get_fallback_page(user: User) -> str:
         case Role.ADMIN:
             return url_for("user.get_professors")
         case Role.STUDENT:
-            return ""
+            return url_for("student.index")
 
 
 @auth.before_app_request
@@ -56,7 +57,7 @@ def logout():
 
 @auth.post("/")
 @inject
-# @login_required()
+@login_required()
 def save_user(user_service: UserService = Provide[Container.user_service]):
     body = request.json
     email = body["email"]

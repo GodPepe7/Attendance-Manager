@@ -1,5 +1,5 @@
 from dependency_injector.wiring import inject, Provide
-from flask import Blueprint, render_template, g, request, redirect, url_for, Response
+from flask import Blueprint, render_template, g, request, redirect, url_for, Response, render_template_string
 
 from src.adapters.flask.blueprint.login_wrapper import login_required
 from src.adapters.flask.config.container import Container
@@ -19,11 +19,27 @@ def index(course_service: CourseService = Provide[Container.course_service]):
     return render_template("course.html", courses=courses)
 
 
+@course.get("/search")
+@inject
+@login_required()
+def get_by_name(course_service: CourseService = Provide[Container.course_service]):
+    search_string = request.args.get("search-string")
+    if not search_string:
+        return "search_string is required", 400
+    courses = course_service.get_courses_by_name_like(search_string)
+    course_list = render_template_string(
+        "{% from 'reusable/searchCourseList.html' import course_list %}"
+        "{{ course_list(courses) }}",
+        courses=courses
+    )
+    return course_list
+
+
 @course.get("/<int:course_id>/")
 @inject
 @login_required()
 def get_by_id(course_id: int, course_service: CourseService = Provide[Container.course_service]):
-    course_data = course_service.get_by_id(user=g.user, course_id=course_id)
+    course_data = course_service.get_by_id(g.user, course_id)
     return render_template("attendance.html", course=course_data)
 
 
@@ -44,9 +60,11 @@ def update_password(course_id: int, course_service: CourseService = Provide[Cont
     password = request.form.get("password")
     expiration_datetime = request.form.get("password_expiration_datetime")
     if not password or not expiration_datetime:
-        return "Password and Password Validty Time are required", 401
+        return "Password and Password Validty Time are required", 400
     dto = UpdateCoursePasswordRequestDto.factory(course_id, password, expiration_datetime)
-    course_service.update_password(g.user, dto)
+    ok = course_service.update_password(g.user, dto)
+    if not ok:
+        return "There was an error updating the password", 500
     return "", 204
 
 
