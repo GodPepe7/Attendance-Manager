@@ -1,5 +1,5 @@
 from dependency_injector.wiring import inject, Provide
-from flask import Blueprint, render_template, g, request, redirect, url_for
+from flask import Blueprint, render_template, g, request, redirect, url_for, Response
 
 from src.adapters.flask.blueprint.login_wrapper import login_required
 from src.adapters.flask.config.container import Container
@@ -42,11 +42,12 @@ def save(course_service: CourseService = Provide[Container.course_service]):
 @login_required()
 def update_password(course_id: int, course_service: CourseService = Provide[Container.course_service]):
     password = request.form.get("password")
-    password_validity_time = request.form.get("password_validity_time")
-    if not password or not password_validity_time:
-        return 401, "Password and Password Validty Time are required"
-    UpdateCoursePasswordRequestDto.factory(course_id, password, password_validity_time)
-    return redirect(url_for("course.index"))
+    expiration_datetime = request.form.get("password_expiration_datetime")
+    if not password or not expiration_datetime:
+        return "Password and Password Validty Time are required", 401
+    dto = UpdateCoursePasswordRequestDto.factory(course_id, password, expiration_datetime)
+    course_service.update_password(g.user, dto)
+    return "", 204
 
 
 # filter function used in jinja template

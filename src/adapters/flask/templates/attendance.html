@@ -5,7 +5,6 @@
 {% block content %}
 
 {% import "reusable/dialog.html" as dialog %}
-<!--TODO: split stuff up into multiple files-->
 {% call dialog.render("add-lecture", "Add Lecture") %}
 <form id="add-lecture-form" method="post" hx-boost="true" action="{{request.path}}lectures">
   <div class="mb-8">
@@ -78,8 +77,9 @@
            value="{{ default_seconds }}"
            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
   </div>
-  <div class="flex items-center">
+  <div class="flex justify-center flex-col">
     <canvas class="w-full" id="qr-canvas"></canvas>
+    <p id="qr-caption" class="truncate text-xs"></p>
   </div>
 </div>
 
@@ -90,6 +90,7 @@
         const closeDialogBtn = document.getElementById("close-generate-qr")
         const lectureSelect = document.getElementById("qr-lecture-select")
         const qrCanvas = document.getElementById("qr-canvas")
+        const qrCaption = document.getElementById("qr-caption")
         const context = qrCanvas.getContext("2d")
         openDialogBtn.addEventListener("click", () => dialog.showModal())
         closeDialogBtn.addEventListener("click", () => {
@@ -100,6 +101,7 @@
             if (event.target === dialog) {
                 lectureSelect.selectedIndex = 0
                 context.clearRect(0, 0, qrCanvas.width, qrCanvas.height);
+                qrCaption.textContent = ""
             }
         })
     })
@@ -126,20 +128,57 @@
 
     function generateQrCode(event) {
         if (!event.detail.successful) return
-        const qrString = window.location.host + event.detail.xhr.response
+        const qrString = event.detail.xhr.response
+        const qrLink = window.location.host + event.detail.xhr.response
         const canvas = document.getElementById("qr-canvas")
         new QRious({
             element: canvas,
-            value: qrString,
+            value: qrLink,
             size: canvas.width,
         })
+        const caption = document.getElementById("qr-caption")
+        caption.textContent = qrString.replace("/attendance/qr/", "")
     }
 
 </script>
 {% endcall %}
 
-<div
-    class="min-h-screen p-4 relative overflow-hidden">
+{% call dialog.render("set-password", "Set Password") %}
+<form hx-patch="{{request.path}}"
+      hx-validate="true"
+      hx-on::after-request="closePasswordDialog(event)">
+  <div class="mb-8">
+    <label for="set-password-input" class="block text-left text-sm font-medium text-gray-700">Password</label>
+    <input type="password" id="set-password-input" name="password" required
+           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+    <label for="set-password-expiration-input" class="block text-left text-sm font-medium text-gray-700 mt-2">Expiration
+      Datetime</label>
+    <input type="datetime-local" id="set-password-expiration-input" name="password_expiration_datetime" required
+           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+  </div>
+  <div class="flex items-center justify-center gap-6 mt-2">
+    <button type="submit"
+            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+      Submit
+    </button>
+  </div>
+</form>
+<script>
+    htmx.onLoad(() => {
+        const dialog = document.getElementById("set-password");
+        const openDialogBtn = document.getElementById('open-set-password-btn');
+        openDialogBtn.addEventListener('click', () => dialog.showModal())
+    })
+
+    function closePasswordDialog(event) {
+        if (!event.detail.successful) return
+        const dialog = document.getElementById("set-password");
+        dialog.close()
+    }
+</script>
+{% endcall %}
+
+<div class="min-h-screen p-4 relative overflow-hidden">
   <header class="bg-white shadow-md p-4 mb-4 flex justify-between items-center">
     <div class="flex items-center space-x-3">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24"
@@ -181,6 +220,21 @@
           </svg>
           QR Code
         </button>
+        <button id="open-set-password-btn"
+                class="bg-gray-700 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100" height="100" viewBox="0,0,256,256"
+               class="h-5 w-5 mr-2">
+            <g fill="#ffffff" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt"
+               stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0"
+               font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal">
+              <g transform="scale(10.66667,10.66667)">
+                <path
+                    d="M12,1c-3.32381,0 -6,2.67619 -6,6v1h-2v14h16v-14h-2v-1c0,-3.32381 -2.67619,-6 -6,-6zM12,3c2.27619,0 4,1.72381 4,4v1h-8v-1c0,-2.27619 1.72381,-4 4,-4zM12,13c1.1,0 2,0.9 2,2c0,1.1 -0.9,2 -2,2c-1.1,0 -2,-0.9 -2,-2c0,-1.1 0.9,-2 2,-2z"></path>
+              </g>
+            </g>
+          </svg>
+          Password
+        </button>
       </div>
     </div>
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -206,7 +260,7 @@
                               const editBtn = document.getElementById("edit-lecture-btn")
                               const deleteBtn = document.getElementById("delete-lecture-btn")
                               datePicker.value = "{{ lecture.date.strftime('%Y-%m-%d') }}"
-                              editBtn.setAttribute("hx-patch", `${window.location.pathname}lectures/{{ lecture.id }}`)
+                              editBtn.setAttribute("hx-put", `${window.location.pathname}lectures/{{ lecture.id }}`)
                               deleteBtn.setAttribute("hx-delete", `${window.location.pathname}lectures/{{ lecture.id }}`)
                               htmx.process(deleteBtn)
                               htmx.process(editBtn)

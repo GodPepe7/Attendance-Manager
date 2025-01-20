@@ -23,7 +23,7 @@ course_table = Table(
     "course",
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("name", String(50), nullable=False),
+    Column("name", String(50), nullable=False, unique=True, index=True),
     Column("professor_id", Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True),
     Column("password_hash", String(100)),
     Column("password_expiration_time", DateTime)

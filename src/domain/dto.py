@@ -39,12 +39,13 @@ class UpdateCoursePasswordRequestDto:
     password_validty_time: datetime
 
     @classmethod
-    def factory(cls, course_id: int, password: str, password_validity_time: str) -> "UpdateCoursePasswordRequestDto":
+    def factory(cls, course_id: int, password: str,
+                password_expiration_datetime: str) -> "UpdateCoursePasswordRequestDto":
         try:
-            parsed_validity_time = datetime.strptime(password_validity_time, "%Y-%M-%d %H:%M")
-            return cls(course_id, password, parsed_validity_time)
-        except ValueError as e:
-            raise InvalidInputException("Datetime for password validity needs to be in format YYYY-MM-DD HH:MM")
+            parsed_expiration_datetime = datetime.fromisoformat(password_expiration_datetime)
+            return cls(course_id, password, parsed_expiration_datetime)
+        except ValueError:
+            raise InvalidInputException("Datetime for password validity needs to be in any valid ISO 8601 format")
 
 
 @dataclass(frozen=True)

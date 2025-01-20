@@ -32,12 +32,12 @@ class Container(containers.DeclarativeContainer):
         session=db_session
     )
 
-    user_repository = providers.Factory(
+    user_repo = providers.Factory(
         UserRepository,
         session=db_session
     )
 
-    enrollment_repository = providers.Factory(
+    course_student_repo = providers.Factory(
         CourseStudentRepository,
         session=db_session
     )
@@ -49,7 +49,7 @@ class Container(containers.DeclarativeContainer):
 
     attendance_service = providers.Factory(
         AttendanceService,
-        enrollment_repo=enrollment_repository,
+        course_student_repo=course_student_repo,
         lecture_repo=lecture_repo,
         course_repo=course_repo,
         encryptor=encryption_service
@@ -68,10 +68,10 @@ class Container(containers.DeclarativeContainer):
 
     user_service = providers.Factory(
         UserService,
-        repo=user_repository
+        repo=user_repo
     )
 
     admin_service = providers.Factory(
         AdminService,
-        user_repo=user_repository
+        user_repo=user_repo
     )
