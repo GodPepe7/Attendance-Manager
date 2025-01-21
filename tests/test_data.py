@@ -48,7 +48,7 @@ courses = [
         students={course_students[0], course_students[1]},
         lectures={lectures[0], lectures[1]},
         password_hash=generate_password_hash("1234"),
-        password_expiration_time=datetime(2024, 12, 25, 15, 30)
+        password_expiration_datetime=datetime(2024, 12, 25, 15, 30)
     ),
     Course(
         id=2,
@@ -57,6 +57,6 @@ courses = [
         students={course_students[2]},
         lectures={lectures[2]},
         password_hash=generate_password_hash("1234"),
-        password_expiration_time=datetime(2024, 12, 31, 15, 30)
+        password_expiration_datetime=datetime(2024, 12, 31, 15, 30)
     )
 ]

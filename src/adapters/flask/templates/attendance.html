@@ -15,7 +15,7 @@
   <div class="flex justify-center mt-4">
     <button type="submit"
             class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-      Add
+      Submit Lecture
     </button>
   </div>
 </form>
@@ -241,7 +241,7 @@
       <div class="overflow-x-auto" style="height: calc(100vh - 250px);">
         <table class="w-full">
           <thead>
-          <tr id="thead-row" class="border-b border-gray-200">
+          <tr id="thead-row" role="columnheader" class="border-b border-gray-200">
             <th class="sticky left-0 z-20 bg-gray-100 px-6 py-3 text-left text-base font-semibold text-gray-500 tracking-wider date-header">
               Name
             </th>
@@ -275,14 +275,13 @@
           </thead>
           <tbody>
           {% for course_student in course.students %}
-          <tr class="border-b border-gray-200 h-full">
-            <th role="rowheader" class="sticky left-0 z-20 bg-white px-6 py-4 whitespace-nowrap h-full">
-              <div class="flex items-center">
-                <div class="text-sm font-semibold text-gray-900">{{course_student.student.name}}</div>
-              </div>
+          <tr data-testid="student-row-{{course_student.student.name}}" class="border-b border-gray-200 h-full">
+            <th role="rowheader" scope="row"
+                class="sticky left-0 bg-white px-6 py-4 whitespace-nowrap h-full text-left text-sm font-semibold text-gray-900">
+              {{course_student.student.name}}
             </th>
             {% for lecture in course.lectures %}
-            <td class="p-0 h-full lecture-{{ lecture.id }}">
+            <td role="cell" class="p-0 h-full lecture-{{ lecture.id }}">
               {% set has_attended = lecture.id | has_attended(course_student.attended_lectures) %}
               {% set attendance_url = request.path ~ "lectures/" ~ lecture.id ~ "/attendance/" ~ course_student.id %}
               {% import 'reusable/attendanceBtn.html' as attendance %}

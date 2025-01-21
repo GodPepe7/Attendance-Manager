@@ -25,11 +25,3 @@ class DB:
 
     def get_db_session(self):
         return self.db_session
-
-    def get_nested_db_session(self):
-        connection = self.engine.connect()
-        # begin the nested transaction
-        transaction = connection.begin()
-        # use the connection with the already started transaction
-        nested_session = Session(bind=connection)
-        yield transaction, nested_session
