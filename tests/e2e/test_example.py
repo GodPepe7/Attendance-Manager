@@ -41,6 +41,18 @@ def test_courses_page_has_2_courses(login_as_professor):
         assert title_text in expected_course_titles, f"Unexpected course title '{title_text}' in card {i + 1}."
 
 
+def test_professor_can_create_course(login_as_professor):
+    page = login_as_professor
+
+    new_course_name = "Economy for Dummies"
+    page.goto("http://127.0.0.1:5000/courses")
+    page.get_by_role("button", name="Create New Course").click()
+    page.get_by_label("Name").fill(new_course_name)
+
+    new_course = page.get_by_test_id("course-card").filter(has=page.get_by_role("heading", name=new_course_name))
+    expect(new_course).to_be_visible()
+
+
 def test_attendance_page_table_shows_correct_data(login_as_professor):
     page = login_as_professor
     page.goto("http://127.0.0.1:5000/courses")
@@ -71,20 +83,19 @@ def test_attendance_page_table_shows_correct_data(login_as_professor):
             expect(all_attendances.nth(i).get_by_text(expected_attendance)).to_contain_text(expected_attendance)
 
 
-def test_professor_can_manage_attendance(login_as_professor):
+def test_professor_can_mark_student_as_has_attended_or_absent(login_as_professor):
     page = login_as_professor
     page.goto("http://127.0.0.1:5000/courses/1")
     student_row = page.get_by_test_id("student-row-alex")
     toggle_attendance_btn = student_row.get_by_role("button").nth(1)
-
     expect(toggle_attendance_btn).to_contain_text("Absent")
+
     toggle_attendance_btn.click()
 
     toggle_attendance_btn = student_row.get_by_role("button").nth(1)
     expect(toggle_attendance_btn).to_contain_text("Attended")
-    toggle_attendance_btn.click()
 
-    # Click again to revert to original state lol
+    toggle_attendance_btn.click()
     toggle_attendance_btn = student_row.get_by_role("button").nth(1)
     expect(toggle_attendance_btn).to_contain_text("Absent")
 

@@ -1,4 +1,4 @@
-from src.domain.dto import CourseResponseDto, UpdateCoursePasswordRequestDto, CourseGetByNameReponseDto
+from src.domain.dto import CourseResponseDto, UpdateCourseRequestDto, CourseGetByNameReponseDto
 from src.domain.entities.course import Course
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
@@ -34,9 +34,17 @@ class CourseService:
         AuthorizerUtils.check_if_role(user, Role.PROFESSOR)
         return self.repo.save(course)
 
-    def update_password(self, user: User, update_password_dto: UpdateCoursePasswordRequestDto) -> bool:
-        course = self.repo.get_by_id(update_password_dto.course_id)
+    def update(self, user: User, updated_course_dto: UpdateCourseRequestDto) -> bool:
+        course = self.repo.get_by_id(updated_course_dto.course_id)
         AuthorizerUtils.check_if_professor_of_course(user, course)
-        course.set_password(update_password_dto.password)
-        course.password_expiration_datetime = update_password_dto.password_validty_datetime
+        if updated_course_dto.name:
+            course.name = updated_course_dto.name
+        if updated_course_dto.password and updated_course_dto.password_expiration_datetime:
+            course.set_password(updated_course_dto.password)
+            course.password_expiration_datetime = updated_course_dto.password_expiration_datetime
         return self.repo.update(course)
+
+    def delete(self, user: User, course_id: int) -> None:
+        course = self.repo.get_by_id(course_id)
+        AuthorizerUtils.check_if_professor_of_course(user, course)
+        self.repo.delete(course)

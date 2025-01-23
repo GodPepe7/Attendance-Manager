@@ -24,3 +24,7 @@ class ICourseRepository(ABC):
     @abstractmethod
     def update(self, updated_course: Course) -> bool:
         pass
+
+    @abstractmethod
+    def delete(self, course: Course) -> None:
+        pass

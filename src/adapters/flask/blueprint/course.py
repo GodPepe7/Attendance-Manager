@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, g, request, redirect, url_for, Res
 
 from src.adapters.flask.blueprint.login_wrapper import login_required
 from src.adapters.flask.config.container import Container
-from src.domain.dto import UpdateCoursePasswordRequestDto
+from src.domain.dto import UpdateCourseRequestDto
 from src.domain.entities.course import Course
 from src.domain.services.course_service import CourseService
 
@@ -56,16 +56,29 @@ def save(course_service: CourseService = Provide[Container.course_service]):
 @course.patch("/<int:course_id>/")
 @inject
 @login_required()
-def update_password(course_id: int, course_service: CourseService = Provide[Container.course_service]):
+def update(course_id: int, course_service: CourseService = Provide[Container.course_service]):
+    name = request.form.get("name")
     password = request.form.get("password")
     expiration_datetime = request.form.get("password_expiration_datetime")
-    if not password or not expiration_datetime:
-        return "Password and Password Validty Time are required", 400
-    dto = UpdateCoursePasswordRequestDto.factory(course_id, password, expiration_datetime)
-    ok = course_service.update_password(g.user, dto)
+    dto = UpdateCourseRequestDto.factory(course_id, name, password, expiration_datetime)
+    ok = course_service.update(g.user, dto)
     if not ok:
         return "There was an error updating the password", 500
-    return "", 204
+    if password and expiration_datetime:
+        return "", 204
+    response = Response("Set password")
+    response.headers["HX-Location"] = url_for('course.index')
+    return response
+
+
+@course.delete("/<int:course_id>/")
+@inject
+@login_required()
+def delete(course_id: int, course_service: CourseService = Provide[Container.course_service]):
+    course_service.delete(g.user, course_id)
+    response = Response("Deleted course")
+    response.headers["HX-Location"] = url_for('course.index')
+    return response
 
 
 # filter function used in jinja template

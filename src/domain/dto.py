@@ -1,6 +1,7 @@
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Optional
 
 from src.domain.exceptions import InvalidInputException
 
@@ -33,19 +34,27 @@ class UpdateLectureRequestDto:
 
 
 @dataclass(frozen=True)
-class UpdateCoursePasswordRequestDto:
+class UpdateCourseRequestDto:
     course_id: int
-    password: str
-    password_validty_datetime: datetime
+    name: Optional[str]
+    password: Optional[str]
+    password_expiration_datetime: Optional[datetime]
 
     @classmethod
-    def factory(cls, course_id: int, password: str,
-                password_expiration_datetime: str) -> "UpdateCoursePasswordRequestDto":
+    def factory(cls, course_id: Optional[int], name: Optional[str], password: Optional[str],
+                password_expiration_datetime: Optional[str]) -> "UpdateCourseRequestDto":
+        if not name and not password and not password_expiration_datetime:
+            raise InvalidInputException("Need at least one field")
+        if (password and not password_expiration_datetime) or (not password and password_expiration_datetime):
+            raise InvalidInputException(
+                "For updating either password or password_expiration_datetime both are required")
+        parsed_expiration_datetime = None
         try:
-            parsed_expiration_datetime = datetime.fromisoformat(password_expiration_datetime)
-            return cls(course_id, password, parsed_expiration_datetime)
+            if password_expiration_datetime:
+                parsed_expiration_datetime = datetime.fromisoformat(password_expiration_datetime)
         except ValueError:
             raise InvalidInputException("Datetime for password validity needs to be in any valid ISO 8601 format")
+        return cls(course_id, name, password, parsed_expiration_datetime)
 
 
 @dataclass(frozen=True)

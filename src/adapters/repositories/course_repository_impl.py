@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import select, false, Select
+from sqlalchemy import select, Select
 from sqlalchemy.orm import Session
 
 from src.domain.entities.course import Course
@@ -35,3 +35,7 @@ class CourseRepository(ICourseRepository):
             return True
         except Exception as e:
             return False
+
+    def delete(self, course: Course) -> None:
+        self.session.delete(course)
+        self.session.commit()

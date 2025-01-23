@@ -132,7 +132,7 @@ class TestAttendanceService:
         new_user = self.create_test_student(session)
         existing_course = self.courses[0]
         course_password = "1234"
-        valid_datetime = existing_course.password_expiration_time - timedelta(minutes=30)
+        valid_datetime = existing_course.password_expiration_datetime - timedelta(minutes=30)
 
         attendance_service.save_with_password(new_user, existing_course.id, course_password, valid_datetime)
 
@@ -148,7 +148,7 @@ class TestAttendanceService:
         new_user = self.create_test_student(session)
         existing_course = self.courses[0]
         wrong_password = "wrong_password"
-        valid_datetime = existing_course.password_expiration_time - timedelta(minutes=30)
+        valid_datetime = existing_course.password_expiration_datetime - timedelta(minutes=30)
 
         with pytest.raises(AttendanceLoggingException) as exc:
             attendance_service.save_with_password(new_user, existing_course.id, wrong_password, valid_datetime)
@@ -160,7 +160,7 @@ class TestAttendanceService:
         new_user = self.create_test_student(session)
         existing_course = self.courses[0]
         wrong_password = "1234"
-        valid_datetime = existing_course.password_expiration_time + timedelta(hours=2)
+        valid_datetime = existing_course.password_expiration_datetime + timedelta(hours=2)
 
         with pytest.raises(AttendanceLoggingException) as exc:
             attendance_service.save_with_password(new_user, existing_course.id, wrong_password, valid_datetime)
