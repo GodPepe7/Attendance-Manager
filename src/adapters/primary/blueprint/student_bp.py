@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, g
 
-from src.adapters.flask.blueprint.login_wrapper import login_required
+from src.adapters.primary.blueprint.login_wrapper import login_required
 from src.domain.authorizer_utils import AuthorizerUtils
 from src.domain.entities.role import Role
 

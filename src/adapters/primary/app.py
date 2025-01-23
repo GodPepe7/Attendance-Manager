@@ -1,7 +1,7 @@
 # fix windows registry stuff
 import mimetypes
 
-from src.adapters.flask.blueprint.student_bp import student_bp
+from src.adapters.primary.blueprint.student_bp import student_bp
 
 mimetypes.add_type('application/javascript', '.js')
 
@@ -10,14 +10,14 @@ import traceback
 
 from flask import Flask, jsonify, redirect, url_for
 
-from src.adapters.flask.blueprint import attendance, auth, course, lecture, user
-from src.adapters.flask.blueprint.attendance import attendance as attendance_bp
-from src.adapters.flask.blueprint.auth import auth as auth_bp
-from src.adapters.flask.blueprint.course import course as course_bp
-from src.adapters.flask.blueprint.lecture import lecture as lecture_bp
-from src.adapters.flask.blueprint.user import user as user_bp
-from src.adapters.flask.config.container import Container
-from src.adapters.flask.config.exception_handler import EXCEPTION_DICT
+from src.adapters.primary.blueprint import attendance, auth, course, lecture, user
+from src.adapters.primary.blueprint.attendance import attendance as attendance_bp
+from src.adapters.primary.blueprint.auth import auth as auth_bp
+from src.adapters.primary.blueprint.course import course as course_bp
+from src.adapters.primary.blueprint.lecture import lecture as lecture_bp
+from src.adapters.primary.blueprint.user import user as user_bp
+from src.adapters.primary.config.container import Container
+from src.adapters.primary.config.exception_handler import EXCEPTION_DICT
 
 
 def create_app() -> Flask:

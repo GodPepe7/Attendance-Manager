@@ -2,11 +2,11 @@ from os import environ
 
 from dependency_injector import containers, providers
 
-from src.adapters.flask.config.db import DB
-from src.adapters.repositories.course_repository_impl import CourseRepository
-from src.adapters.repositories.enrollment_repository_impl import CourseStudentRepository
-from src.adapters.repositories.lecture_repository_impl import LectureRepository
-from src.adapters.repositories.user_repository_impl import UserRepository
+from src.adapters.primary.config.db import DB
+from src.adapters.secondary.course_repository_impl import CourseRepository
+from src.adapters.secondary.enrollment_repository_impl import CourseStudentRepository
+from src.adapters.secondary.lecture_repository_impl import LectureRepository
+from src.adapters.secondary.user_repository_impl import UserRepository
 from src.domain.services.admin_service import AdminService
 from src.domain.services.attendance_service import AttendanceService
 from src.domain.services.course_service import CourseService

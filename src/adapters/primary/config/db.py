@@ -1,7 +1,7 @@
 from sqlalchemy.orm import scoped_session, sessionmaker, Session, registry, deferred, relationship
 from sqlalchemy import create_engine, event, Table, Column, Integer, String, Enum, ForeignKey, Date
 
-from src.adapters.flask.config.tables import metadata
+from src.adapters.primary.config.tables import metadata
 from src.domain.entities.course import Course
 from src.domain.entities.course_student import CourseStudent
 from src.domain.entities.lecture import Lecture

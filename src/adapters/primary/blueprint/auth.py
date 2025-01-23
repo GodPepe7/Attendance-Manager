@@ -1,8 +1,8 @@
 from dependency_injector.wiring import Provide, inject
 from flask import (request, Blueprint, jsonify, g, session, url_for, render_template, redirect)
 
-from src.adapters.flask.blueprint.login_wrapper import login_required
-from src.adapters.flask.config.container import Container
+from src.adapters.primary.blueprint.login_wrapper import login_required
+from src.adapters.primary.config.container import Container
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.services.user_service import UserService

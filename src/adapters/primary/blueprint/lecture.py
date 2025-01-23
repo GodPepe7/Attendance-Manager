@@ -3,8 +3,8 @@ from datetime import datetime
 from dependency_injector.wiring import inject, Provide
 from flask import Blueprint, request, g, url_for, redirect, Response
 
-from src.adapters.flask.blueprint.login_wrapper import login_required
-from src.adapters.flask.config.container import Container
+from src.adapters.primary.blueprint.login_wrapper import login_required
+from src.adapters.primary.config.container import Container
 from src.domain.dto import UpdateLectureRequestDto
 from src.domain.entities.lecture import Lecture
 from src.domain.services.lecture_service import LectureService

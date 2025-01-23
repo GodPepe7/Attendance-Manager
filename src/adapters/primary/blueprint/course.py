@@ -1,8 +1,8 @@
 from dependency_injector.wiring import inject, Provide
 from flask import Blueprint, render_template, g, request, redirect, url_for, Response, render_template_string
 
-from src.adapters.flask.blueprint.login_wrapper import login_required
-from src.adapters.flask.config.container import Container
+from src.adapters.primary.blueprint.login_wrapper import login_required
+from src.adapters.primary.config.container import Container
 from src.domain.dto import UpdateCourseRequestDto
 from src.domain.entities.course import Course
 from src.domain.services.course_service import CourseService
