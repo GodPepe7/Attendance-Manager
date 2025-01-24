@@ -3,6 +3,7 @@ from os import environ
 from dependency_injector import containers, providers
 
 from src.adapters.primary.config.db import DB
+from src.adapters.secondary.clock_impl import Clock
 from src.adapters.secondary.course_repository_impl import CourseRepository
 from src.adapters.secondary.enrollment_repository_impl import CourseStudentRepository
 from src.adapters.secondary.lecture_repository_impl import LectureRepository
@@ -21,6 +22,10 @@ class Container(containers.DeclarativeContainer):
     db_uri = environ.get("DB_URI")
     db = providers.Singleton(DB, db_uri=environ.get("DB_URI"))
     db_session = providers.Factory(db.provided.get_db_session())
+
+    clock = providers.Factory(
+        Clock
+    )
 
     course_repo = providers.Factory(
         CourseRepository,
@@ -52,7 +57,8 @@ class Container(containers.DeclarativeContainer):
         course_student_repo=course_student_repo,
         lecture_repo=lecture_repo,
         course_repo=course_repo,
-        encryptor=encryption_service
+        encryptor=encryption_service,
+        clock=clock
     )
 
     course_service = providers.Factory(
