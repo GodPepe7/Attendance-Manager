@@ -3,6 +3,8 @@ services:
     image: traefik
     command:
       - "--api.insecure=true"
+      - "--log.level=ERROR"
+      - "--accesslog=true"
       - "--providers.docker"
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.websecure.address=:443"
