@@ -4,19 +4,34 @@ services:
     command:
       - "--api.insecure=true"
       - "--providers.docker"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=s0579081@htw-berlin.de"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
     ports:
       - "80:80"
+      - "443:443"
       - "8080:8080"
     volumes:
+      - letsencrypt:/letsencrypt
       # So that Traefik can listen to Docker events
       - /var/run/docker.sock:/var/run/docker.sock
   attendance-manager:
     build: .
     labels:
-      - "traefik.http.routers.attendance-manager.rule=Host(`attend-man.f4.htw-berlin`)"
+      - "traefik.enable=true"
+      - "traefik.http.routers.attendance-manager.rule=Host(`attend-man.f4.htw-berlin.de`)"
+      - "traefik.http.routers.attendance-manager.entrypoints=websecure"
+      - "traefik.http.routers.attendance-manager.tls.certresolver=myresolver"
     env_file:
       - ./.env
     ports:
       - "8000:8000"
     volumes:
       - ./dev.db:/app/dev.db
+volumes:
+  letsencrypt:
