@@ -260,8 +260,8 @@
                               const editBtn = document.getElementById("edit-lecture-btn")
                               const deleteBtn = document.getElementById("delete-lecture-btn")
                               datePicker.value = "{{ lecture.date.strftime('%Y-%m-%d') }}"
-                              editBtn.setAttribute("hx-put", `${window.location.pathname}lectures/{{ lecture.id }}`)
-                              deleteBtn.setAttribute("hx-delete", `${window.location.pathname}lectures/{{ lecture.id }}`)
+                              editBtn.setAttribute("hx-put", `/courses/{{lecture.course_id}}/lectures/{{ lecture.id }}`)
+                              deleteBtn.setAttribute("hx-delete", `/courses/{{lecture.course_id}}lectures/{{ lecture.id }}`)
                               htmx.process(deleteBtn)
                               htmx.process(editBtn)
                               dialog.showModal()
