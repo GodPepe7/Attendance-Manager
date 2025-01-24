@@ -1,5 +1,4 @@
-# Use an official lightweight Python image
-FROM python:3.14
+FROM python:3.13
 
 # Set the working directory in the container
 WORKDIR /app
@@ -10,8 +9,5 @@ COPY . .
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose port 5000 (Flask default)
-EXPOSE 5000
-
 # Start the Flask app
-CMD ["gunicorn", "-w", "4", "src.adapters.flask.app:create_app"]
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "-w", "4", "src.adapters.primary.app:create_app()"]
