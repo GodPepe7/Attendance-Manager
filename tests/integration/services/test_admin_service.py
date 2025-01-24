@@ -2,13 +2,13 @@ import random
 
 import pytest
 
-from src.adapters.repositories.user_repository_impl import UserRepository
+from src.adapters.secondary.user_repository_impl import UserRepository
 from src.domain.dto import UserResponseDto
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import NotFoundException, UnauthorizedException, InvalidInputException
 from src.domain.services.admin_service import AdminService
-from tests.conftest import engine, tables, add_data, db_session
+from tests.conftest import db_session
 from tests.test_data import users
 
 

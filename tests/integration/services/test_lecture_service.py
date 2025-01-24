@@ -3,15 +3,15 @@ import random
 
 import pytest
 
-from src.adapters.repositories.course_repository_impl import CourseRepository
-from src.adapters.repositories.lecture_repository_impl import LectureRepository
+from src.adapters.secondary.course_repository_impl import CourseRepository
+from src.adapters.secondary.lecture_repository_impl import LectureRepository
 from src.domain.dto import UpdateLectureRequestDto
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import NotFoundException
 from src.domain.services.lecture_service import LectureService
-from tests.conftest import engine, tables, add_data, db_session
+from tests.conftest import db_session
 from tests.test_data import courses
 
 

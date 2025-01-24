@@ -65,8 +65,7 @@ def get_qr_code_string(
         g.user,
         course_id,
         lecture_id,
-        seconds,
-        datetime.now()
+        seconds
     )
     qr_code_link = url_for(
         "attendance.save_with_qr_code_string",
@@ -82,7 +81,7 @@ def save_with_qr_code_string(
         qr_code_string: str,
         attendance_service: AttendanceService = Provide[Container.attendance_service]
 ):
-    attendance_service.save_with_qr_code_string(g.user, qr_code_string, datetime.now())
+    attendance_service.save_with_qr_code_string(g.user, qr_code_string)
     return render_template("success.html")
 
 

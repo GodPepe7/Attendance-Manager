@@ -2,12 +2,12 @@ import random
 
 import pytest
 
-from src.adapters.repositories.user_repository_impl import UserRepository
+from src.adapters.secondary.user_repository_impl import UserRepository
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import InvalidCredentialsException, NotFoundException
 from src.domain.services.user_service import UserService
-from tests.conftest import engine, tables, add_data, db_session
+from tests.conftest import db_session
 from tests.test_data import users
 
 

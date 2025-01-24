@@ -7,9 +7,10 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from src.adapters.repositories.course_repository_impl import CourseRepository
-from src.adapters.repositories.enrollment_repository_impl import CourseStudentRepository
-from src.adapters.repositories.lecture_repository_impl import LectureRepository
+from src.adapters.secondary.clock_impl import Clock
+from src.adapters.secondary.course_repository_impl import CourseRepository
+from src.adapters.secondary.enrollment_repository_impl import CourseStudentRepository
+from src.adapters.secondary.lecture_repository_impl import LectureRepository
 from src.domain.entities.course_student import CourseStudent
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.role import Role
@@ -29,7 +30,8 @@ class TestAttendanceService:
         course_repo = CourseRepository(db_session)
         lecture_repo = LectureRepository(db_session)
         encryptor = EncryptionService(fernet_key=fernet.Fernet.generate_key())
-        attendance_service = AttendanceService(enrollment_repo, lecture_repo, course_repo, encryptor)
+        clock = Clock()
+        attendance_service = AttendanceService(enrollment_repo, lecture_repo, course_repo, encryptor, clock)
         return db_session, attendance_service
 
     @staticmethod
@@ -74,37 +76,35 @@ class TestAttendanceService:
 
         assert "doesn't exist" in str(exc)
 
-    def test_generate_qr_then_scan(self, attendance_service):
+    def test_generate_qr_then_scan_works(self, attendance_service):
         session, attendance_service = attendance_service
         course = self.courses[1]
         enrollment = list(course.students)[0]
         lecture = list(course.lectures)[0]
         EXPIRATION_TIME = 30
-        now = datetime.datetime.now()
         assert lecture not in list(enrollment.attended_lectures)
 
         qr_code_str = attendance_service.generate_qr_code_string(course.professor, course.id, lecture.id,
-                                                                 EXPIRATION_TIME,
-                                                                 now)
-        attendance_service.save_with_qr_code_string(enrollment.student, qr_code_str, now)
+                                                                 EXPIRATION_TIME)
+        attendance_service.save_with_qr_code_string(enrollment.student, qr_code_str)
 
         updated_enrollment = session.get(CourseStudent, enrollment.id)
         assert lecture in list(updated_enrollment.attended_lectures)
 
-    def test_generate_qr_then_scan_expired(self, attendance_service):
+    def test_generate_qr_then_scan_expired_raises(self, attendance_service, mocker):
         _, attendance_service = attendance_service
         course = self.courses[1]
         enrollment = list(course.students)[0]
         lecture = list(course.lectures)[0]
         EXPIRATION_TIME = 30
-        now = datetime.datetime.now()
-        thirty_one_seconds_after = now + datetime.timedelta(seconds=31)
+        thirty_one_seconds_after = datetime.datetime.now() + datetime.timedelta(seconds=31)
 
         qr_code_str = attendance_service.generate_qr_code_string(course.professor, course.id, lecture.id,
-                                                                 EXPIRATION_TIME, now)
+                                                                 EXPIRATION_TIME)
         with pytest.raises(QrCodeExpired) as exc:
-            attendance_service.save_with_qr_code_string(enrollment.student, qr_code_str,
-                                                        thirty_one_seconds_after)
+            # mock get_current_datetime to return a datetime past the expiration time
+            mocker.patch.object(attendance_service.clock, "get_current_datetime", return_value=thirty_one_seconds_after)
+            attendance_service.save_with_qr_code_string(enrollment.student, qr_code_str)
 
         assert "expired" in str(exc.value)
 
@@ -114,12 +114,11 @@ class TestAttendanceService:
         existing_course = random.choice(self.courses)
         existing_lecture = random.choice(list(existing_course.lectures))
         EXPIRATION_TIME = 30
-        now = datetime.datetime.now()
 
         qr_code_str = attendance_service.generate_qr_code_string(existing_course.professor, existing_course.id,
                                                                  existing_lecture.id,
-                                                                 EXPIRATION_TIME, now)
-        attendance_service.save_with_qr_code_string(new_user, qr_code_str, now)
+                                                                 EXPIRATION_TIME)
+        attendance_service.save_with_qr_code_string(new_user, qr_code_str)
 
         stmt = select(CourseStudent).where(CourseStudent.course_id == existing_course.id,
                                            CourseStudent.student_id == new_user.id)
@@ -127,14 +126,16 @@ class TestAttendanceService:
         assert updated_enrollment
         assert existing_lecture in updated_enrollment.attended_lectures
 
-    def test_save_with_correct_password_saves_to_db(self, attendance_service):
+    def test_save_with_correct_password_saves_to_db(self, attendance_service, mocker):
         session, attendance_service = attendance_service
         new_user = self.create_test_student(session)
         existing_course = self.courses[0]
         course_password = "1234"
         valid_datetime = existing_course.password_expiration_datetime - timedelta(minutes=30)
+        mocker.patch.object(attendance_service.clock, "get_current_datetime",
+                            return_value=valid_datetime)
 
-        attendance_service.save_with_password(new_user, existing_course.id, course_password, valid_datetime)
+        attendance_service.save_with_password(new_user, existing_course.id, course_password)
 
         stmt = select(CourseStudent).where(CourseStudent.course_id == existing_course.id,
                                            CourseStudent.student_id == new_user.id)
@@ -148,21 +149,22 @@ class TestAttendanceService:
         new_user = self.create_test_student(session)
         existing_course = self.courses[0]
         wrong_password = "wrong_password"
-        valid_datetime = existing_course.password_expiration_datetime - timedelta(minutes=30)
 
         with pytest.raises(AttendanceLoggingException) as exc:
-            attendance_service.save_with_password(new_user, existing_course.id, wrong_password, valid_datetime)
+            attendance_service.save_with_password(new_user, existing_course.id, wrong_password)
 
         assert exc
 
-    def test_save_with_expired_password_raises(self, attendance_service):
+    def test_save_with_expired_password_raises(self, attendance_service, mocker):
         session, attendance_service = attendance_service
         new_user = self.create_test_student(session)
         existing_course = self.courses[0]
         wrong_password = "1234"
-        valid_datetime = existing_course.password_expiration_datetime + timedelta(hours=2)
+        two_hours_after_expiration = existing_course.password_expiration_datetime + timedelta(hours=2)
 
         with pytest.raises(AttendanceLoggingException) as exc:
-            attendance_service.save_with_password(new_user, existing_course.id, wrong_password, valid_datetime)
+            mocker.patch.object(attendance_service.clock, "get_current_datetime",
+                                return_value=two_hours_after_expiration)
+            attendance_service.save_with_password(new_user, existing_course.id, wrong_password)
 
         assert exc

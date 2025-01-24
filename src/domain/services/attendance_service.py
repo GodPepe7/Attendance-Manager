@@ -7,6 +7,7 @@ from src.domain.entities.role import Role
 from src.domain.entities.user import User
 from src.domain.exceptions import NotFoundException, QrCodeExpired, AttendanceLoggingException
 from src.domain.ports.attendance_repository import IAttendanceRepository
+from src.domain.ports.clock import IClock
 from src.domain.ports.course_repository import ICourseRepository
 from src.domain.ports.course_student_repository import ICourseStudentRepository
 from src.domain.ports.lecture_repository import ILectureRepository
@@ -27,12 +28,14 @@ class AttendanceService:
             course_student_repo: ICourseStudentRepository,
             lecture_repo: ILectureRepository,
             course_repo: ICourseRepository,
-            encryptor: EncryptionService
+            encryptor: EncryptionService,
+            clock: IClock
     ):
         self.course_student_repo = course_student_repo
         self.lecture_repo = lecture_repo
         self.course_repo = course_repo
         self.encryptor = encryptor
+        self.clock = clock
 
     def _get_course_student_and_lecture(self, user: User, course_id: int, lecture_id: int, course_student_id: int) -> (
             CourseStudent, Lecture):
@@ -54,23 +57,23 @@ class AttendanceService:
         course_student.attended_lectures.remove(lecture)
         self.course_student_repo.update(course_student)
 
-    def generate_qr_code_string(self, user: User, course_id: int, lecture_id: int, seconds: int,
-                                current_time: datetime) -> str:
+    def generate_qr_code_string(self, user: User, course_id: int, lecture_id: int, seconds: int) -> str:
         course = self.course_repo.get_by_id(course_id)
         lecture = self.lecture_repo.get_by_id(lecture_id)
         AuthorizerUtils.check_if_professor_of_lecture(user, course, lecture)
-        expiration_time = current_time + timedelta(seconds=seconds)
+        current_datetime = self.clock.get_current_datetime()
+        expiration_time = current_datetime + timedelta(seconds=seconds)
         encrypted_time = self.encryptor.encrypt_lecture_and_time(lecture_id, expiration_time)
         return encrypted_time
 
-    def save_with_qr_code_string(self, user: User, qr_code_string: str,
-                                 current_time: datetime = datetime.now()) -> None:
+    def save_with_qr_code_string(self, user: User, qr_code_string: str) -> None:
         AuthorizerUtils.check_if_role(user, Role.STUDENT)
-        lecture_id, expiration_time = self.encryptor.decrypt_to_lecture_and_time(qr_code_string)
+        current_datetime = self.clock.get_current_datetime()
+        lecture_id, expiration_datetime = self.encryptor.decrypt_to_lecture_and_time(qr_code_string)
         lecture = self.lecture_repo.get_by_id(lecture_id)
         if not lecture:
             raise NotFoundException("Lecture doesn't exist")
-        if current_time > expiration_time:
+        if current_datetime > expiration_datetime:
             raise QrCodeExpired("Didn't save attendance. QR Code is already expired")
         course_student = self.course_student_repo.get_by_course_id_and_student_id(lecture.course_id, user.id)
         if not course_student:
@@ -78,9 +81,9 @@ class AttendanceService:
         course_student.attended_lectures.add(lecture)
         self.course_student_repo.update(course_student)
 
-    def save_with_password(self, user: User, course_id: int, password: str,
-                           current_datetime: datetime = datetime.now()) -> None:
+    def save_with_password(self, user: User, course_id: int, password: str) -> None:
         AuthorizerUtils.check_if_role(user, Role.STUDENT)
+        current_datetime = self.clock.get_current_datetime()
         course = self.course_repo.get_by_id(course_id)
         if not course:
             raise NotFoundException(f"Course with ID: {course_id} doesn't exist")
