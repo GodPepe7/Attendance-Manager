@@ -1,6 +1,6 @@
 AttendancyManager.iml
 *.xml
-dev.db
+*.db
 test.html
 inhaltsverzeichnis.md
 .idea
