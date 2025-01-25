@@ -3,8 +3,9 @@ services:
     image: traefik
     command:
       - "--api.insecure=true"
-      - "--log.level=ERROR"
+      - "--log.level=INFO"
       - "--accesslog=true"
+      - "--accesslog.filePath=/logs/access.log"
       - "--providers.docker"
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.websecure.address=:443"
@@ -19,6 +20,7 @@ services:
       - "443:443"
       - "8080:8080"
     volumes:
+      - ./logs/:/logs/
       - letsencrypt:/letsencrypt
       # So that Traefik can listen to Docker events
       - /var/run/docker.sock:/var/run/docker.sock
