@@ -24,22 +24,3 @@ class AuthorizerUtils:
         if not is_course_professor:
             raise UnauthorizedException(
                 "Only the course professor is allowed to do this action!")
-
-    @staticmethod
-    def check_if_professor_of_lecture(user: User, course: Course, lecture: Lecture):
-        """
-        Checks if the user is the professor of the lecture's course and thus authorized.
-        Will throw an UnauthorizedException otherwise
-        """
-        AuthorizerUtils.check_if_role(user, Role.PROFESSOR)
-        if not course:
-            raise NotFoundException(f"Course doesn't exist")
-        is_course_professor = course.professor.id == user.id
-        if not is_course_professor:
-            raise UnauthorizedException(
-                "Only the course professor is allowed to do this action!")
-        if not lecture:
-            raise NotFoundException("Lecture doesn't exist!")
-        if lecture.course_id != course.id:
-            raise NotFoundException(
-                f"Lecture with ID '{lecture.id}' is not part of the course with ID: '{course.id}'!")

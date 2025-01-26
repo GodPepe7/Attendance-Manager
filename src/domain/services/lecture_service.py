@@ -1,6 +1,7 @@
 from src.domain.dto import UpdateLectureRequestDto
 from src.domain.entities.lecture import Lecture
 from src.domain.entities.user import User
+from src.domain.exceptions import NotFoundException
 from src.domain.ports.course_repository import ICourseRepository
 from src.domain.ports.lecture_repository import ILectureRepository
 from src.domain.authorizer_utils import AuthorizerUtils
@@ -16,15 +17,19 @@ class LectureService:
         AuthorizerUtils.check_if_professor_of_course(user, course)
         return self.repo.save(lecture)
 
-    def delete(self, user: User, course_id: int, lecture_id: int) -> None:
+    def delete(self, user: User, lecture_id: int) -> None:
         lecture = self.repo.get_by_id(lecture_id)
-        course = self.course_repo.get_by_id(course_id)
-        AuthorizerUtils.check_if_professor_of_lecture(user, course, lecture)
+        if not lecture:
+            raise NotFoundException(f"Lecture with ID {lecture_id} doesn't exist")
+        course = self.course_repo.get_by_id(lecture.course_id)
+        AuthorizerUtils.check_if_professor_of_course(user, course)
         self.repo.delete(lecture)
 
     def update(self, user: User, updated_lecture_dto: UpdateLectureRequestDto) -> bool:
         lecture = self.repo.get_by_id(updated_lecture_dto.lecture_id)
-        course = self.course_repo.get_by_id(updated_lecture_dto.course_id)
-        AuthorizerUtils.check_if_professor_of_lecture(user, course, lecture)
+        if not lecture:
+            raise NotFoundException(f"Lecture with ID {updated_lecture_dto.lecture_id} doesn't exist")
+        course = self.course_repo.get_by_id(lecture.course_id)
+        AuthorizerUtils.check_if_professor_of_course(user, course)
         lecture.date = updated_lecture_dto.date
         return self.repo.update(lecture)

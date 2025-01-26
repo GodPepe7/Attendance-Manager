@@ -22,19 +22,15 @@
 </dialog>
 
 <script>
-    htmx.onLoad(() => {
-        const dialog = document.getElementById("{{ dialog_id }}");
-        const closeDialogBtn = document.getElementById('close-{{dialog_id}}');
+    document.getElementById('close-{{dialog_id}}').addEventListener('click', () => {
+        document.getElementById("{{ dialog_id }}").close();
+    });
 
-        closeDialogBtn.addEventListener('click', () => {
+    document.getElementById("{{ dialog_id }}").addEventListener('click', (event) => {
+        const dialog = document.getElementById("{{ dialog_id }}")
+        if (event.target === dialog) {
             dialog.close();
-        });
-
-        dialog.addEventListener('click', (event) => {
-            if (event.target === dialog) {
-                dialog.close();
-            }
-        });
+        }
     })
 </script>
 {%- endmacro %}

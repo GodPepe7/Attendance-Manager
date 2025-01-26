@@ -1,6 +1,9 @@
-{% macro button(has_attended, attendance_endpoint) -%}
+{% macro button(has_attended, lecture_id, course_student_id) -%}
 {% if has_attended %}
-<button hx-delete="{{ attendance_endpoint }}" hx-swap="outerHTML" hx-target="this"
+<button hx-delete="/attendance"
+        hx-swap="outerHTML"
+        hx-target="this"
+        hx-vals='{"lecture_id": {{ lecture_id }}, "course_student_id": {{ course_student_id }}}'
         class="w-full h-full flex items-center justify-center focus:outline-none hover:bg-gray-200">
   <span class="sr-only">Attended</span>
   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="green">
@@ -10,7 +13,10 @@
   </svg>
 </button>
 {% else %}
-<button hx-post="{{ attendance_endpoint }}" hx-swap="outerHTML" hx-target="this"
+<button hx-post="/attendance"
+        hx-swap="outerHTML"
+        hx-target="this"
+        hx-vals='{"lecture_id": {{ lecture_id }}, "course_student_id": {{ course_student_id }}}'
         class="w-full h-full flex items-center justify-center focus:outline-none hover:bg-gray-200">
   <span class="sr-only">Absent</span>
   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="red">

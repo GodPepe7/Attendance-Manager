@@ -57,7 +57,7 @@ class TestLectureService:
         random_course = random.choice(self.courses)
         random_lecture = random.choice(list(random_course.lectures))
 
-        lecture_service.delete(random_course.professor, random_lecture.course_id, random_lecture.id)
+        lecture_service.delete(random_course.professor, random_lecture.id)
 
         fetched_lecture = session.get(Lecture, random_lecture.id)
         assert not fetched_lecture
@@ -68,7 +68,7 @@ class TestLectureService:
         non_existing_lecture = 69420
 
         with pytest.raises(NotFoundException) as exc:
-            lecture_service.delete(random_course.professor, random_course.id, non_existing_lecture)
+            lecture_service.delete(random_course.professor, non_existing_lecture)
 
         assert "doesn't exist" in str(exc.value)
 
@@ -77,7 +77,7 @@ class TestLectureService:
         random_course = random.choice(self.courses)
         random_lecture = random.choice(list(random_course.lectures))
         new_date = datetime.datetime.now().date()
-        updated_lecture_dto = UpdateLectureRequestDto(random_lecture.id, random_lecture.course_id, new_date)
+        updated_lecture_dto = UpdateLectureRequestDto(random_lecture.id, new_date)
 
         lecture_service.update(random_course.professor, updated_lecture_dto)
 

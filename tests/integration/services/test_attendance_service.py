@@ -48,7 +48,7 @@ class TestAttendanceService:
         random_lecture = random.choice(list(random_course.lectures))
         random_enrollment = random.choice(list(random_course.students))
 
-        attendance_service.save(random_course.professor, random_course.id, random_lecture.id, random_enrollment.id)
+        attendance_service.save(random_course.professor, random_lecture.id, random_enrollment.id)
 
         fetched_enrollment = session.get(CourseStudent, random_enrollment.id)
         assert random_lecture in list(fetched_enrollment.attended_lectures)
@@ -59,7 +59,7 @@ class TestAttendanceService:
         existing_enrollment = list(existing_course.students)[0]
         random_lecture = random.choice(list(existing_enrollment.attended_lectures))
 
-        attendance_service.delete(existing_course.professor, existing_course.id, random_lecture.id,
+        attendance_service.delete(existing_course.professor, random_lecture.id,
                                   existing_enrollment.id)
 
         fetched_enrollment = session.get(CourseStudent, existing_enrollment.id)
@@ -72,7 +72,7 @@ class TestAttendanceService:
         existing_lecture = list(existing_course.lectures)[0]
 
         with pytest.raises(NotFoundException) as exc:
-            attendance_service.delete(existing_course.professor, existing_course.id, existing_lecture.id, 1234)
+            attendance_service.delete(existing_course.professor, existing_lecture.id, 1234)
 
         assert "doesn't exist" in str(exc)
 
@@ -84,8 +84,7 @@ class TestAttendanceService:
         EXPIRATION_TIME = 30
         assert lecture not in list(enrollment.attended_lectures)
 
-        qr_code_str = attendance_service.generate_qr_code_string(course.professor, course.id, lecture.id,
-                                                                 EXPIRATION_TIME)
+        qr_code_str = attendance_service.generate_qr_code_string(course.professor, lecture.id, EXPIRATION_TIME)
         attendance_service.save_with_qr_code_string(enrollment.student, qr_code_str)
 
         updated_enrollment = session.get(CourseStudent, enrollment.id)
@@ -99,8 +98,7 @@ class TestAttendanceService:
         EXPIRATION_TIME = 30
         thirty_one_seconds_after = datetime.datetime.now() + datetime.timedelta(seconds=31)
 
-        qr_code_str = attendance_service.generate_qr_code_string(course.professor, course.id, lecture.id,
-                                                                 EXPIRATION_TIME)
+        qr_code_str = attendance_service.generate_qr_code_string(course.professor, lecture.id, EXPIRATION_TIME)
         with pytest.raises(QrCodeExpired) as exc:
             # mock get_current_datetime to return a datetime past the expiration time
             mocker.patch.object(attendance_service.clock, "get_current_datetime", return_value=thirty_one_seconds_after)
@@ -108,15 +106,14 @@ class TestAttendanceService:
 
         assert "expired" in str(exc.value)
 
-    def test_generate_qr_then_scan_with_not_yet_enrolled_student_also_works(self, attendance_service):
+    def test_generate_qr_then_scan_with_student_not_course_student_yet_also_works(self, attendance_service):
         session, attendance_service = attendance_service
         new_user = self.create_test_student(session)
         existing_course = random.choice(self.courses)
         existing_lecture = random.choice(list(existing_course.lectures))
         EXPIRATION_TIME = 30
 
-        qr_code_str = attendance_service.generate_qr_code_string(existing_course.professor, existing_course.id,
-                                                                 existing_lecture.id,
+        qr_code_str = attendance_service.generate_qr_code_string(existing_course.professor, existing_lecture.id,
                                                                  EXPIRATION_TIME)
         attendance_service.save_with_qr_code_string(new_user, qr_code_str)
 

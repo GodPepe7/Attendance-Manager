@@ -7,6 +7,7 @@
   <div class="flex justify-between items-center mb-16">
     <h1 class="text-3xl font-bold">Your Courses</h1>
     <button id="open-add-course"
+            hx-on:click="document.getElementById('add-course').showModal()"
             class="bg-gray-700 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded flex items-center">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
         <path fill-rule="evenodd"
@@ -66,10 +67,10 @@
   </div>
 </form>
 <script>
-    htmx.onLoad(() => {
-        const dialog = document.getElementById("add-course");
-        const openDialogBtn = document.getElementById('open-add-course');
-        openDialogBtn.addEventListener('click', () => dialog.showModal())
+    document.addEventListener("DOMContentLoaded", () => {
+        const addCourseDialog = document.getElementById("add-course");
+        const openAddCourseDialogBtn = document.getElementById('open-add-course');
+        openAddCourseDialogBtn.addEventListener('click', () => addCourseDialog.showModal())
     })
 </script>
 {% endcall %}
@@ -81,7 +82,7 @@
          class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
 </div>
 <div class="flex items-center justify-center gap-6 mt-4">
-  <button type="button" id="delete-course-btn" hx-include="none"
+  <button type="button" id="delete-course-btn" hx-params="none"
           class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
     Delete
   </button>

@@ -16,8 +16,8 @@ lecture = Blueprint('lecture', __name__, url_prefix="/courses/<int:course_id>/le
 @inject
 @login_required()
 def save(course_id: int, lecture_service: LectureService = Provide[Container.lecture_service]):
-    date = request.form.get('lecture-date')
-    new_lecture = Lecture.factory(course_id, date)
+    lecture_date = request.form.get('lecture_date')
+    new_lecture = Lecture.factory(course_id, lecture_date)
     lecture_service.save(g.user, new_lecture)
     return redirect(url_for('course.get_by_id', course_id=course_id))
 
@@ -26,7 +26,7 @@ def save(course_id: int, lecture_service: LectureService = Provide[Container.lec
 @inject
 @login_required()
 def delete(course_id: int, lecture_id: int, lecture_service: LectureService = Provide[Container.lecture_service]):
-    lecture_service.delete(g.user, course_id, lecture_id)
+    lecture_service.delete(g.user, lecture_id)
     response = Response("Deleted lecture")
     response.headers["HX-Location"] = url_for('course.get_by_id', course_id=course_id)
     return response
@@ -36,13 +36,11 @@ def delete(course_id: int, lecture_id: int, lecture_service: LectureService = Pr
 @inject
 @login_required()
 def update(course_id: int, lecture_id: int, lecture_service: LectureService = Provide[Container.lecture_service]):
-    new_date = request.form.get("date")
-    try:
-        parsed_date = datetime.strptime(new_date, "%Y-%m-%d")
-        lecture_request_dto = UpdateLectureRequestDto(lecture_id, course_id, parsed_date)
-        lecture_service.update(g.user, lecture_request_dto)
-        response = Response("Updated lecture")
-        response.headers["HX-Location"] = url_for('course.get_by_id', course_id=course_id)
-        return response
-    except ValueError:
-        return "Invalid date", 400
+    new_date = request.form.get("lecture_date")
+    if not new_date:
+        return "Value 'lecture_date' is required", 400
+    lecture_request_dto = UpdateLectureRequestDto.factory(lecture_id, new_date)
+    lecture_service.update(g.user, lecture_request_dto)
+    response = Response("Updated lecture")
+    response.headers["HX-Location"] = url_for('course.get_by_id', course_id=course_id)
+    return response

@@ -9,7 +9,7 @@
 <form id="add-lecture-form" method="post" hx-boost="true" action="{{request.path}}lectures">
   <div class="mb-8">
     <label for="add-lecture-date" class="block text-left text-sm font-medium text-gray-700">Lecture Date</label>
-    <input type="date" id="add-lecture-date" name="lecture-date" required
+    <input type="date" id="add-lecture-date" name="lecture_date" required
            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
   </div>
   <div class="flex justify-center mt-4">
@@ -19,24 +19,17 @@
     </button>
   </div>
 </form>
-<script>
-    htmx.onLoad(() => {
-        const dialog = document.getElementById("add-lecture");
-        const openDialogBtn = document.getElementById('open-add-lecture');
-        openDialogBtn.addEventListener('click', () => dialog.showModal())
-    })
-</script>
 {% endcall %}
 
 {% call dialog.render("edit-lecture", "Edit Lecture") %}
 <div>
   <div class="mb-8">
     <label for="edit-lecture-date" class="block text-left text-sm font-medium text-gray-700">Lecture Date</label>
-    <input type="date" id="edit-lecture-date" name="date" required
+    <input type="date" id="edit-lecture-date" name="lecture_date" required
            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
   </div>
   <div class="flex items-center justify-center gap-6 mt-4">
-    <button type="button" id="delete-lecture-btn" hx-include="none"
+    <button type="button" id="delete-lecture-btn"
             class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
       Delete
     </button>
@@ -53,14 +46,16 @@
 <div class="mb-8">
   <div class="mb-4">
     <label for="qr-lecture-select" class="block text-left text-sm font-medium text-gray-700">Select Lecture</label>
-    <select id="qr-lecture-select" name="lecture-select" required onchange=""
+    <select id="qr-lecture-select" name="lecture-select" required
             class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
       <option value="" disabled selected>Choose a lecture</option>
       {% set default_seconds = 30 %}
       {% for lecture in course.lectures %}
       <option class="qr-lecture-option lecture" value="{{ lecture.id }}"
-              hx-get="{{ request.path }}lectures/{{ lecture.id }}/attendance/qr"
-              hx-include="[name='seconds']" hx-swap="none" hx-on::after-request="generateQrCode(event)"
+              hx-get="/attendance/qr"
+              hx-vals='"lecture_id": "{{ lecture.id }}"'
+              hx-include="[name='seconds']" hx-swap="none"
+              hx-on::after-request="generateQrCode(event)"
               hx-trigger="click, every {{ default_seconds }}s [isSelected('{{ lecture.id }}')]">
         {{ lecture.date.strftime('%d.%m.%y') }}
       </option>
@@ -79,32 +74,20 @@
   </div>
   <div class="flex justify-center flex-col">
     <canvas class="w-full" id="qr-canvas"></canvas>
-    <p id="qr-caption" class="truncate text-xs"></p>
   </div>
 </div>
 
 <script>
-    htmx.onLoad(() => {
-        const dialog = document.getElementById("generate-qr");
-        const openDialogBtn = document.getElementById("open-generate-qr-btn")
-        const closeDialogBtn = document.getElementById("close-generate-qr")
-        const lectureSelect = document.getElementById("qr-lecture-select")
+    function resetQrDialogState() {
+        const qrLectureSelect = document.getElementById("qr-lecture-select")
         const qrCanvas = document.getElementById("qr-canvas")
-        const qrCaption = document.getElementById("qr-caption")
-        const context = qrCanvas.getContext("2d")
-        openDialogBtn.addEventListener("click", () => dialog.showModal())
-        closeDialogBtn.addEventListener("click", () => {
-            lectureSelect.selectedIndex = -1
-            context.clearRect(0, 0, qrCanvas.width, qrCanvas.height);
-        })
-        dialog.addEventListener('click', (event) => {
-            if (event.target === dialog) {
-                lectureSelect.selectedIndex = 0
-                context.clearRect(0, 0, qrCanvas.width, qrCanvas.height);
-                qrCaption.textContent = ""
-            }
-        })
-    })
+        const qrContext = qrCanvas.getContext("2d")
+        qrLectureSelect.selectedIndex = 0
+        qrContext.clearRect(0, 0, qrCanvas.width, qrCanvas.height);
+    }
+
+    htmx.on("#generate-qr", "click", resetQrDialogState)
+    htmx.on("#close-generate-qr", "click", resetQrDialogState)
 
     function isSelected(lectureId) {
         const lectureSelect = document.getElementById("qr-lecture-select")
@@ -136,10 +119,7 @@
             value: qrLink,
             size: canvas.width,
         })
-        const caption = document.getElementById("qr-caption")
-        caption.textContent = qrString.replace("/attendance/qr/", "")
     }
-
 </script>
 {% endcall %}
 
@@ -164,12 +144,6 @@
   </div>
 </form>
 <script>
-    htmx.onLoad(() => {
-        const dialog = document.getElementById("set-password");
-        const openDialogBtn = document.getElementById('open-set-password-btn');
-        openDialogBtn.addEventListener('click', () => dialog.showModal())
-    })
-
     function closePasswordDialog(event) {
         if (!event.detail.successful) return
         const dialog = document.getElementById("set-password");
@@ -198,9 +172,10 @@
   </header>
   <div class="relative z-10 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6">
     <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-md mb-4">
+      <h3 class="text-base font-bold mr-2">Student Count: {{ course.students | length }}</h3>
       <div class="flex items-center space-x-2">
-        <input type="text" placeholder="Search by name, ID, or email" class="px-4 py-2 border rounded-md">
         <button id="open-add-lecture"
+                hx-on:click="document.getElementById('add-lecture').showModal()"
                 class="bg-gray-700 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd"
@@ -210,6 +185,7 @@
           Add Lecture
         </button>
         <button id="open-generate-qr-btn"
+                hx-on:click="document.getElementById('generate-qr').showModal()"
                 class="bg-gray-700 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd"
@@ -221,6 +197,7 @@
           QR Code
         </button>
         <button id="open-set-password-btn"
+                hx-on:click="document.getElementById('set-password').showModal()"
                 class="bg-gray-700 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100" height="100" viewBox="0,0,256,256"
                class="h-5 w-5 mr-2">
@@ -248,29 +225,27 @@
             {% for lecture in course.lectures %}
             <th class="text-center p-0 bg-gray-50 lecture-{{ lecture.id }}">
               <button id="lecture-{{ lecture.id }}-btn"
-                      data-date="{{lecture.date.strftime('%Y-%m-%d')}}"
-                      class="w-full h-full px-6 py-3 hover:bg-gray-200 font-normal">
+                      hx-on:click="openEditLectureDialog('{{course.id}}', '{{lecture.id}}', '{{lecture.date.strftime('%Y-%m-%d')}}')"
+                      class="lecture-btn w-full h-full px-6 py-3 hover:bg-gray-200 font-normal">
                 {{ lecture.date.strftime('%d.%m.%y') }}
               </button>
-              <script>
-                  htmx.onLoad(() => {
-                          document.getElementById("lecture-{{ lecture.id }}-btn").addEventListener("click", () => {
-                              const dialog = document.getElementById("edit-lecture")
-                              const datePicker = document.getElementById("edit-lecture-date")
-                              const editBtn = document.getElementById("edit-lecture-btn")
-                              const deleteBtn = document.getElementById("delete-lecture-btn")
-                              datePicker.value = "{{ lecture.date.strftime('%Y-%m-%d') }}"
-                              editBtn.setAttribute("hx-put", `/courses/{{lecture.course_id}}/lectures/{{ lecture.id }}`)
-                              deleteBtn.setAttribute("hx-delete", `/courses/{{lecture.course_id}}lectures/{{ lecture.id }}`)
-                              htmx.process(deleteBtn)
-                              htmx.process(editBtn)
-                              dialog.showModal()
-                          })
-                      }
-                  )
-              </script>
             </th>
             {% endfor %}
+            <script>
+                function openEditLectureDialog(courseId, lectureId, date) {
+                    const editLectureDialog = document.getElementById("edit-lecture")
+                    const editLectureDateInput = document.getElementById("edit-lecture-date")
+                    const editLectureBtn = document.getElementById("edit-lecture-btn")
+                    const deleteLectureBtn = document.getElementById("delete-lecture-btn")
+                    const endpoint = `/courses/${courseId}/lectures/${lectureId}`
+                    editLectureDateInput.value = date
+                    editLectureBtn.setAttribute("hx-put", endpoint)
+                    deleteLectureBtn.setAttribute("hx-delete", endpoint)
+                    htmx.process(editLectureBtn)
+                    htmx.process(deleteLectureBtn)
+                    editLectureDialog.showModal()
+                }
+            </script>
           </tr>
           </thead>
           <tbody>
@@ -283,9 +258,8 @@
             {% for lecture in course.lectures %}
             <td role="cell" class="p-0 h-full lecture-{{ lecture.id }}">
               {% set has_attended = lecture.id | has_attended(course_student.attended_lectures) %}
-              {% set attendance_url = request.path ~ "lectures/" ~ lecture.id ~ "/attendance/" ~ course_student.id %}
               {% import 'reusable/attendanceBtn.html' as attendance %}
-              {{ attendance.button(has_attended, attendance_url) }}
+              {{ attendance.button(has_attended, lecture.id, course_student.id) }}
             </td>
             {% endfor %}
           </tr>

@@ -29,8 +29,15 @@ class LectureResponseDto:
 @dataclass(frozen=True)
 class UpdateLectureRequestDto:
     lecture_id: int
-    course_id: int
     date: datetime.date
+
+    @classmethod
+    def factory(cls, lecture_id: int, date_str: str) -> "UpdateLectureRequestDto":
+        try:
+            parsed_date = datetime.strptime(date_str, "%Y-%m-%d")
+            return cls(lecture_id, parsed_date)
+        except ValueError:
+            raise InvalidInputException("Date needs to be of format YYYY-MM-DD")
 
 
 @dataclass(frozen=True)
