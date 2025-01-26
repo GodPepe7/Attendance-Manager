@@ -47,10 +47,36 @@ def test_professor_can_create_course(login_as_professor):
     new_course_name = "Economy for Dummies"
     page.goto("http://127.0.0.1:5000/courses")
     page.get_by_role("button", name="Create New Course").click()
-    page.get_by_label("Name").fill(new_course_name)
+    page.get_by_label("Name", exact=True).fill(new_course_name)
+    page.get_by_text("Add", exact=True).click()
 
     new_course = page.get_by_test_id("course-card").filter(has=page.get_by_role("heading", name=new_course_name))
     expect(new_course).to_be_visible()
+
+
+def test_professor_can_edit_course_name(login_as_professor):
+    page = login_as_professor
+
+    edited_course_name = "Economy for Intermediates"
+    page.goto("http://127.0.0.1:5000/courses")
+    page.locator("#open-edit-course-btn").nth(2).click()
+    page.get_by_label("Course Name").fill(edited_course_name)
+    page.get_by_text("Edit", exact=True).click()
+
+    new_course = page.get_by_test_id("course-card").filter(has=page.get_by_role("heading", name=edited_course_name))
+    expect(new_course).to_be_visible()
+
+
+def test_professor_can_delete_course(login_as_professor):
+    page = login_as_professor
+
+    page.goto("http://127.0.0.1:5000/courses")
+    page.locator("#open-edit-course-btn").nth(2).click()
+    page.get_by_text("Delete").click()
+
+    course_name = "Economy for Intermediates"
+    deleted_course = page.get_by_test_id("course-card").filter(has=page.get_by_role("heading", name=course_name))
+    expect(deleted_course).not_to_be_visible()
 
 
 def test_attendance_page_table_shows_correct_data(login_as_professor):
@@ -122,6 +148,16 @@ def test_professor_can_edit_lecture(login_as_professor):
 
     expect(page.get_by_role("columnheader", name="21.01.25")).not_to_be_visible()
     expect(page.get_by_role("columnheader", name="22.01.25")).to_be_visible()
+
+
+def test_professor_can_delete_lecture(login_as_professor):
+    page = login_as_professor
+    page.goto("http://127.0.0.1:5000/courses/1")
+    page.get_by_role("button", name="22.01.25").click()
+
+    page.get_by_text("Delete").click()
+
+    expect(page.get_by_role("columnheader", name="22.01.25")).not_to_be_visible()
 
 
 def test_professor_can_set_password(login_as_professor):
