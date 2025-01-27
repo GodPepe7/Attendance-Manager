@@ -2,7 +2,6 @@ services:
   reverse-proxy:
     image: traefik
     command:
-      - "--api.insecure=true"
       - "--log.level=INFO"
       - "--accesslog=true"
       - "--accesslog.filePath=/logs/access.log"

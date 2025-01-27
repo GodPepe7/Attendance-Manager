@@ -6,7 +6,7 @@
 
 {% import "reusable/dialog.html" as dialog %}
 {% call dialog.render("add-lecture", "Add Lecture") %}
-<form id="add-lecture-form" method="post" hx-boost="true" action="{{request.path}}lectures">
+<form id="add-lecture-form" method="post" hx-boost="true" action="lectures">
   <div class="mb-8">
     <label for="add-lecture-date" class="block text-left text-sm font-medium text-gray-700">Lecture Date</label>
     <input type="date" id="add-lecture-date" name="lecture_date" required
@@ -124,7 +124,7 @@
 {% endcall %}
 
 {% call dialog.render("set-password", "Set Password") %}
-<form hx-patch="{{request.path}}"
+<form hx-patch="/courses/{{course.id}}"
       hx-validate="true"
       hx-on::after-request="closePasswordDialog(event)">
   <div class="mb-8">

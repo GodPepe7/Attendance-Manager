@@ -33,7 +33,7 @@
         </div>
       </div>
       <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
-        <a href="/courses/{{course.id}}" hx-boost="true"
+        <a href="{{course.id}}" hx-boost="true"
            class="bg-gray-700 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded flex-grow text-center mr-2">
           View Attendance
         </a>
@@ -53,7 +53,7 @@
 {% import "reusable/dialog.html" as dialog %}
 
 {% call dialog.render("add-course", "Add Course") %}
-<form id="add-course-form" method="post" hx-boost="true" action="/courses">
+<form id="add-course-form" method="post" hx-boost="true" action="">
   <div class="mb-8">
     <label for="add-course-name" class="block text-left text-sm font-medium text-gray-700">Name</label>
     <input type="text" id="add-course-name" name="name" required
