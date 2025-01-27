@@ -1,15 +1,17 @@
 from dependency_injector.wiring import Provide, inject
-from flask import Blueprint, g, request, Response, url_for, render_template
+from flask import Blueprint, g, request, Response, url_for, render_template, jsonify
 
 from src.adapters.primary.blueprint.login_wrapper import login_required
 from src.adapters.primary.config.container import Container
 from src.domain.dto import UserResponseDto
+from src.domain.entities.user import User
 from src.domain.services.admin_service import AdminService
+from src.domain.services.user_service import UserService
 
 user = Blueprint('user', __name__, url_prefix="/professors", template_folder="../templates")
 
 
-@user.get("/")
+@user.get("")
 @inject
 @login_required()
 def get_professors(admin_service: AdminService = Provide[Container.admin_service]):
@@ -39,3 +41,17 @@ def update_professor(user_id: int, admin_service: AdminService = Provide[Contain
     response = Response("Updated professor")
     response.headers["HX-Location"] = url_for('admin.get_professors')
     return response
+
+
+@user.post("")
+@inject
+@login_required()
+def save_user(user_service: UserService = Provide[Container.user_service]):
+    body = request.json
+    email = body["email"]
+    name = body["name"]
+    password = body["password"]
+    role = body["role"]
+    user = User.factory(name, email, password, role)
+    user_service.create_user(user)
+    return jsonify({"message": "User created"}), 201

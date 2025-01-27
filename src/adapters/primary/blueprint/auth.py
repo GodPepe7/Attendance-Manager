@@ -1,7 +1,6 @@
 from dependency_injector.wiring import Provide, inject
-from flask import (request, Blueprint, jsonify, g, session, url_for, render_template, redirect)
+from flask import (request, Blueprint, g, session, url_for, render_template, redirect)
 
-from src.adapters.primary.blueprint.login_wrapper import login_required
 from src.adapters.primary.config.container import Container
 from src.domain.entities.role import Role
 from src.domain.entities.user import User
@@ -53,17 +52,3 @@ def login(user_service: UserService = Provide[Container.user_service]):
 def logout():
     session.clear()
     return "", 200
-
-
-@auth.post("/")
-@inject
-@login_required()
-def save_user(user_service: UserService = Provide[Container.user_service]):
-    body = request.json
-    email = body["email"]
-    name = body["name"]
-    password = body["password"]
-    role = body["role"]
-    user = User.factory(name, email, password, role)
-    user_service.create_user(user)
-    return jsonify({"message": "User created"}), 201

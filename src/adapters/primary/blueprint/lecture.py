@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from dependency_injector.wiring import inject, Provide
 from flask import Blueprint, request, g, url_for, redirect, Response
 
@@ -12,7 +10,7 @@ from src.domain.services.lecture_service import LectureService
 lecture = Blueprint('lecture', __name__, url_prefix="/courses/<int:course_id>/lectures")
 
 
-@lecture.post("/")
+@lecture.post("")
 @inject
 @login_required()
 def save(course_id: int, lecture_service: LectureService = Provide[Container.lecture_service]):

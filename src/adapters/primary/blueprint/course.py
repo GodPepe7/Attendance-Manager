@@ -10,7 +10,7 @@ from src.domain.services.course_service import CourseService
 course = Blueprint("course", __name__, url_prefix="/courses", template_folder="../templates")
 
 
-@course.get("/")
+@course.get("")
 @inject
 @login_required()
 def index(course_service: CourseService = Provide[Container.course_service]):
@@ -35,7 +35,7 @@ def get_by_name(course_service: CourseService = Provide[Container.course_service
     return course_list
 
 
-@course.get("/<int:course_id>/")
+@course.get("/<int:course_id>")
 @inject
 @login_required()
 def get_by_id(course_id: int, course_service: CourseService = Provide[Container.course_service]):
@@ -43,7 +43,7 @@ def get_by_id(course_id: int, course_service: CourseService = Provide[Container.
     return render_template("attendance.html", course=course_data)
 
 
-@course.post("/")
+@course.post("")
 @inject
 @login_required()
 def save(course_service: CourseService = Provide[Container.course_service]):
@@ -53,7 +53,7 @@ def save(course_service: CourseService = Provide[Container.course_service]):
     return redirect(url_for("course.index"))
 
 
-@course.patch("/<int:course_id>/")
+@course.patch("/<int:course_id>")
 @inject
 @login_required()
 def update(course_id: int, course_service: CourseService = Provide[Container.course_service]):
@@ -71,7 +71,7 @@ def update(course_id: int, course_service: CourseService = Provide[Container.cou
     return response
 
 
-@course.delete("/<int:course_id>/")
+@course.delete("/<int:course_id>")
 @inject
 @login_required()
 def delete(course_id: int, course_service: CourseService = Provide[Container.course_service]):

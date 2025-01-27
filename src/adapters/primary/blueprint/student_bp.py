@@ -7,7 +7,7 @@ from src.domain.entities.role import Role
 student_bp = Blueprint('student', __name__, url_prefix="/student", template_folder="../templates")
 
 
-@student_bp.get("/")
+@student_bp.get("")
 @login_required()
 def index():
     AuthorizerUtils.check_if_role(g.user, Role.STUDENT)
