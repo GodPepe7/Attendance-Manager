@@ -1,6 +1,7 @@
 services:
   reverse-proxy:
     image: traefik
+    restart: always
     command:
       - "--log.level=INFO"
       - "--accesslog=true"
@@ -17,7 +18,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"
     volumes:
       - ./logs/:/logs/
       - letsencrypt:/letsencrypt
@@ -25,6 +25,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
   attendance-manager:
     build: .
+    restart: always
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.attendance-manager.rule=Host(`attend-man.f4.htw-berlin.de`)"
