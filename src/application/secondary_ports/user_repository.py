@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from src.domain.dto import UserResponseDto
-from src.domain.entities.user import User
+from src.application.dto import UpdateUserRequestDto
+from src.application.entities.user import User
 
 
 class IUserRepository(ABC):
@@ -23,13 +23,13 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    def save(self, entity: User) -> None:
+    def save(self, entity: User) -> int:
         pass
 
     @abstractmethod
-    def delete_prof(self, user_id: int) -> bool:
+    def delete_prof(self, prof_id: int) -> None:
         pass
 
     @abstractmethod
-    def update_prof(self, user_dto: UserResponseDto) -> bool:
+    def update_prof(self, prof_dto: UpdateUserRequestDto) -> None:
         pass

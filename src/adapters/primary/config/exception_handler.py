@@ -1,4 +1,5 @@
-from src.domain.exceptions import InvalidInputException, InvalidCredentialsException, NotFoundException, QrCodeExpired, \
+from src.application.exceptions import InvalidInputException, InvalidCredentialsException, NotFoundException, \
+    QrCodeExpired, \
     UnauthorizedException, NoPasswordAndExpirationYetException
 
 EXCEPTION_DICT = {

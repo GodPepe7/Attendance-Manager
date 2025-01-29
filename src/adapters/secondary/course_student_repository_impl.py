@@ -3,11 +3,11 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from src.domain.entities.course import Course
-from src.domain.entities.course_student import CourseStudent
-from src.domain.entities.user import User
-from src.domain.exceptions import NotFoundException
-from src.domain.ports.course_student_repository import ICourseStudentRepository
+from src.application.entities.course import Course
+from src.application.entities.course_student import CourseStudent
+from src.application.entities.user import User
+from src.application.exceptions import NotFoundException
+from src.application.secondary_ports.course_student_repository import ICourseStudentRepository
 
 
 class CourseStudentRepository(ICourseStudentRepository):

@@ -1,10 +1,9 @@
 import datetime
 import random
-from random import choice
 
 import fernet
 
-from src.domain.services.encryption_service import EncryptionService
+from src.application.primary_ports.encryption_service import EncryptionService
 
 
 class TestEncryptionService:

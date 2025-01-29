@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
 
-from src.domain.dto import CourseStudentResponseDto
-from src.domain.entities.lecture import Lecture
-from src.domain.entities.role import Role
-from src.domain.entities.user import User, InvalidRoleException
-from src.domain.exceptions import NotFoundException
+from src.application.dto import CourseStudentResponseDto
+from src.application.entities.lecture import Lecture
+from src.application.entities.role import Role
+from src.application.entities.user import User, InvalidRoleException
+from src.application.exceptions import NotFoundException
 
 
 @dataclass

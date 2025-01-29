@@ -1,17 +1,16 @@
-from src.domain.dto import CourseResponseDto, UpdateCourseRequestDto, CourseGetByNameReponseDto
-from src.domain.entities.course import Course
-from src.domain.entities.role import Role
-from src.domain.entities.user import User
-from src.domain.exceptions import InvalidInputException
-from src.domain.ports.course_repository import ICourseRepository
-from src.domain.authorizer_utils import AuthorizerUtils
+from src.application.dto import CourseResponseDto, UpdateCourseRequestDto, CourseGetByNameReponseDto
+from src.application.entities.course import Course
+from src.application.entities.role import Role
+from src.application.entities.user import User
+from src.application.secondary_ports.course_repository import ICourseRepository
+from src.application.authorizer_utils import AuthorizerUtils
 
 
 class CourseService:
     def __init__(self, repo: ICourseRepository):
         self.repo = repo
 
-    def get_courses_by_prof(self, user: User) -> list[CourseResponseDto]:
+    def get_courses_of_prof(self, user: User) -> list[CourseResponseDto]:
         AuthorizerUtils.check_if_role(user, Role.PROFESSOR)
         courses = self.repo.get_all_by_professor_id(user.id)
         course_dtos = [course.to_dto() for course in courses]

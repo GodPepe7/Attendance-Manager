@@ -1,8 +1,8 @@
 from typing import Optional
 
-from src.domain.entities.user import User
-from src.domain.exceptions import InvalidCredentialsException, NotFoundException
-from src.domain.ports.user_repository import IUserRepository
+from src.application.entities.user import User
+from src.application.exceptions import InvalidCredentialsException, NotFoundException, InvalidInputException
+from src.application.secondary_ports.user_repository import IUserRepository
 
 
 class UserService:
@@ -20,9 +20,6 @@ class UserService:
         if not user:
             raise NotFoundException(f"User with ID: {id} doesn't exist")
         return user
-
-    def get_students_by_name_starting_with(self, name_prefix: str):
-        return [student.to_dto() for student in self.get_students_by_name_starting_with(name_prefix)]
 
     def authenticate(self, email: str, password: str) -> User:
         """

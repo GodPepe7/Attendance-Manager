@@ -1,10 +1,10 @@
-from src.domain.dto import UpdateLectureRequestDto
-from src.domain.entities.lecture import Lecture
-from src.domain.entities.user import User
-from src.domain.exceptions import NotFoundException
-from src.domain.ports.course_repository import ICourseRepository
-from src.domain.ports.lecture_repository import ILectureRepository
-from src.domain.authorizer_utils import AuthorizerUtils
+from src.application.dto import UpdateLectureRequestDto
+from src.application.entities.lecture import Lecture
+from src.application.entities.user import User
+from src.application.exceptions import NotFoundException
+from src.application.secondary_ports.course_repository import ICourseRepository
+from src.application.secondary_ports.lecture_repository import ILectureRepository
+from src.application.authorizer_utils import AuthorizerUtils
 
 
 class LectureService:

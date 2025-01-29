@@ -1,18 +1,18 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from src.domain.entities.course_student import CourseStudent
-from src.domain.entities.lecture import Lecture
-from src.domain.entities.role import Role
-from src.domain.entities.user import User
-from src.domain.exceptions import NotFoundException, QrCodeExpired, AttendanceLoggingException, InvalidInputException
-from src.domain.ports.attendance_repository import IAttendanceRepository
-from src.domain.ports.clock import IClock
-from src.domain.ports.course_repository import ICourseRepository
-from src.domain.ports.course_student_repository import ICourseStudentRepository
-from src.domain.ports.lecture_repository import ILectureRepository
-from src.domain.authorizer_utils import AuthorizerUtils
-from src.domain.services.encryption_service import EncryptionService
+from src.application.entities.course_student import CourseStudent
+from src.application.entities.lecture import Lecture
+from src.application.entities.role import Role
+from src.application.entities.user import User
+from src.application.exceptions import NotFoundException, QrCodeExpired, AttendanceLoggingException, \
+    InvalidInputException
+from src.application.secondary_ports.clock import IClock
+from src.application.secondary_ports.course_repository import ICourseRepository
+from src.application.secondary_ports.course_student_repository import ICourseStudentRepository
+from src.application.secondary_ports.lecture_repository import ILectureRepository
+from src.application.authorizer_utils import AuthorizerUtils
+from src.application.primary_ports.encryption_service import EncryptionService
 
 
 @dataclass

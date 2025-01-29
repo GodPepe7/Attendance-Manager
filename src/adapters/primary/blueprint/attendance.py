@@ -3,7 +3,7 @@ from flask import Blueprint, g, request, render_template_string, url_for, render
 
 from src.adapters.primary.blueprint.login_wrapper import login_required
 from src.adapters.primary.config.container import Container
-from src.domain.services.attendance_service import AttendanceService
+from src.application.primary_ports.attendance_service import AttendanceService
 
 attendance = Blueprint('attendance', __name__, template_folder="../templates", url_prefix="/attendance")
 

@@ -2,9 +2,9 @@ from dependency_injector.wiring import Provide, inject
 from flask import (request, Blueprint, g, session, url_for, render_template, redirect)
 
 from src.adapters.primary.config.container import Container
-from src.domain.entities.role import Role
-from src.domain.entities.user import User
-from src.domain.services.user_service import UserService
+from src.application.entities.role import Role
+from src.application.entities.user import User
+from src.application.primary_ports.user_service import UserService
 
 auth = Blueprint('auth', __name__, url_prefix="/auth", template_folder="../templates")
 

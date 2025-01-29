@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.domain.ports.clock import IClock
+from src.application.secondary_ports.clock import IClock
 
 
 class Clock(IClock):

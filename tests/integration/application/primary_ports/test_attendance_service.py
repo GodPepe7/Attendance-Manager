@@ -9,15 +9,15 @@ from sqlalchemy.orm import Session
 
 from src.adapters.secondary.clock_impl import Clock
 from src.adapters.secondary.course_repository_impl import CourseRepository
-from src.adapters.secondary.enrollment_repository_impl import CourseStudentRepository
+from src.adapters.secondary.course_student_repository_impl import CourseStudentRepository
 from src.adapters.secondary.lecture_repository_impl import LectureRepository
-from src.domain.entities.course_student import CourseStudent
-from src.domain.entities.lecture import Lecture
-from src.domain.entities.role import Role
-from src.domain.entities.user import User
-from src.domain.exceptions import NotFoundException, QrCodeExpired, AttendanceLoggingException
-from src.domain.services.attendance_service import AttendanceService
-from src.domain.services.encryption_service import EncryptionService
+from src.application.entities.course_student import CourseStudent
+from src.application.entities.lecture import Lecture
+from src.application.entities.role import Role
+from src.application.entities.user import User
+from src.application.exceptions import NotFoundException, QrCodeExpired, AttendanceLoggingException
+from src.application.primary_ports.attendance_service import AttendanceService
+from src.application.primary_ports.encryption_service import EncryptionService
 from tests.conftest import engine, tables, add_data, db_session
 from tests.test_data import courses
 

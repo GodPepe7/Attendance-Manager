@@ -2,11 +2,11 @@ from datetime import datetime, date
 
 from werkzeug.security import generate_password_hash
 
-from src.domain.entities.course import Course
-from src.domain.entities.course_student import CourseStudent
-from src.domain.entities.lecture import Lecture
-from src.domain.entities.role import Role
-from src.domain.entities.user import User
+from src.application.entities.course import Course
+from src.application.entities.course_student import CourseStudent
+from src.application.entities.lecture import Lecture
+from src.application.entities.role import Role
+from src.application.entities.user import User
 
 users = [
     User(name="alex", email="alex@abc.de", password_hash=generate_password_hash("1234"), role=Role.STUDENT, id=1),

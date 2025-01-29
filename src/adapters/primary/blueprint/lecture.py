@@ -3,9 +3,9 @@ from flask import Blueprint, request, g, url_for, redirect, Response
 
 from src.adapters.primary.blueprint.login_wrapper import login_required
 from src.adapters.primary.config.container import Container
-from src.domain.dto import UpdateLectureRequestDto
-from src.domain.entities.lecture import Lecture
-from src.domain.services.lecture_service import LectureService
+from src.application.dto import UpdateLectureRequestDto
+from src.application.entities.lecture import Lecture
+from src.application.primary_ports.lecture_service import LectureService
 
 lecture = Blueprint('lecture', __name__, url_prefix="/courses/<int:course_id>/lectures")
 

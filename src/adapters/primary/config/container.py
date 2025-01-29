@@ -5,15 +5,15 @@ from dependency_injector import containers, providers
 from src.adapters.primary.config.db import DB
 from src.adapters.secondary.clock_impl import Clock
 from src.adapters.secondary.course_repository_impl import CourseRepository
-from src.adapters.secondary.enrollment_repository_impl import CourseStudentRepository
+from src.adapters.secondary.course_student_repository_impl import CourseStudentRepository
 from src.adapters.secondary.lecture_repository_impl import LectureRepository
 from src.adapters.secondary.user_repository_impl import UserRepository
-from src.domain.services.admin_service import AdminService
-from src.domain.services.attendance_service import AttendanceService
-from src.domain.services.course_service import CourseService
-from src.domain.services.encryption_service import EncryptionService
-from src.domain.services.lecture_service import LectureService
-from src.domain.services.user_service import UserService
+from src.application.primary_ports.admin_service import AdminService
+from src.application.primary_ports.attendance_service import AttendanceService
+from src.application.primary_ports.course_service import CourseService
+from src.application.primary_ports.encryption_service import EncryptionService
+from src.application.primary_ports.lecture_service import LectureService
+from src.application.primary_ports.user_service import UserService
 
 
 class Container(containers.DeclarativeContainer):

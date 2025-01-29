@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from src.domain.dto import LectureResponseDto
-from src.domain.exceptions import InvalidInputException
+from src.application.dto import LectureResponseDto
+from src.application.exceptions import InvalidInputException
 
 
 @dataclass

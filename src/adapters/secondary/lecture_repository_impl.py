@@ -4,8 +4,8 @@ from typing import Optional
 from sqlalchemy import Select
 from sqlalchemy.orm import Session
 
-from src.domain.entities.lecture import Lecture
-from src.domain.ports.lecture_repository import ILectureRepository
+from src.application.entities.lecture import Lecture
+from src.application.secondary_ports.lecture_repository import ILectureRepository
 
 
 class LectureRepository(ILectureRepository):

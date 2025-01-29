@@ -1,7 +1,7 @@
 import pytest
 
-from src.domain.dto import UpdateCourseRequestDto
-from src.domain.exceptions import InvalidInputException
+from src.application.dto import UpdateCourseRequestDto
+from src.application.exceptions import InvalidInputException
 
 
 class TestDto:

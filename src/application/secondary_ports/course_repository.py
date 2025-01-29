@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from src.domain.entities.course import Course
+from src.application.entities.course import Course
 
 
 class ICourseRepository(ABC):

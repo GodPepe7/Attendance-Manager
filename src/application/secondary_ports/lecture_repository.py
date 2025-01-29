@@ -2,7 +2,7 @@ import datetime
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from src.domain.entities.lecture import Lecture
+from src.application.entities.lecture import Lecture
 
 
 class ILectureRepository(ABC):

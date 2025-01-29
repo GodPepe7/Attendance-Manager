@@ -1,12 +1,14 @@
 from typing import Optional
 
 from sqlalchemy import select, delete
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from src.domain.dto import UserResponseDto
-from src.domain.entities.role import Role
-from src.domain.entities.user import User
-from src.domain.ports.user_repository import IUserRepository
+from src.application.dto import UpdateUserRequestDto
+from src.application.entities.role import Role
+from src.application.entities.user import User
+from src.application.exceptions import NotFoundException
+from src.application.secondary_ports.user_repository import IUserRepository
 
 
 class UserRepository(IUserRepository):
@@ -32,23 +34,27 @@ class UserRepository(IUserRepository):
         stmt = select(User).where(User.name.startswith(name_prefix), User.role == Role.STUDENT)
         return list(self.session.scalars(stmt).all())
 
-    def save(self, user: User) -> None:
+    def save(self, user: User) -> int:
         self.session.add(user)
         self.session.commit()
+        self.session.refresh(user)
+        return user.id
 
     def delete_prof(self, user_id: int) -> bool:
         user = self.session.get(User, user_id)
         if not user or user.role != Role.PROFESSOR:
-            return False
+            raise NotFoundException(f"Professor with ID {user_id} doesn't exist")
         self.session.delete(user)
         self.session.commit()
         return True
 
-    def update_prof(self, user_dto: UserResponseDto) -> bool:
+    def update_prof(self, user_dto: UpdateUserRequestDto) -> None:
         user = self.session.get(User, user_dto.id)
         if not user or user.role != Role.PROFESSOR:
-            return False
+            raise NotFoundException(f"Professor with ID {user_dto.id} doesn't exist")
         user.name = user_dto.name
         user.email = user_dto.email
-        self.session.commit()
-        return True
+        try:
+            self.session.commit()
+        except IntegrityError:
+            raise NotFoundException(f"Email {UpdateUserRequestDto.email} already in use by other user")

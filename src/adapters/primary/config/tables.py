@@ -1,11 +1,11 @@
 from sqlalchemy import Table, Column, Integer, String, Enum, ForeignKey, Date, DateTime
 from sqlalchemy.orm import registry, deferred, relationship
 
-from src.domain.entities.course import Course
-from src.domain.entities.course_student import CourseStudent
-from src.domain.entities.lecture import Lecture
-from src.domain.entities.role import Role
-from src.domain.entities.user import User
+from src.application.entities.course import Course
+from src.application.entities.course_student import CourseStudent
+from src.application.entities.lecture import Lecture
+from src.application.entities.role import Role
+from src.application.entities.user import User
 
 mapper_registry = registry()
 metadata = mapper_registry.metadata

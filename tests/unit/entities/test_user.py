@@ -1,8 +1,8 @@
 import pytest
 
-from src.domain.entities.role import Role
-from src.domain.entities.user import User
-from src.domain.exceptions import InvalidInputException
+from src.application.entities.role import Role
+from src.application.entities.user import User
+from src.application.exceptions import InvalidInputException
 
 
 class TestUser:

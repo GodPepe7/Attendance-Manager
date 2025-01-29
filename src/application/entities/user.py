@@ -3,9 +3,9 @@ from dataclasses import dataclass
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from src.domain.dto import UserResponseDto
-from src.domain.entities.role import Role, get_enum_by_value
-from src.domain.exceptions import InvalidInputException
+from src.application.dto import UserResponseDto
+from src.application.entities.role import Role, get_enum_by_value
+from src.application.exceptions import InvalidInputException
 
 
 class InvalidRoleException(Exception):
@@ -30,7 +30,7 @@ class User:
         return check_password_hash(self.password_hash, password)
 
     def to_dto(self):
-        return UserResponseDto.factory(user_id=self.id, name=self.name, email=self.email)
+        return UserResponseDto(id=self.id, name=self.name, email=self.email)
 
     @classmethod
     def factory(cls, name: str, email: str, password: str, role_input: str) -> "User":

@@ -3,10 +3,10 @@ from flask import Blueprint, g, request, Response, url_for, render_template, jso
 
 from src.adapters.primary.blueprint.login_wrapper import login_required
 from src.adapters.primary.config.container import Container
-from src.domain.dto import UserResponseDto
-from src.domain.entities.user import User
-from src.domain.services.admin_service import AdminService
-from src.domain.services.user_service import UserService
+from src.application.dto import UserResponseDto, UpdateUserRequestDto
+from src.application.entities.user import User
+from src.application.primary_ports.admin_service import AdminService
+from src.application.primary_ports.user_service import UserService
 
 user = Blueprint('user', __name__, url_prefix="/professors", template_folder="../templates")
 
@@ -36,7 +36,7 @@ def update_professor(user_id: int, admin_service: AdminService = Provide[Contain
     body = request.form
     email = body["email"]
     name = body["name"]
-    user_dto = UserResponseDto.factory(user_id, name, email)
+    user_dto = UpdateUserRequestDto.factory(user_id, name, email)
     admin_service.update_professor(g.user, user_dto)
     response = Response("Updated professor")
     response.headers["HX-Location"] = url_for('admin.get_professors')

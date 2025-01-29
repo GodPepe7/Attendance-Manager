@@ -1,7 +1,7 @@
 import pytest
 
-from src.domain.entities.lecture import Lecture
-from src.domain.exceptions import InvalidInputException
+from src.application.entities.lecture import Lecture
+from src.application.exceptions import InvalidInputException
 
 
 class TestLecture:

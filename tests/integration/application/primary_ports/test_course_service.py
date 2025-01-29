@@ -4,12 +4,12 @@ import random
 import pytest
 
 from src.adapters.secondary.course_repository_impl import CourseRepository
-from src.domain.dto import CourseResponseDto, UpdateCourseRequestDto
-from src.domain.entities.course import Course
-from src.domain.entities.role import Role
-from src.domain.entities.user import User
-from src.domain.exceptions import NotFoundException, UnauthorizedException
-from src.domain.services.course_service import CourseService
+from src.application.dto import CourseResponseDto, UpdateCourseRequestDto
+from src.application.entities.course import Course
+from src.application.entities.role import Role
+from src.application.entities.user import User
+from src.application.exceptions import NotFoundException, UnauthorizedException
+from src.application.primary_ports.course_service import CourseService
 from tests.conftest import db_session
 from tests.test_data import courses, users
 
@@ -85,7 +85,7 @@ class TestCourseService:
         existing_professor = random.choice([user for user in self.users if user.role == Role.PROFESSOR])
         expected_courses = [course for course in self.courses if course.professor.id == existing_professor.id]
 
-        course_dtos = course_service.get_courses_by_prof(existing_professor)
+        course_dtos = course_service.get_courses_of_prof(existing_professor)
 
         assert len(course_dtos) == len(expected_courses)
         course_dtos.sort(key=lambda course: course.id)

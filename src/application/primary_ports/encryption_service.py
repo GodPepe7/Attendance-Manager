@@ -1,10 +1,8 @@
 from datetime import datetime
-from typing import Optional
 
 from fernet import Fernet
 
-from src.domain.entities.lecture import Lecture
-from src.domain.exceptions import InvalidInputException
+from src.application.exceptions import InvalidInputException
 
 
 class EncryptionService:

@@ -3,8 +3,8 @@ from typing import Optional
 from sqlalchemy import select, Select
 from sqlalchemy.orm import Session
 
-from src.domain.entities.course import Course
-from src.domain.ports.course_repository import ICourseRepository
+from src.application.entities.course import Course
+from src.application.secondary_ports.course_repository import ICourseRepository
 
 
 class CourseRepository(ICourseRepository):

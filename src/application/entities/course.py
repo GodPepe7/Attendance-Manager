@@ -3,12 +3,12 @@ from dataclasses import dataclass, field
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from src.domain.dto import CourseResponseDto
-from src.domain.entities.course_student import CourseStudent
-from src.domain.entities.lecture import Lecture
-from src.domain.entities.role import Role
-from src.domain.entities.user import User
-from src.domain.exceptions import UnauthorizedException, NoPasswordAndExpirationYetException
+from src.application.dto import CourseResponseDto
+from src.application.entities.course_student import CourseStudent
+from src.application.entities.lecture import Lecture
+from src.application.entities.role import Role
+from src.application.entities.user import User
+from src.application.exceptions import UnauthorizedException, NoPasswordAndExpirationYetException
 
 
 @dataclass

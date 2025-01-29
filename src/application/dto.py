@@ -3,11 +3,18 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 
-from src.domain.exceptions import InvalidInputException
+from src.application.exceptions import InvalidInputException
 
 
 @dataclass(frozen=True)
 class UserResponseDto:
+    id: int
+    name: str
+    email: str
+
+
+@dataclass(frozen=True)
+class UpdateUserRequestDto:
     id: int
     name: str
     email: str

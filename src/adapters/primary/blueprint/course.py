@@ -3,9 +3,9 @@ from flask import Blueprint, render_template, g, request, redirect, url_for, Res
 
 from src.adapters.primary.blueprint.login_wrapper import login_required
 from src.adapters.primary.config.container import Container
-from src.domain.dto import UpdateCourseRequestDto
-from src.domain.entities.course import Course
-from src.domain.services.course_service import CourseService
+from src.application.dto import UpdateCourseRequestDto
+from src.application.entities.course import Course
+from src.application.primary_ports.course_service import CourseService
 
 course = Blueprint("course", __name__, url_prefix="/courses", template_folder="../templates")
 
@@ -14,7 +14,7 @@ course = Blueprint("course", __name__, url_prefix="/courses", template_folder=".
 @inject
 @login_required()
 def index(course_service: CourseService = Provide[Container.course_service]):
-    courses = course_service.get_courses_by_prof(g.user)
+    courses = course_service.get_courses_of_prof(g.user)
     courses = [{"id": c.id, "name": c.name, "amount_students": len(c.students)} for c in courses]
     return render_template("course.html", courses=courses)
 
