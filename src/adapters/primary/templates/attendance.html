@@ -43,82 +43,77 @@
 
 {% call dialog.render("generate-qr", "Generate QR-Code") %}
 
-<div class="mb-8">
-  <div class="mb-4">
-    <label for="qr-lecture-select" class="block text-left text-sm font-medium text-gray-700">Select Lecture</label>
-    <select id="qr-lecture-select" name="lecture-select" required
-            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-      <option value="" disabled selected>Choose a lecture</option>
-      {% set default_seconds = 30 %}
-      {% for lecture in course.lectures %}
-      <option class="qr-lecture-option lecture" value="{{ lecture.id }}"
-              hx-get="/attendance/qr"
-              hx-vals='"lecture_id": "{{ lecture.id }}"'
-              hx-include="[name='seconds']" hx-swap="none"
-              hx-on::after-request="generateQrCode(event)"
-              hx-trigger="click, every {{ default_seconds }}s [isSelected('{{ lecture.id }}')]">
-        {{ lecture.date.strftime('%d.%m.%y') }}
-      </option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="mb-4">
-    <label for="qr-polling-rate-input" class="block text-left text-sm font-medium text-gray-700">
-      Regeneration Time (seconds)
-    </label>
-    <input type="number" id="qr-polling-rate-input" onchange="setQrPolling()" name="seconds" required
-           min="30"
-           max="300"
-           value="{{ default_seconds }}"
-           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-  </div>
-  <div class="flex justify-center flex-col">
-    <canvas class="w-full" id="qr-canvas"></canvas>
-  </div>
+{% set default_seconds = 30 %}
+<form id="generate-qr-form" class="mb-4"
+      hx-get="/attendance/qr"
+      hx-trigger="change, every {{ default_seconds }}s"
+      hx-swap="none"
+      hx-on::after-request="generateQrCode(event)">
+  <label for="qr-lecture-select" class="block text-left text-sm font-medium text-gray-700">Select Lecture</label>
+  <select id="qr-lecture-select" name="lecture_id" required
+          class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+    <option value="" disabled selected>Choose a lecture</option>
+    {% for lecture in course.lectures %}
+    <option class="qr-lecture-option" value="{{ lecture.id }}">
+      {{ lecture.date.strftime('%d.%m.%y') }}
+    </option>
+    {% endfor %}
+  </select>
+  <label for="qr-polling-rate-input" class="mt-4 block text-left text-sm font-medium text-gray-700">
+    Regeneration Time (seconds)
+  </label>
+  <input type="number" id="qr-polling-rate-input" onchange="setQrPolling()" name="seconds" required
+         min="5"
+         max="600"
+         value="{{ default_seconds }}"
+         class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+</form>
+<div id="qr-canvas-container" class="flex justify-center flex-col hidden">
+  <canvas class="w-full" id="qr-canvas"></canvas>
+  <p id="qr-code-string" class="truncate"></p>
 </div>
 
 <script>
     function resetQrDialogState() {
         const qrLectureSelect = document.getElementById("qr-lecture-select")
+        const qrCanvasContainer = document.getElementById("qr-canvas-container")
         const qrCanvas = document.getElementById("qr-canvas")
         const qrContext = qrCanvas.getContext("2d")
         qrLectureSelect.selectedIndex = 0
         qrContext.clearRect(0, 0, qrCanvas.width, qrCanvas.height);
+        qrCanvasContainer.classList.add("hidden")
     }
 
     htmx.on("#generate-qr", "click", resetQrDialogState)
     htmx.on("#close-generate-qr", "click", resetQrDialogState)
-
-    function isSelected(lectureId) {
-        const lectureSelect = document.getElementById("qr-lecture-select")
-        return lectureSelect.value === lectureId
-    }
+    htmx.on("#generate-qr-container", "click", (evt) => evt.stopPropagation())
 
     function setQrPolling() {
-        const pollingRateInput = document.getElementById("qr-polling-rate-input")
-        if (!pollingRateInput.checkValidity()) return
-        const pollingRate = pollingRateInput.value
-        const qrLectureOptions = document.querySelectorAll(".qr-lecture-option")
-        qrLectureOptions.forEach(option => {
-            const triggerValue = option.getAttribute("hx-trigger")
-            const split = triggerValue.split(" ")
-            split[2] = pollingRate + "s"
-            const updatedTriggerValue = split.join(" ")
-            option.setAttribute("hx-trigger", updatedTriggerValue)
-            htmx.process(option)
-        })
+        const qrForm = document.getElementById("generate-qr-form")
+        qrForm.reportValidity()
+        const pollingRate = document.getElementById("qr-polling-rate-input").value
+        const triggerValue = qrForm.getAttribute("hx-trigger")
+        const split = triggerValue.split(" ")
+        split[2] = pollingRate + "s"
+        const updatedTriggerValue = split.join(" ")
+        qrForm.setAttribute("hx-trigger", updatedTriggerValue)
+        htmx.process(qrForm)
     }
 
     function generateQrCode(event) {
         if (!event.detail.successful) return
         const qrString = event.detail.xhr.response
         const qrLink = window.location.host + event.detail.xhr.response
+        const canvasContainer = document.getElementById("qr-canvas-container")
         const canvas = document.getElementById("qr-canvas")
+        const qrStringDisplay = document.getElementById("qr-code-string")
+        qrStringDisplay.textContent = qrString.replace("/attendance/qr/", "")
         new QRious({
             element: canvas,
             value: qrLink,
             size: canvas.width,
         })
+        canvasContainer.classList.remove("hidden")
     }
 </script>
 {% endcall %}

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 from playwright.sync_api import expect
 
@@ -15,6 +17,7 @@ def login_as_professor(new_context, storage):
     else:
         context = new_context()
         page = context.new_page()
+        page.clock.install()
         page.goto("127.0.0.1:5000")
         page.get_by_label("Email").fill("prof@htw.de")
         page.get_by_label("Password").fill("test")
@@ -170,3 +173,18 @@ def test_professor_can_set_password(login_as_professor):
     page.get_by_text("Submit", exact=True).click()
 
     expect(page.locator("#set-password")).not_to_be_visible()
+
+
+def test_professor_can_create_qr_code_that_changes_after_30_seconds(login_as_professor):
+    page = login_as_professor
+    page.goto("http://127.0.0.1:5000/courses/1")
+    page.get_by_role("button", name="QR Code").click()
+    expect(page.locator("#qr-canvas")).not_to_be_visible()
+
+    page.get_by_label("Select Lecture").select_option("1")
+
+    expect(page.locator("#qr-canvas")).to_be_visible()
+    first_qr_code = page.locator("#qr-code-string").text_content()
+    page.clock.fast_forward("00:30")
+    second_qr_code = page.locator("#qr-code-string").text_content()
+    assert first_qr_code != second_qr_code
