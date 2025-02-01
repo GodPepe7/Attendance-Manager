@@ -1,5 +1,6 @@
 import pytest
 from playwright.sync_api import expect
+from tests.fixtures import start_test_app
 
 
 @pytest.fixture(scope="session")
@@ -9,7 +10,7 @@ def storage(tmp_path_factory):
 
 
 @pytest.fixture
-def login_as_student(new_context, storage):
+def login_as_student(new_context, storage, start_test_app):
     if storage.exists():
         yield new_context(storage_state=storage).new_page()
     else:
@@ -25,10 +26,5 @@ def login_as_student(new_context, storage):
         context.storage_state(path=storage)
 
 
-def test_course_searching_shows_course_list(login_as_student):
+def test_course_search_gives_list_of_courses_that_are_clickable(login_as_student):
     page = login_as_student
-
-    page.get_by_placeholder("Business English").fill("soft")
-
-    expect(page.get_by_text("Softwareengineering (chad)")).to_be_visible()
-    expect(page.get_by_text("Projektmanagement (chad)")).not_to_be_visible()

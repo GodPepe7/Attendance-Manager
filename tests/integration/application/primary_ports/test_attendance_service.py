@@ -18,7 +18,7 @@ from src.application.entities.user import User
 from src.application.exceptions import NotFoundException, QrCodeExpired, AttendanceLoggingException
 from src.application.primary_ports.attendance_service import AttendanceService
 from src.application.primary_ports.encryption_service import EncryptionService
-from tests.conftest import engine, tables, add_data, db_session
+from tests.fixtures import engine, tables, add_data, db_session
 from tests.test_data import courses
 
 

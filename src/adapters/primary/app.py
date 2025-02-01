@@ -22,15 +22,25 @@ from src.adapters.primary.config.container import Container
 from src.adapters.primary.config.exception_handler import EXCEPTION_DICT
 
 
-def create_app() -> Flask:
+def create_app(config_overrides: dict = None, dependency_overrides: dict = None,
+               config_path: str = "config/config.py") -> Flask:
     app = Flask(__name__, static_url_path='/static')
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
-    app.config.from_pyfile("config/config.py")
+    app.config.from_pyfile(config_path)
     app.config['APPLICATION_ROOT'] = '/'
     app.config['PREFERRED_URL_SCHEME'] = 'https'
     container = Container()
+
+    if config_overrides:
+        container.config.from_dict(config_overrides)
+
+    if dependency_overrides:
+        for dependency, new_provider in dependency_overrides.items():
+            container.set_provider(dependency, new_provider)
+
     container.wire(modules=[attendance, auth, course, lecture, user])
     app.container = container
+
     db = Container.db()
     db.create_tables()
 

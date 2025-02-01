@@ -11,7 +11,7 @@ from src.application.entities.role import Role
 from src.application.entities.user import User
 from src.application.exceptions import NotFoundException
 from src.application.primary_ports.lecture_service import LectureService
-from tests.conftest import db_session
+from tests.fixtures import db_session
 from tests.test_data import courses
 
 

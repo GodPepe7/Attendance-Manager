@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, String, Enum, ForeignKey, Date, DateTime
+from sqlalchemy import Table, Column, Integer, String, Enum, ForeignKey, Date, DateTime, UniqueConstraint
 from sqlalchemy.orm import registry, deferred, relationship
 
 from src.application.entities.course import Course
@@ -15,9 +15,9 @@ user_table = Table(
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("name", String(50), nullable=False),
-    Column("email", String(30), nullable=False, unique=True, index=True),
+    Column("email", String(30), nullable=False, unique=True),
     Column("password_hash", String(100), nullable=False),
-    Column("role", Enum(Role), nullable=False)
+    Column("role", Enum(Role), nullable=False),
 )
 course_table = Table(
     "course",
@@ -26,28 +26,32 @@ course_table = Table(
     Column("name", String(100), nullable=False, unique=True, index=True),
     Column("professor_id", Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True),
     Column("password_hash", String(100)),
-    Column("password_expiration_datetime", DateTime)
+    Column("password_expiration_datetime", DateTime),
+    UniqueConstraint("professor_id", "name", name="uc_professor_id_name"),
 )
 lecture_table = Table(
     "lecture",
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("course_id", Integer, ForeignKey("course.id", ondelete="CASCADE"), nullable=False),
-    Column("date", Date, nullable=False)
+    Column("date", Date, nullable=False),
+    UniqueConstraint("course_id", "date", name="uc_course_id_date"),
 )
 course_student_table = Table(
     "course_student",
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("student_id", Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False),
-    Column("course_id", Integer, ForeignKey("course.id", ondelete="CASCADE"), nullable=False)
+    Column("course_id", Integer, ForeignKey("course.id", ondelete="CASCADE"), nullable=False),
+    UniqueConstraint("student_id", "course_id", name="uc_course_id_student_id"),
 )
 attendance_table = Table(
     "attendance",
     metadata,
     Column("course_student_id", Integer, ForeignKey("course_student.id", ondelete="CASCADE"), primary_key=True,
            nullable=False),
-    Column("lecture_id", Integer, ForeignKey("lecture.id", ondelete="CASCADE"), primary_key=True, nullable=False)
+    Column("lecture_id", Integer, ForeignKey("lecture.id", ondelete="CASCADE"), primary_key=True, nullable=False),
+    UniqueConstraint("course_student_id", "lecture_id", name="uc_lecture_id_course_student_id"),
 )
 
 mapper_registry.map_imperatively(

@@ -18,9 +18,10 @@ from src.application.primary_ports.user_service import UserService
 
 class Container(containers.DeclarativeContainer):
     config = providers.Configuration()
+    config.db_uri.from_env("DB_URI", default="sqlite:///test2.db")
+    config.fernet_key.from_env("ENCRYPTION_KEY", default="default")
 
-    db_uri = environ.get("DB_URI")
-    db = providers.Singleton(DB, db_uri=environ.get("DB_URI"))
+    db = providers.Singleton(DB, db_uri=config.db_uri)
     db_session = providers.Factory(db.provided.get_db_session())
 
     clock = providers.Factory(
@@ -49,7 +50,7 @@ class Container(containers.DeclarativeContainer):
 
     encryption_service = providers.Factory(
         EncryptionService,
-        fernet_key=environ.get("ENCRYPTION_KEY").encode()
+        fernet_key=config.fernet_key.provided.encode()
     )
 
     attendance_service = providers.Factory(

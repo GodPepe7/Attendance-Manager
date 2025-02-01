@@ -7,7 +7,7 @@ from src.application.entities.role import Role
 from src.application.entities.user import User
 from src.application.exceptions import InvalidCredentialsException, NotFoundException
 from src.application.primary_ports.user_service import UserService
-from tests.conftest import db_session
+from tests.fixtures import db_session
 from tests.test_data import users
 
 
