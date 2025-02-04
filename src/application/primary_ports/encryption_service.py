@@ -6,8 +6,8 @@ from src.application.exceptions import InvalidInputException
 
 
 class EncryptionService:
-    def __init__(self, fernet_key: bytes):
-        self.cipher_suite = Fernet(fernet_key)
+    def __init__(self, key: bytes):
+        self.cipher_suite = Fernet(key)
 
     def encrypt_lecture_and_time(self, lecture_id: int, date_time: datetime) -> str:
         datetime_str = date_time.strftime("%Y-%m-%d %H:%M:%S")

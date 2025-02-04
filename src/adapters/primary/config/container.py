@@ -1,5 +1,9 @@
-from os import environ
+import base64
+import os
+from pathlib import Path
+from secrets import token_bytes
 
+import fernet
 from dependency_injector import containers, providers
 
 from src.adapters.primary.config.db import DB
@@ -18,10 +22,11 @@ from src.application.primary_ports.user_service import UserService
 
 class Container(containers.DeclarativeContainer):
     config = providers.Configuration()
+    script_dir = Path(__file__).parent.absolute()
     config.db_uri.from_env("DB_URI", default="sqlite:///test2.db")
-    config.fernet_key.from_env("ENCRYPTION_KEY", default="default")
+    config.encryption_key.from_value(fernet.Fernet.generate_key())
 
-    db = providers.Singleton(DB, db_uri=config.db_uri)
+    db = providers.Singleton(DB, db_uri=config.db_uri())
     db_session = providers.Factory(db.provided.get_db_session())
 
     clock = providers.Factory(
@@ -50,7 +55,7 @@ class Container(containers.DeclarativeContainer):
 
     encryption_service = providers.Factory(
         EncryptionService,
-        fernet_key=config.fernet_key.provided.encode()
+        key=config.encryption_key()
     )
 
     attendance_service = providers.Factory(

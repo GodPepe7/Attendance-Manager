@@ -1,14 +1,14 @@
 import contextlib
-from datetime import datetime, timedelta
+from datetime import datetime
 from threading import Thread
 
 import pytest
-from dependency_injector import providers, containers
+from dependency_injector import providers
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from src.adapters.primary.app import create_app
-from src.adapters.primary.config.db import DB
+from src.adapters.primary.app import FlaskApp
+from src.adapters.primary.config.container import Container
 from src.adapters.primary.config.tables import metadata
 from src.application.secondary_ports.clock import IClock
 from tests.test_data import courses
@@ -57,14 +57,6 @@ def db_session(add_data):
     connection.close()
 
 
-class TestClock(IClock):
-    def __init__(self, fixed_datetime: datetime):
-        self.current = fixed_datetime
-
-    def get_current_datetime(self) -> datetime:
-        pass
-
-
 class FixedClock(IClock):
     def __init__(self, fixed_datetime: datetime):
         self.current = fixed_datetime
@@ -73,41 +65,61 @@ class FixedClock(IClock):
         return self.current
 
 
-class TestOverrideContainer(containers.DeclarativeContainer):
-    config = providers.Configuration()
-    config.from_dict({
-        "fernet_key": "test"
-    })
-    db = providers.Singleton(DB, db_uri="sqlite:///test2.db")
-    db_session = providers.Factory(db.provided.get_db_session())
-    fixed_datetime = course_expiration_datetime - timedelta(hours=1)
-    clock = providers.Factory(
-        FixedClock, fixed_datetime=fixed_datetime
-    )
-
+# ------------E2E--------------
 
 @pytest.fixture(scope="module")
-def start_test_app():
-    app = create_app(config_path="config/test_config.py")
-    testContainer = TestOverrideContainer()
-    app.container.override(testContainer)
+def storage(tmp_path_factory):
+    tmp_path = tmp_path_factory.mktemp("session")
+    return tmp_path / "state.json"
 
-    db = app.container.db()
-    db.create_tables()
-    session = db.get_db_session()
-    session.add_all(e2e_courses)
-    session.commit()
+
+@pytest.fixture(scope="session")
+def start_test_app():
+    flask_app: FlaskApp
+    config_dict = {
+        "DEBUG": False,
+        "SECRET_KEY": "super_secret_key"
+    }
+
+    container = Container()
+    flask_app = FlaskApp(container, config_dict)
 
     def run_app():
-        app.run(host="127.0.0.1", port=5000)
+        flask_app.run(host="127.0.0.1", port=5001)
 
     thread = Thread(target=run_app, daemon=True)
     thread.start()
 
-    yield app
+    return flask_app
 
-    with contextlib.closing(db.engine.connect()) as con:
-        trans = con.begin()
-        for table in reversed(metadata.sorted_tables):
-            con.execute(table.delete())
-        trans.commit()
+
+@pytest.fixture(scope="session")
+def add_test_data(start_test_app):
+    flask_app = start_test_app
+    db = flask_app.app.container.db()
+    session = db.get_db_session()
+    session.add_all(e2e_courses)
+    session.commit()
+    session.expunge_all()
+
+    yield flask_app
+
+    metadata.drop_all(bind=db.engine)
+
+
+@pytest.fixture
+def transactional_app(add_test_data):
+    flask_app = add_test_data
+    container = flask_app.container
+
+    engine = container.db().engine
+    connection = engine.connect()
+    transaction = connection.begin()
+    session = providers.Singleton(Session, bind=connection)
+    container.db_session.override(session)
+
+    yield flask_app
+
+    container.db_session().close()
+    transaction.rollback()
+    connection.close()

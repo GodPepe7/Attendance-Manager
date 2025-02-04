@@ -7,7 +7,7 @@ from src.application.primary_ports.encryption_service import EncryptionService
 
 
 class TestEncryptionService:
-    encryptor = EncryptionService(fernet_key=fernet.Fernet.generate_key())
+    encryptor = EncryptionService(fernet.Fernet.generate_key())
 
     def test_encrypt_lecture_and_time_and_decrypt_back_gives_orginal_back(self):
         now = datetime.datetime.now().replace(microsecond=0)

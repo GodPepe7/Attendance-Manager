@@ -19,7 +19,7 @@ class AuthorizerUtils:
         AuthorizerUtils.check_if_role(user, Role.PROFESSOR)
         if not course:
             raise NotFoundException(f"Course doesn't exist")
-        is_course_professor = course.professor.id == user.id
+        is_course_professor = course.professor == user
         if not is_course_professor:
             raise UnauthorizedException(
                 "Only the course professor is allowed to do this action!")

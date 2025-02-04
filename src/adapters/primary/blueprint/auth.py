@@ -28,7 +28,13 @@ def load_logged_in_user(user_service: UserService = Provide[Container.user_servi
     if user_id is None:
         g.user = None
     else:
-        g.user = user_service.get_by_id(user_id)
+        try:
+            g.user = user_service.get_by_id(user_id)
+            if g.user is None:  # User was deleted
+                session.clear()  # Clear invalid session
+        except Exception as e:
+            session.clear()  # Reset session on error
+            g.user = None
 
 
 @auth.route("/login", methods=["GET", "POST"])
