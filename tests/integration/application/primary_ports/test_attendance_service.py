@@ -29,7 +29,7 @@ class TestAttendanceService:
         enrollment_repo = CourseStudentRepository(db_session)
         course_repo = CourseRepository(db_session)
         lecture_repo = LectureRepository(db_session)
-        encryptor = EncryptionService(fernet_key=fernet.Fernet.generate_key())
+        encryptor = EncryptionService(fernet.Fernet.generate_key())
         clock = Clock()
         attendance_service = AttendanceService(enrollment_repo, lecture_repo, course_repo, encryptor, clock)
         return db_session, attendance_service

@@ -4,7 +4,7 @@ import pytest
 from dependency_injector import providers
 from playwright.sync_api import expect
 
-from tests.fixtures import storage, start_test_app, add_test_data, FixedClock, transactional_app
+from tests.e2e_fixtures import storage, start_test_app, add_test_data, FixedClock, transactional_app
 from tests.test_data_e2e import course_expiration_datetime
 
 
