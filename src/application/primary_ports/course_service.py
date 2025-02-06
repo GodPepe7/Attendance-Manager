@@ -1,4 +1,5 @@
-from src.application.dto import CourseResponseDto, UpdateCourseRequestDto, CourseGetByNameReponseDto
+from src.application.dto import CourseResponseDto, UpdateCourseRequestDto, CourseGetByNameReponseDto, \
+    GetMultipleCoursesResponseDto
 from src.application.entities.course import Course
 from src.application.entities.role import Role
 from src.application.entities.user import User
@@ -10,10 +11,11 @@ class CourseService:
     def __init__(self, repo: ICourseRepository):
         self.repo = repo
 
-    def get_courses_of_prof(self, user: User) -> list[CourseResponseDto]:
+    def get_courses_of_prof(self, user: User) -> list[GetMultipleCoursesResponseDto]:
         AuthorizerUtils.check_if_role(user, Role.PROFESSOR)
         courses = self.repo.get_all_by_professor_id(user.id)
-        course_dtos = [course.to_dto() for course in courses]
+        course_dtos = [GetMultipleCoursesResponseDto(course.id, course.name, len(course.students)) for course in
+                       courses]
         return course_dtos
 
     def get_courses_by_name_like(self, name: str) -> list[CourseGetByNameReponseDto]:
@@ -24,7 +26,7 @@ class CourseService:
     def get_by_id(self, user: User, course_id: int) -> CourseResponseDto:
         course = self.repo.get_by_id(course_id)
         AuthorizerUtils.check_if_professor_of_course(user, course)
-        course_dtos = course.to_dto()
+        course_dtos = CourseResponseDto.factory(course)
         course_dtos.lectures.sort(key=lambda lecture: lecture.date)
         course_dtos.students.sort(key=lambda enrollment: enrollment.student.name)
         return course_dtos
@@ -39,8 +41,8 @@ class CourseService:
         if updated_course_dto.name:
             course.name = updated_course_dto.name
         if updated_course_dto.password and updated_course_dto.password_expiration_datetime:
-            course.set_password(updated_course_dto.password)
-            course.password_expiration_datetime = updated_course_dto.password_expiration_datetime
+            course.set_password_and_expiration(updated_course_dto.password,
+                                               updated_course_dto.password_expiration_datetime)
         return self.repo.update(course)
 
     def delete(self, user: User, course_id: int) -> None:

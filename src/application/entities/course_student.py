@@ -1,10 +1,8 @@
 from dataclasses import dataclass, field
 
-from src.application.dto import CourseStudentResponseDto
 from src.application.entities.lecture import Lecture
 from src.application.entities.role import Role
 from src.application.entities.user import User, InvalidRoleException
-from src.application.exceptions import NotFoundException
 
 
 @dataclass
@@ -19,19 +17,19 @@ class CourseStudent:
 
     def add_lecture(self, lecture: Lecture) -> None:
         """
-        Will add to the CourseStudent if it's a course lecture.
-        If a password is passed in, it will also check if it matches the lecture's password.
+        Adds if the lecture belongs to the same course that the student is part of.
         """
         if self.course_id != lecture.course_id:
-            raise NotFoundException("Lecture does not belong to the same course as student")
+            raise InvalidRoleException("Lecture does not belong to the same course as student")
         self.attended_lectures.add(lecture)
 
-    def to_dto(self):
-        return CourseStudentResponseDto(
-            id=self.id,
-            student=self.student.to_dto(),
-            attended_lectures=[attended_lecture.to_dto() for attended_lecture in self.attended_lectures]
-        )
+    def remove_lecture(self, lecture: Lecture) -> None:
+        """
+        Will remove if the student has the lecture attendend.
+        """
+        if lecture in self.attended_lectures:
+            self.attended_lectures.remove(lecture)
+        return
 
     @classmethod
     def factory(cls, student: User, course_id: int) -> "CourseStudent":

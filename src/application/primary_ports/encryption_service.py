@@ -14,7 +14,7 @@ class EncryptionService:
         lecture_and_time_str = str(lecture_id) + "," + datetime_str
         return self.cipher_suite.encrypt(lecture_and_time_str.encode()).decode()
 
-    def decrypt_to_lecture_and_time(self, encrypted_str: str) -> (int, datetime):
+    def decrypt_to_lecture_and_time(self, encrypted_str: str) -> tuple[int, datetime]:
         try:
             lecture_and_time_str = self.cipher_suite.decrypt(encrypted_str.encode()).decode()
             lecture_and_time = lecture_and_time_str.split(",")

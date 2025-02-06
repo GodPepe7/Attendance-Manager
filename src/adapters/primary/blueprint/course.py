@@ -14,9 +14,8 @@ course = Blueprint("course", __name__, url_prefix="/courses", template_folder=".
 @inject
 @login_required()
 def index(course_service: CourseService = Provide[Container.course_service]):
-    courses = course_service.get_courses_of_prof(g.user)
-    courses = [{"id": c.id, "name": c.name, "amount_students": len(c.students)} for c in courses]
-    return render_template("course.html", courses=courses)
+    courses_dto = course_service.get_courses_of_prof(g.user)
+    return render_template("course.html", courses=courses_dto)
 
 
 @course.get("/search")

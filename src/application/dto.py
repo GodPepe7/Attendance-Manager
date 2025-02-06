@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 
+from src.application.entities.course import Course
 from src.application.exceptions import InvalidInputException
 
 
@@ -48,6 +49,42 @@ class UpdateLectureRequestDto:
 
 
 @dataclass(frozen=True)
+class CourseStudentResponseDto:
+    id: int
+    student: UserResponseDto
+    attended_lectures: list[LectureResponseDto]
+
+
+@dataclass(frozen=True)
+class GetMultipleCoursesResponseDto:
+    id: int
+    name: str
+    amount_students: int
+
+
+@dataclass(frozen=True)
+class CourseResponseDto:
+    id: int
+    name: str
+    professor: UserResponseDto
+    lectures: list[LectureResponseDto]
+    students: list[CourseStudentResponseDto] = field(compare=False)
+
+    @classmethod
+    def factory(cls, course: Course):
+        professor_dto = UserResponseDto(course.professor.id, course.professor.name, course.professor.email)
+        lecture_dtos = [LectureResponseDto(lecture.id, lecture.date) for lecture in course.lectures]
+        student_dtos: list[CourseStudentResponseDto] = []
+        for course_student in course.students:
+            student_user = course_student.student
+            attendend_lectures = course_student.attended_lectures
+            user_dto = UserResponseDto(student_user.id, student_user.name, student_user.email)
+            attendend_lectures_dto = [LectureResponseDto(lecture.id, lecture.date) for lecture in attendend_lectures]
+            student_dtos.append(CourseStudentResponseDto(course_student.id, user_dto, attendend_lectures_dto))
+        return cls(course.id, course.name, professor_dto, lecture_dtos, student_dtos)
+
+
+@dataclass(frozen=True)
 class UpdateCourseRequestDto:
     course_id: int
     name: Optional[str]
@@ -69,22 +106,6 @@ class UpdateCourseRequestDto:
         except ValueError:
             raise InvalidInputException("Datetime for password validity needs to be in any valid ISO 8601 format")
         return cls(course_id, name, password, parsed_expiration_datetime)
-
-
-@dataclass(frozen=True)
-class CourseStudentResponseDto:
-    id: int
-    student: UserResponseDto
-    attended_lectures: list[LectureResponseDto]
-
-
-@dataclass(frozen=True)
-class CourseResponseDto:
-    id: int
-    name: str
-    professor: UserResponseDto
-    lectures: list[LectureResponseDto]
-    students: list[CourseStudentResponseDto] = field(compare=False)
 
 
 @dataclass(frozen=True)

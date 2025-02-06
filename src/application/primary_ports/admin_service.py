@@ -1,7 +1,7 @@
 from src.application.dto import UserResponseDto, UpdateUserRequestDto
 from src.application.entities.role import Role
 from src.application.entities.user import User
-from src.application.exceptions import NotFoundException, InvalidInputException
+from src.application.exceptions import InvalidInputException
 from src.application.secondary_ports.user_repository import IUserRepository
 from src.application.authorizer_utils import AuthorizerUtils
 
@@ -13,7 +13,7 @@ class AdminService:
     def get_all_professors(self, user: User) -> list[UserResponseDto]:
         AuthorizerUtils.check_if_role(user, Role.ADMIN)
         professors = self.user_repo.get_all_professors()
-        return [prof.to_dto() for prof in professors]
+        return [UserResponseDto(prof.id, prof.name, prof.email) for prof in professors]
 
     def delete_professor(self, user, professor_id: int) -> None:
         AuthorizerUtils.check_if_role(user, Role.ADMIN)

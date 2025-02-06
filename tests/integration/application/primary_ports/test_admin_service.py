@@ -3,7 +3,7 @@ import random
 import pytest
 
 from src.adapters.secondary.user_repository_impl import UserRepository
-from src.application.dto import UpdateUserRequestDto
+from src.application.dto import UpdateUserRequestDto, UserResponseDto
 from src.application.entities.role import Role
 from src.application.entities.user import User
 from src.application.exceptions import NotFoundException, UnauthorizedException, InvalidInputException
@@ -21,7 +21,7 @@ class TestAdminService:
         return db_session, admin_service
 
     @staticmethod
-    def _assert_dto_equals_user(dto: UpdateUserRequestDto, user: User):
+    def _assert_dto_equals_user(dto: UpdateUserRequestDto | UserResponseDto, user: User):
         assert dto.id == user.id and dto.name == user.name and dto.email == user.email
 
     def test_get_all_professors_with_non_admin_raises(self, admin_service):

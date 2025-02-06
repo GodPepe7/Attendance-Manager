@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from src.application.dto import LectureResponseDto
 from src.application.exceptions import InvalidInputException
 
 
@@ -16,12 +15,6 @@ class Lecture:
 
     def __hash__(self):
         return hash((self.id, self.date, self.course_id))
-
-    def to_dto(self) -> LectureResponseDto:
-        return LectureResponseDto(
-            id=self.id,
-            date=self.date,
-        )
 
     @classmethod
     def factory(cls, course_id: int, date: str) -> "Lecture":

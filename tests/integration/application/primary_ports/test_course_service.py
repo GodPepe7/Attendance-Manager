@@ -90,7 +90,9 @@ class TestCourseService:
         assert len(course_dtos) == len(expected_courses)
         course_dtos.sort(key=lambda course: course.id)
         for course, course_dto in zip(expected_courses, course_dtos):
-            self.assert_dto_is_equal_to_course(course_dto, course)
+            assert course_dto.id == course.id
+            assert course_dto.name == course.name
+            assert course_dto.amount_students == len(course.students)
 
     def test_save_course_persists_to_db(self, course_service):
         session, course_service = course_service

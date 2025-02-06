@@ -37,8 +37,8 @@ class AttendanceService:
         self.encryptor = encryptor
         self.clock = clock
 
-    def _get_course_student_and_lecture(self, user: User, lecture_id: int, course_student_id: int) -> (
-            CourseStudent, Lecture):
+    def _get_course_student_and_lecture(self, user: User, lecture_id: int, course_student_id: int) -> tuple[
+        CourseStudent, Lecture]:
         lecture = self.lecture_repo.get_by_id(lecture_id)
         if not lecture:
             raise NotFoundException(f"Lecture with ID {lecture_id} doesn't exist")
@@ -51,12 +51,12 @@ class AttendanceService:
 
     def save(self, user: User, lecture_id: int, course_student_id: int):
         course_student, lecture = self._get_course_student_and_lecture(user, lecture_id, course_student_id)
-        course_student.attended_lectures.add(lecture)
+        course_student.add_lecture(lecture)
         self.course_student_repo.update(course_student)
 
     def delete(self, user: User, lecture_id: int, course_student_id: int):
         course_student, lecture = self._get_course_student_and_lecture(user, lecture_id, course_student_id)
-        course_student.attended_lectures.remove(lecture)
+        course_student.remove_lecture(lecture)
         self.course_student_repo.update(course_student)
 
     def generate_qr_code_string(self, user: User, lecture_id: int, seconds: int) -> str:
