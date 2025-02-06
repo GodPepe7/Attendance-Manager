@@ -22,6 +22,6 @@ class AdminService:
     def update_professor(self, user: User, user_dto: UpdateUserRequestDto) -> None:
         AuthorizerUtils.check_if_role(user, Role.ADMIN)
         user = self.user_repo.get_by_email(user_dto.email)
-        if user:
+        if user and user.id != user_dto.id:
             raise InvalidInputException(f"Email '{user_dto.email}' is already in use. Choose another one")
         self.user_repo.update_prof(user_dto)

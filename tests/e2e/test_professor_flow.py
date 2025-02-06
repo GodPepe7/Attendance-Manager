@@ -1,16 +1,19 @@
 import re
+from datetime import datetime
 
 import pytest
+from dependency_injector import providers
 from playwright.sync_api import expect
-from tests.e2e_fixtures import storage, start_test_app, add_test_data, transactional_app
+from tests.e2e_fixtures import storage, start_test_app, add_test_data, transactional_app, FixedClock
 
 url = "127.0.0.1:5001"
 
 
 @pytest.fixture
 def login_as_professor(new_context, storage, transactional_app):
+    flask_app = transactional_app
     if storage.exists():
-        yield new_context(storage_state=storage).new_page()
+        yield new_context(storage_state=storage).new_page(), flask_app
     else:
         context = new_context()
         page = context.new_page()
@@ -20,24 +23,23 @@ def login_as_professor(new_context, storage, transactional_app):
         page.get_by_label("Password").fill("test")
         page.get_by_role("button", name="Login").click()
         expect(page.get_by_role("heading", name="Your Courses")).to_be_visible()
-        yield page
+        yield page, flask_app
         context.storage_state(path=storage)
 
 
 @pytest.fixture
 def go_to_softwareengineering(login_as_professor):
-    page = login_as_professor
+    page, flask_app = login_as_professor
     page.goto(url)
     softwareengineering_course_card = page.get_by_test_id("course-card").filter(
         has=page.get_by_role("heading", name="Softwareengineering"))
     softwareengineering_course_card.get_by_role("link", name="View Attendance").click()
     expect(page.get_by_text(re.compile("Student Count:"))).to_be_visible()
-    page.wait_for_load_state('networkidle')
-    return page
+    return page, flask_app
 
 
 def test_courses_page_has_2_courses(login_as_professor):
-    page = login_as_professor
+    page, _ = login_as_professor
     page.goto(f"{url}/courses")
     page.wait_for_load_state('networkidle')
 
@@ -53,7 +55,7 @@ def test_courses_page_has_2_courses(login_as_professor):
 
 
 def test_professor_can_create_course(login_as_professor):
-    page = login_as_professor
+    page, _ = login_as_professor
     page.goto(f"{url}/courses")
     page.wait_for_load_state('networkidle')
 
@@ -69,7 +71,7 @@ def test_professor_can_create_course(login_as_professor):
 
 
 def test_professor_can_edit_course_name(login_as_professor):
-    page = login_as_professor
+    page, _ = login_as_professor
     page.goto(f"{url}/courses")
     page.wait_for_load_state('networkidle')
 
@@ -86,7 +88,7 @@ def test_professor_can_edit_course_name(login_as_professor):
 
 
 def test_professor_can_delete_course(login_as_professor):
-    page = login_as_professor
+    page, _ = login_as_professor
     page.goto(f"{url}/courses")
     page.wait_for_load_state('networkidle')
 
@@ -100,7 +102,7 @@ def test_professor_can_delete_course(login_as_professor):
 
 
 def test_attendance_page_table_shows_correct_data(go_to_softwareengineering):
-    page = go_to_softwareengineering
+    page, _ = go_to_softwareengineering
 
     expect(page.get_by_role("heading", name="Softwareengineering")).to_be_visible()
     expected_lectures = ["01.01.25", "02.01.25", "03.01.25", "23.01.25"]
@@ -125,7 +127,7 @@ def test_attendance_page_table_shows_correct_data(go_to_softwareengineering):
 
 
 def test_professor_can_mark_student_as_has_attended_or_absent(go_to_softwareengineering):
-    page = go_to_softwareengineering
+    page, _ = go_to_softwareengineering
 
     student_row = page.get_by_test_id("student-row-alex")
     toggle_attendance_btn = student_row.get_by_role("button").nth(1)
@@ -143,7 +145,7 @@ def test_professor_can_mark_student_as_has_attended_or_absent(go_to_softwareengi
 
 
 def test_professor_can_create_lecture(go_to_softwareengineering):
-    page = go_to_softwareengineering
+    page, _ = go_to_softwareengineering
 
     page.get_by_role("button", name="Add Lecture").click()
     page.locator("#add-lecture-date").fill("2025-01-21")
@@ -154,7 +156,7 @@ def test_professor_can_create_lecture(go_to_softwareengineering):
 
 
 def test_professor_can_edit_lecture(go_to_softwareengineering):
-    page = go_to_softwareengineering
+    page, _ = go_to_softwareengineering
 
     page.get_by_role("button", name="01.01.25").click()
     page.locator("#edit-lecture-date").fill("2025-01-22")
@@ -166,7 +168,7 @@ def test_professor_can_edit_lecture(go_to_softwareengineering):
 
 
 def test_professor_can_delete_lecture(go_to_softwareengineering):
-    page = go_to_softwareengineering
+    page, _ = go_to_softwareengineering
 
     page.get_by_role("button", name="01.01.25").click()
     page.get_by_text("Delete").click()
@@ -175,19 +177,44 @@ def test_professor_can_delete_lecture(go_to_softwareengineering):
     expect(page.get_by_role("columnheader", name="01.01.25")).not_to_be_visible()
 
 
-def test_professor_can_set_password(go_to_softwareengineering):
-    page = go_to_softwareengineering
+def test_professor_can_set_new_password_and_student_can_use_it(go_to_softwareengineering, new_context):
+    page, flask_app = go_to_softwareengineering
+    date_of_second_lecture = datetime(2025, 1, 2, 10, 0, 0)
+    fixed_clock = providers.Factory(
+        FixedClock, fixed_datetime=date_of_second_lecture
+    )
+    flask_app.container.clock.override(fixed_clock)
+    student_row = page.get_by_test_id("student-row-alex")
+    toggle_attendance_btn = student_row.get_by_role("button").nth(1)
+    expect(toggle_attendance_btn).to_contain_text("Absent")
 
+    new_password = "safe password"
     page.get_by_role("button", name="Password").click()
-    page.get_by_label("Password").fill("1234")
-    page.get_by_label("Expiration Datetime").fill("2025-12-31T12:00")
+    page.get_by_label("Password").fill(new_password)
+    page.get_by_label("Expiration Datetime").fill("2025-01-02T12:00")
     page.get_by_text("Submit", exact=True).click()
-
     expect(page.locator("#set-password")).not_to_be_visible()
 
+    context = new_context()
+    new_page = context.new_page()
+    new_page.goto(url)
+    new_page.get_by_label("Email").fill("student@htw.de")
+    new_page.get_by_label("Password").fill("test")
+    new_page.get_by_role("button", name="Login").click()
+    expect(new_page.get_by_role("heading", name="Log Attendance")).to_be_visible()
+    new_page.get_by_label("Course").fill("Softwareengineering")
+    new_page.get_by_text("Softwareengineering (chad)").click()
+    new_page.get_by_label("password").fill(new_password)
+    new_page.get_by_role("button", name="Submit").click()
+    expect(new_page.get_by_text("Successfully logged attendance")).to_be_visible()
+
+    page.reload()
+    updated_student_row = page.get_by_test_id("student-row-alex")
+    toggle_attendance_btn = updated_student_row.get_by_role("button").nth(1)
+    expect(toggle_attendance_btn).to_contain_text("Attended")
 
 def test_professor_can_create_qr_code_that_changes_after_30_seconds(go_to_softwareengineering):
-    page = go_to_softwareengineering
+    page, _ = go_to_softwareengineering
 
     page.get_by_role("button", name="QR Code").click()
     expect(page.locator("#qr-canvas")).not_to_be_visible()

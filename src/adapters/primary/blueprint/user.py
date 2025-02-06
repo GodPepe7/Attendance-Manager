@@ -25,7 +25,7 @@ def get_professors(admin_service: AdminService = Provide[Container.admin_service
 def delete_professor(user_id: int, admin_service: AdminService = Provide[Container.admin_service]):
     admin_service.delete_professor(g.user, user_id)
     response = Response("Deleted professor")
-    response.headers["HX-Location"] = url_for('admin.get_professors')
+    response.headers["HX-Location"] = url_for('user.get_professors')
     return response
 
 
@@ -39,7 +39,7 @@ def update_professor(user_id: int, admin_service: AdminService = Provide[Contain
     user_dto = UpdateUserRequestDto.factory(user_id, name, email)
     admin_service.update_professor(g.user, user_dto)
     response = Response("Updated professor")
-    response.headers["HX-Location"] = url_for('admin.get_professors')
+    response.headers["HX-Location"] = url_for('user.get_professors')
     return response
 
 
@@ -52,6 +52,6 @@ def save_user(user_service: UserService = Provide[Container.user_service]):
     name = body["name"]
     password = body["password"]
     role = body["role"]
-    user = User.factory(name, email, password, role)
-    user_service.create_user(user)
+    new_user = User.factory(name, email, password, role)
+    user_service.create_user(new_user)
     return jsonify({"message": "User created"}), 201

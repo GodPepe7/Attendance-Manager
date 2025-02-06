@@ -9,7 +9,7 @@ from src.adapters.primary.app import FlaskApp
 from src.adapters.primary.config.container import Container
 from src.adapters.primary.config.tables import metadata
 from src.application.secondary_ports.clock import IClock
-from tests.test_data_e2e import courses
+from tests.test_data_e2e import courses, users
 
 
 class FixedClock(IClock):
@@ -51,6 +51,7 @@ def add_test_data(start_test_app):
     flask_app = start_test_app
     db = flask_app.app.container.db()
     session = db.get_db_session()
+    session.add_all(users)
     session.add_all(courses)
     session.commit()
     session.expunge_all()
