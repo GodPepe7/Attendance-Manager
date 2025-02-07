@@ -50,7 +50,7 @@ def get_qr_code_string(attendance_service: AttendanceService = Provide[Container
     seconds = request.args.get('seconds', type=int)
     if not seconds or not lecture_id:
         return "Values 'lecture_id' and 'seconds' are required", 400
-    encypted_expiration_time = attendance_service.generate_qr_code_string(g.user, lecture_id, seconds)
+    encypted_expiration_time = attendance_service.generate_code(g.user, lecture_id, seconds)
     qr_code_link = url_for("attendance.save_with_qr_code_string", qr_code_string=encypted_expiration_time)
     return qr_code_link, 200
 
@@ -62,7 +62,7 @@ def save_with_qr_code_string(
         qr_code_string: str,
         attendance_service: AttendanceService = Provide[Container.attendance_service]
 ):
-    attendance_service.save_with_qr_code_string(g.user, qr_code_string)
+    attendance_service.save_by_code(g.user, qr_code_string)
     return render_template("success.html")
 
 
@@ -74,5 +74,5 @@ def save_with_password(attendance_service: AttendanceService = Provide[Container
     course_id = request.form.get("course_id", type=int)
     if not password or not course_id:
         return "Values 'password' and 'course_id' are required", 400
-    attendance_service.save_with_password(g.user, course_id, password)
+    attendance_service.save_by_password(g.user, course_id, password)
     return render_template("success.html")

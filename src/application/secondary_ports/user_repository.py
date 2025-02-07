@@ -6,10 +6,7 @@ from src.application.entities.user import User
 
 
 class IUserRepository(ABC):
-    @abstractmethod
-    def get_all(self) -> list[User]:
-        pass
-
+    
     @abstractmethod
     def get_all_professors(self) -> list[User]:
         pass
@@ -27,9 +24,9 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    def delete_prof(self, prof_id: int) -> None:
+    def delete(self, professor: User) -> None:
         pass
 
     @abstractmethod
-    def update_prof(self, prof_dto: UpdateUserRequestDto) -> None:
+    def update(self, prof_dto: UpdateUserRequestDto) -> None:
         pass

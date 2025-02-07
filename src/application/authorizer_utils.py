@@ -13,7 +13,7 @@ class AuthorizerUtils:
     @staticmethod
     def check_if_professor_of_course(user: User, course: Course):
         """
-        Checks if the user is the professor of the course and thus authorized.
+        Checks if the admin is the professor of the course and thus authorized.
         Will throw an UnauthorizedException otherwise
         """
         AuthorizerUtils.check_if_role(user, Role.PROFESSOR)

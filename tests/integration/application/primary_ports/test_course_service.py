@@ -4,7 +4,7 @@ import random
 import pytest
 
 from src.adapters.secondary.course_repository_impl import CourseRepository
-from src.application.dto import CourseResponseDto, UpdateCourseRequestDto
+from src.application.dto import CourseResponseDto, UpdateCourseRequestDto, UpdateUserRequestDto, UserResponseDto
 from src.application.entities.course import Course
 from src.application.entities.role import Role
 from src.application.entities.user import User
@@ -39,14 +39,14 @@ class TestCourseService:
             assert lecture.id == lecture_dto.id
             assert lecture.date == lecture_dto.date
 
-        # assert enrolled_student of course are equal to dto
+        # assert course_student of course are equal to dto
         assert len(course_students) == len(course_students_dtos)
         for enrollment, enrollment_dto in zip(course_students, course_students_dtos):
             assert enrollment.id == enrollment_dto.id
 
             attended_lectures = sorted(enrollment.attended_lectures, key=lambda lec: lec.id)
             attended_lectures_dtos = sorted(enrollment_dto.attended_lectures, key=lambda lec: lec.id)
-            # assert attended_lectures of enrollment are equal to dto
+            # assert attended_lectures of course_student are equal to dto
             assert len(attended_lectures) == len(attended_lectures_dtos)
             for attended_lecture, attended_lecture_dto in zip(attended_lectures, attended_lectures_dtos):
                 assert attended_lecture.id == attended_lecture_dto.id
@@ -85,7 +85,7 @@ class TestCourseService:
         existing_professor = random.choice([user for user in self.users if user.role == Role.PROFESSOR])
         expected_courses = [course for course in self.courses if course.professor.id == existing_professor.id]
 
-        course_dtos = course_service.get_courses_of_prof(existing_professor)
+        course_dtos = course_service.get_all_by_prof(existing_professor)
 
         assert len(course_dtos) == len(expected_courses)
         course_dtos.sort(key=lambda course: course.id)
@@ -116,3 +116,30 @@ class TestCourseService:
 
         fetched_course = session.get(Course, existing_course.id)
         assert fetched_course.password_hash != password
+
+    def test_get_by_name_with_existing_full_course_name(self, course_service):
+        _, course_service = course_service
+        existing_course = random.choice(self.courses)
+        course_name = existing_course.name
+
+        results = course_service.get_all_by_name_like(course_name)
+
+        assert course_name in [result.name for result in results]
+
+    def test_get_by_name_with_substring_of_existing_course_name(self, course_service):
+        _, course_service = course_service
+        existing_course = random.choice(self.courses)
+        course_name = existing_course.name
+        course_name_sub_str = course_name[:random.randint(1, len(course_name) - 1)]
+
+        results = course_service.get_all_by_name_like(course_name_sub_str)
+
+        assert course_name in [result.name for result in results]
+
+    def test_get_by_name_with_non_existing_course_name(self, course_service):
+        session, course_service = course_service
+        non_existing_course_name = "How To Build A Nuke 101"
+
+        results = course_service.get_all_by_name_like(non_existing_course_name)
+
+        assert not results

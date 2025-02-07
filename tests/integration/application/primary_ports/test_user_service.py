@@ -3,9 +3,11 @@ import random
 import pytest
 
 from src.adapters.secondary.user_repository_impl import UserRepository
+from src.application.dto import UpdateUserRequestDto, UserResponseDto
 from src.application.entities.role import Role
 from src.application.entities.user import User
-from src.application.exceptions import InvalidCredentialsException, NotFoundException
+from src.application.exceptions import InvalidCredentialsException, NotFoundException, UnauthorizedException, \
+    InvalidInputException
 from src.application.primary_ports.user_service import UserService
 from tests.fixtures import engine, tables, add_data, db_session
 from tests.test_data import users
@@ -18,24 +20,19 @@ class TestUserService:
         repo = UserRepository(db_session)
         return db_session, UserService(repo)
 
+    @staticmethod
+    def _assert_dto_equals_user(dto: UpdateUserRequestDto | UserResponseDto, user: User):
+        assert dto.id == user.id and dto.name == user.name and dto.email == user.email
+
     def test_create_user_persists_to_db(self, user_service):
         session, user_service = user_service
         test_user = User("deez", "deez@knees.com", "1234", Role.ADMIN, len(self.users) + 100)
 
-        user_service.create_user(test_user)
+        user_service.save(test_user)
 
         fetched_user = session.get(User, test_user.id)
         assert fetched_user
         assert fetched_user == test_user
-
-    def test_get_all_users_returns_all_users(self, user_service):
-        session, user_service = user_service
-
-        fetchedUsers = user_service.get_all()
-
-        fetchedUsers.sort(key=lambda user: user.id)
-        assert len(fetchedUsers) == len(self.users)
-        assert len(set(fetchedUsers).intersection(self.users)) == len(self.users)
 
     def test_get_by_id_of_existing_user_returns_user(self, user_service):
         _, user_service = user_service
@@ -87,3 +84,88 @@ class TestUserService:
             user_service.authenticate("hackerman@darkweb.xyz", "superhackerman9000")
 
         assert exception
+
+    def test_get_all_professors_with_non_admin_raises(self, user_service):
+        _, user_service = user_service
+        non_admin = User("foo", "foo@bar.de", "1234", random.choice([Role.PROFESSOR, Role.STUDENT]), 69420)
+
+        with pytest.raises(UnauthorizedException) as exc:
+            user_service.get_all_professors(non_admin)
+
+        assert "'admin' can do this" in str(exc.value)
+
+    def test_get_all_professors_only_returns_professors(self, user_service):
+        _, user_service = user_service
+        expected_professors = [user for user in self.users if user.role == Role.PROFESSOR]
+        test_admin = User("admin", "admin@admin.de", "admin", Role.ADMIN, 69420)
+
+        professors = user_service.get_all_professors(test_admin)
+
+        professors.sort(key=lambda prof: prof.id)
+        assert len(professors) == len(expected_professors)
+        for user_dto, user in zip(professors, expected_professors):
+            self._assert_dto_equals_user(user_dto, user)
+
+    def test_deleting_professor_with_non_admin_raises(self, user_service):
+        _, user_service = user_service
+        non_admin = User("foo", "foo@bar.de", "1234", random.choice([Role.PROFESSOR, Role.STUDENT]), 69420)
+        existing_professor = random.choice([user for user in self.users if user.role == Role.PROFESSOR])
+
+        with pytest.raises(UnauthorizedException) as exc:
+            user_service.delete_professor(non_admin, existing_professor)
+
+        assert "'admin' can do this" in str(exc.value)
+
+    def test_deleting_existing_professor_works(self, user_service):
+        session, user_service = user_service
+        existing_professor = random.choice([user for user in self.users if user.role == Role.PROFESSOR])
+        test_admin = User("admin", "admin@admin.de", "admin", Role.ADMIN, 69420)
+
+        user_service.delete_professor(test_admin, existing_professor.id)
+
+        assert not session.get(User, existing_professor.id)
+
+    def test_deleting_non_existing_professor_raises(self, user_service):
+        _, user_service = user_service
+        non_existing_professor_id = 123456789
+        test_admin = User("admin", "admin@admin.de", "admin", Role.ADMIN, 69420)
+
+        with pytest.raises(NotFoundException) as exc:
+            user_service.delete_professor(test_admin, non_existing_professor_id)
+
+        assert "doesn't exist" in str(exc.value)
+
+    def test_updating_with_non_admin_raises(self, user_service):
+        _, user_service = user_service
+        non_admin = User("foo", "foo@bar.de", "1234", random.choice([Role.PROFESSOR, Role.STUDENT]), 69420)
+        random_professor = random.choice([user for user in self.users if user.role == Role.PROFESSOR])
+        update_professor_dto = UpdateUserRequestDto(random_professor.id, "Super Professor", "goat69@htw.de")
+
+        with pytest.raises(UnauthorizedException) as exc:
+            user_service.update_professor(non_admin, update_professor_dto)
+
+        assert "'admin' can do this" in str(exc.value)
+
+    def test_updating_existing_professor_persists_to_db(self, user_service):
+        session, user_service = user_service
+        existing_professor = random.choice([user for user in self.users if user.role == Role.PROFESSOR])
+        update_professor_dto = UpdateUserRequestDto(existing_professor.id, "Super Professor", "goat69@htw.de")
+        test_admin = User("admin", "admin@admin.de", "admin", Role.ADMIN, 69420)
+
+        user_service.update_professor(test_admin, update_professor_dto)
+
+        fetched_professor = session.get(User, existing_professor.id)
+        self._assert_dto_equals_user(update_professor_dto, fetched_professor)
+
+    def test_update_existing_professor_with_already_used_email_raises(self, user_service):
+        session, user_service = user_service
+        professors = [user for user in self.users if user.role == Role.PROFESSOR]
+        existing_professor = professors[0]
+        existing_professor2 = professors[1]
+        update_professor_dto = UpdateUserRequestDto(existing_professor.id, "Super Professor", existing_professor2.email)
+        test_admin = User("admin", "admin@admin.de", "admin", Role.ADMIN, 69420)
+
+        with pytest.raises(InvalidInputException) as exc:
+            user_service.update_professor(test_admin, update_professor_dto)
+
+        assert "already in use" in str(exc.value)

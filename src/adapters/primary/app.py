@@ -12,7 +12,7 @@ from src.adapters.primary.blueprint.attendance import attendance as attendance_b
 from src.adapters.primary.blueprint.auth import auth as auth_bp
 from src.adapters.primary.blueprint.course import course as course_bp
 from src.adapters.primary.blueprint.lecture import lecture as lecture_bp
-from src.adapters.primary.blueprint.user import user as user_bp
+from src.adapters.primary.blueprint.user import admin as user_bp
 from src.adapters.primary.blueprint.student_bp import student_bp
 
 import logging

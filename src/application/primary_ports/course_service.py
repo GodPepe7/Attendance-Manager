@@ -11,14 +11,14 @@ class CourseService:
     def __init__(self, repo: ICourseRepository):
         self.repo = repo
 
-    def get_courses_of_prof(self, user: User) -> list[GetMultipleCoursesResponseDto]:
+    def get_all_by_prof(self, user: User) -> list[GetMultipleCoursesResponseDto]:
         AuthorizerUtils.check_if_role(user, Role.PROFESSOR)
         courses = self.repo.get_all_by_professor_id(user.id)
         course_dtos = [GetMultipleCoursesResponseDto(course.id, course.name, len(course.students)) for course in
                        courses]
         return course_dtos
 
-    def get_courses_by_name_like(self, name: str) -> list[CourseGetByNameReponseDto]:
+    def get_all_by_name_like(self, name: str) -> list[CourseGetByNameReponseDto]:
         courses = self.repo.get_all_by_name_like(name)
         course_dtos = [CourseGetByNameReponseDto(course.id, course.name, course.professor.name) for course in courses]
         return course_dtos

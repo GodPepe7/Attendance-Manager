@@ -14,7 +14,7 @@ course = Blueprint("course", __name__, url_prefix="/courses", template_folder=".
 @inject
 @login_required()
 def index(course_service: CourseService = Provide[Container.course_service]):
-    courses_dto = course_service.get_courses_of_prof(g.user)
+    courses_dto = course_service.get_all_by_prof(g.user)
     return render_template("course.html", courses=courses_dto)
 
 
@@ -25,7 +25,7 @@ def get_by_name(course_service: CourseService = Provide[Container.course_service
     search_string = request.args.get("search-string")
     if not search_string:
         return "search_string is required", 400
-    courses = course_service.get_courses_by_name_like(search_string)
+    courses = course_service.get_all_by_name_like(search_string)
     course_list = render_template_string(
         "{% from 'reusable/searchCourseList.html' import course_list %}"
         "{{ course_list(courses) }}",

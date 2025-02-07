@@ -213,6 +213,40 @@ def test_professor_can_set_new_password_and_student_can_use_it(go_to_softwareeng
     toggle_attendance_btn = updated_student_row.get_by_role("button").nth(1)
     expect(toggle_attendance_btn).to_contain_text("Attended")
 
+
+def test_professor_can_create_qr_code_that_student_can_use(go_to_softwareengineering, new_context):
+    page, flask_app = go_to_softwareengineering
+    date_of_second_lecture = datetime(2025, 1, 2, 10, 0, 0)
+    fixed_clock = providers.Factory(
+        FixedClock, fixed_datetime=date_of_second_lecture
+    )
+    flask_app.container.clock.override(fixed_clock)
+    student_row = page.get_by_test_id("student-row-alex")
+    toggle_attendance_btn = student_row.get_by_role("button").nth(1)
+    expect(toggle_attendance_btn).to_contain_text("Absent")
+
+    page.get_by_role("button", name="QR Code").click()
+    expect(page.locator("#qr-canvas")).not_to_be_visible()
+    page.get_by_label("Select Lecture").select_option("1")
+
+    expect(page.locator("#qr-canvas")).to_be_visible()
+    qr_code = page.locator("#qr-code-string").text_content()
+
+    qr_endpoint = f"{url}/attendance/qr/{qr_code}"
+    context = new_context()
+    new_page = context.new_page()
+    new_page.goto(qr_endpoint)
+    new_page.get_by_label("Email").fill("student@htw.de")
+    new_page.get_by_label("Password").fill("test")
+    new_page.get_by_role("button", name="Login").click()
+    expect(new_page.get_by_text("Successfully logged attendance")).to_be_visible()
+
+    page.reload()
+    updated_student_row = page.get_by_test_id("student-row-alex")
+    toggle_attendance_btn = updated_student_row.get_by_role("button").nth(1)
+    expect(toggle_attendance_btn).to_contain_text("Attended")
+
+
 def test_professor_can_create_qr_code_that_changes_after_30_seconds(go_to_softwareengineering):
     page, _ = go_to_softwareengineering
 

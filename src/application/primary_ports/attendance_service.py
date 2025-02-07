@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from src.application.entities.course_student import CourseStudent
 from src.application.entities.lecture import Lecture
@@ -59,7 +59,7 @@ class AttendanceService:
         course_student.remove_lecture(lecture)
         self.course_student_repo.update(course_student)
 
-    def generate_qr_code_string(self, user: User, lecture_id: int, seconds: int) -> str:
+    def generate_code(self, user: User, lecture_id: int, seconds: int) -> str:
         lecture = self.lecture_repo.get_by_id(lecture_id)
         if not lecture:
             raise NotFoundException(f"Lecture with ID {lecture_id} doesn't exist")
@@ -70,7 +70,7 @@ class AttendanceService:
         encrypted_time = self.encryptor.encrypt_lecture_and_time(lecture_id, expiration_time)
         return encrypted_time
 
-    def save_with_qr_code_string(self, user: User, qr_code_string: str) -> None:
+    def save_by_code(self, user: User, qr_code_string: str) -> None:
         AuthorizerUtils.check_if_role(user, Role.STUDENT)
         current_datetime = self.clock.get_current_datetime()
         lecture_id, expiration_datetime = self.encryptor.decrypt_to_lecture_and_time(qr_code_string)
@@ -81,11 +81,12 @@ class AttendanceService:
             raise QrCodeExpired("Didn't save attendance. QR Code is already expired")
         course_student = self.course_student_repo.get_by_course_id_and_student_id(lecture.course_id, user.id)
         if not course_student:
-            course_student = self.course_student_repo.save_by_course_id_and_user_id(lecture.course_id, user.id)
-        course_student.attended_lectures.add(lecture)
+            course_student = CourseStudent(user, lecture.course_id)
+            self.course_student_repo.save(course_student)
+        course_student.add_lecture(lecture)
         self.course_student_repo.update(course_student)
 
-    def save_with_password(self, user: User, course_id: int, password: str) -> None:
+    def save_by_password(self, user: User, course_id: int, password: str) -> None:
         AuthorizerUtils.check_if_role(user, Role.STUDENT)
         current_datetime = self.clock.get_current_datetime()
         course = self.course_repo.get_by_id(course_id)
@@ -100,6 +101,7 @@ class AttendanceService:
                 f"No lecture with date {current_datetime.date()} for course with ID: {course_id} was found")
         course_student = self.course_student_repo.get_by_course_id_and_student_id(course_id, user.id)
         if not course_student:
-            course_student = self.course_student_repo.save_by_course_id_and_user_id(course_id, user.id)
-        course_student.attended_lectures.add(lecture)
+            course_student = CourseStudent(user, lecture.course_id)
+            self.course_student_repo.save(course_student)
+        course_student.add_lecture(lecture)
         self.course_student_repo.update(course_student)

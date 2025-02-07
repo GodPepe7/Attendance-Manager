@@ -14,7 +14,7 @@ class ICourseStudentRepository(ABC):
         pass
 
     @abstractmethod
-    def save_by_course_id_and_user_id(self, course_id: int, student_id: int) -> CourseStudent:
+    def save(self, course_student: CourseStudent) -> CourseStudent:
         pass
 
     @abstractmethod

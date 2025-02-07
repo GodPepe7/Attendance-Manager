@@ -14,8 +14,9 @@ class TestEncryptionService:
         lecture_id = random.randint(1, 999999)
         now_str = now.strftime("%Y-%m-%d %H:%M:%S")
 
-        encrypted = self.encryptor.encrypt_lecture_and_time(lecture_id, now)
-        decrypted_lecture_id, decrypted_expiration_time = self.encryptor.decrypt_to_lecture_and_time(encrypted)
+        encrypted_lecture_and_time = self.encryptor.encrypt_lecture_and_time(lecture_id, now)
+        decrypted_lecture_id, decrypted_expiration_time = self.encryptor.decrypt_to_lecture_and_time(
+            encrypted_lecture_and_time)
 
-        assert f"{lecture_id},{now_str}" != encrypted
+        assert f"{lecture_id},{now_str}" != encrypted_lecture_and_time
         assert lecture_id == decrypted_lecture_id and now == decrypted_expiration_time

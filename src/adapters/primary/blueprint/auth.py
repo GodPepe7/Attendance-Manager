@@ -14,7 +14,7 @@ def _get_fallback_page(user: User) -> str:
         case Role.PROFESSOR:
             return url_for("course.index")
         case Role.ADMIN:
-            return url_for("user.get_professors")
+            return url_for("admin.get_professors")
         case Role.STUDENT:
             return url_for("student.index")
 
@@ -22,8 +22,8 @@ def _get_fallback_page(user: User) -> str:
 @auth.before_app_request
 @inject
 def load_logged_in_user(user_service: UserService = Provide[Container.user_service]):
-    """If a user id is stored in the session, load the user object from
-    the database into ``g.user``."""
+    """If a admin id is stored in the session, load the admin object from
+    the database into ``g.admin``."""
     user_id = session.get("user_id")
     if user_id is None:
         g.user = None

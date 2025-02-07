@@ -4,7 +4,7 @@ import pytest
 
 from src.application.entities.role import Role
 from src.application.entities.user import User
-from src.application.exceptions import UnauthorizedException, NotFoundException
+from src.application.exceptions import UnauthorizedException
 from src.application.authorizer_utils import AuthorizerUtils
 from tests.test_data import courses, users
 

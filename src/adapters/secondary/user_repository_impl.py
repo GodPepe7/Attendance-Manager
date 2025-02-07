@@ -15,10 +15,6 @@ class UserRepository(IUserRepository):
     def __init__(self, session: Session):
         self.session = session
 
-    def get_all(self) -> list[User]:
-        stmt = select(User)
-        return list(self.session.scalars(stmt).all())
-
     def get_all_professors(self) -> list[User]:
         stmt = select(User).where(User.role == Role.PROFESSOR)
         return list(self.session.scalars(stmt).all())
@@ -40,15 +36,12 @@ class UserRepository(IUserRepository):
         self.session.refresh(user)
         return user.id
 
-    def delete_prof(self, user_id: int) -> bool:
-        user = self.session.get(User, user_id)
-        if not user or user.role != Role.PROFESSOR:
-            raise NotFoundException(f"Professor with ID {user_id} doesn't exist")
+    def delete(self, user: User) -> bool:
         self.session.delete(user)
         self.session.commit()
         return True
 
-    def update_prof(self, user_dto: UpdateUserRequestDto) -> None:
+    def update(self, user_dto: UpdateUserRequestDto) -> None:
         user = self.session.get(User, user_dto.id)
         if not user or user.role != Role.PROFESSOR:
             raise NotFoundException(f"Professor with ID {user_dto.id} doesn't exist")
