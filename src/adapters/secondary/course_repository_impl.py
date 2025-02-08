@@ -1,9 +1,11 @@
+from sqlalchemy.exc import IntegrityError
 from typing import Optional
 
 from sqlalchemy import select, Select
 from sqlalchemy.orm import Session
 
 from src.application.entities.course import Course
+from src.application.exceptions import DuplicateException
 from src.application.secondary_ports.course_repository import ICourseRepository
 
 
@@ -26,15 +28,19 @@ class CourseRepository(ICourseRepository):
 
     def save(self, course: Course) -> int:
         self.session.add(course)
-        self.session.commit()
+        try:
+            self.session.commit()
+        except IntegrityError:
+            self.session.rollback()
+            raise DuplicateException("Course name needs to be unique")
         return course.id
 
     def update(self, updated_course: Course) -> bool:
         try:
             self.session.commit()
             return True
-        except Exception as e:
-            return False
+        except IntegrityError:
+            raise DuplicateException("Course name needs to be unique")
 
     def delete(self, course: Course) -> None:
         self.session.delete(course)

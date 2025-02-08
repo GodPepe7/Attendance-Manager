@@ -30,6 +30,9 @@ class User:
 
     @classmethod
     def factory(cls, name: str, email: str, password: str, role_input: str) -> "User":
+        if not name:
+            raise InvalidInputException("Name can't be empty")
+        
         email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if not re.match(email_pattern, email):
             raise InvalidInputException("Invalid email. A valid email looks like 'example@host.com'")

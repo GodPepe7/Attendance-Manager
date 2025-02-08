@@ -1,11 +1,11 @@
 import datetime
+from sqlite3 import IntegrityError
 from typing import Optional
 
 from sqlalchemy import Select
 from sqlalchemy.orm import Session
 
 from src.application.entities.lecture import Lecture
-from src.application.exceptions import NotFoundException
 from src.application.secondary_ports.lecture_repository import ILectureRepository
 
 
@@ -18,10 +18,7 @@ class LectureRepository(ILectureRepository):
 
     def get_by_course_id_and_date(self, course_id: int, date: datetime.date) -> Optional[Lecture]:
         stmt = Select(Lecture).where(Lecture.course_id == course_id, Lecture.date == date)
-        lecture = self.session.scalar(stmt)
-        if not lecture:
-            raise NotFoundException(f"Lecture with course_id {course_id} and date {date} doesn't exist")
-        return lecture
+        return self.session.scalar(stmt)
 
     def save(self, lecture: Lecture) -> int:
         self.session.add(lecture)
@@ -36,5 +33,5 @@ class LectureRepository(ILectureRepository):
         try:
             self.session.commit()
             return True
-        except Exception as e:
+        except IntegrityError as e:
             return False

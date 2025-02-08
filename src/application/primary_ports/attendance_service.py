@@ -98,7 +98,7 @@ class AttendanceService:
         lecture = self.lecture_repo.get_by_course_id_and_date(course_id, current_datetime.date())
         if not lecture:
             raise NotFoundException(
-                f"No lecture with date {current_datetime.date()} for course with ID: {course_id} was found")
+                f"Attendance can only be logged on the day a lecture is held for this course!")
         course_student = self.course_student_repo.get_by_course_id_and_student_id(course_id, user.id)
         if not course_student:
             course_student = CourseStudent(user, lecture.course_id)

@@ -180,7 +180,7 @@ def test_professor_can_delete_lecture(go_to_softwareengineering):
 def test_professor_can_set_new_password_and_student_can_use_it(go_to_softwareengineering, new_context):
     page, flask_app = go_to_softwareengineering
     date_of_second_lecture = datetime(2025, 1, 2, 10, 0, 0)
-    fixed_clock = providers.Factory(
+    fixed_clock = providers.ThreadSafeSingleton(
         FixedClock, fixed_datetime=date_of_second_lecture
     )
     flask_app.container.clock.override(fixed_clock)
@@ -212,12 +212,13 @@ def test_professor_can_set_new_password_and_student_can_use_it(go_to_softwareeng
     updated_student_row = page.get_by_test_id("student-row-alex")
     toggle_attendance_btn = updated_student_row.get_by_role("button").nth(1)
     expect(toggle_attendance_btn).to_contain_text("Attended")
+    flask_app.container.reset_override()
 
 
 def test_professor_can_create_qr_code_that_student_can_use(go_to_softwareengineering, new_context):
     page, flask_app = go_to_softwareengineering
     date_of_second_lecture = datetime(2025, 1, 2, 10, 0, 0)
-    fixed_clock = providers.Factory(
+    fixed_clock = providers.ThreadSafeSingleton(
         FixedClock, fixed_datetime=date_of_second_lecture
     )
     flask_app.container.clock.override(fixed_clock)
@@ -245,6 +246,7 @@ def test_professor_can_create_qr_code_that_student_can_use(go_to_softwareenginee
     updated_student_row = page.get_by_test_id("student-row-alex")
     toggle_attendance_btn = updated_student_row.get_by_role("button").nth(1)
     expect(toggle_attendance_btn).to_contain_text("Attended")
+    flask_app.container.reset_last_overriding()
 
 
 def test_professor_can_create_qr_code_that_changes_after_30_seconds(go_to_softwareengineering):

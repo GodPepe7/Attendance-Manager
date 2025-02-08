@@ -35,10 +35,12 @@ class UserService:
 
     def update_professor(self, user: User, user_dto: UpdateUserRequestDto) -> None:
         AuthorizerUtils.check_if_role(user, Role.ADMIN)
-        user = self.repo.get_by_email(user_dto.email)
-        if user and user.id != user_dto.id:
-            raise InvalidInputException(f"Email '{user_dto.email}' is already in use.")
-        self.repo.update(user_dto)
+        user = self.repo.get_by_id(user_dto.id)
+        if not user or user.role != Role.PROFESSOR:
+            raise NotFoundException(f"Professor with ID {user_dto.id} doesn't exist")
+        user.name = user_dto.name
+        user.email = user_dto.email
+        self.repo.update(user)
 
     def authenticate(self, email: str, password: str) -> User:
         """

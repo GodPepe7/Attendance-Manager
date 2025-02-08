@@ -69,7 +69,7 @@ def transactional_app(add_test_data):
     engine = container.db().engine
     connection = engine.connect()
     transaction = connection.begin()
-    session = providers.Singleton(Session, bind=connection)
+    session = providers.ThreadSafeSingleton(Session, bind=connection)
     container.db_session.override(session)
 
     yield flask_app

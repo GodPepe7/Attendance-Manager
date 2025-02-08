@@ -6,13 +6,13 @@ mimetypes.add_type('application/javascript', '.js')
 from dependency_injector import containers
 from werkzeug.middleware.proxy_fix import ProxyFix
 from src.adapters.primary.config.container import Container
-from src.adapters.primary.blueprint import attendance, auth, lecture, user, course
+from src.adapters.primary.blueprint import attendance, auth, lecture, admin, course
 from src.adapters.primary.config.exception_handler import EXCEPTION_DICT
 from src.adapters.primary.blueprint.attendance import attendance as attendance_bp
 from src.adapters.primary.blueprint.auth import auth as auth_bp
 from src.adapters.primary.blueprint.course import course as course_bp
 from src.adapters.primary.blueprint.lecture import lecture as lecture_bp
-from src.adapters.primary.blueprint.user import admin as user_bp
+from src.adapters.primary.blueprint.admin import admin as admin_bp
 from src.adapters.primary.blueprint.student_bp import student_bp
 
 import logging
@@ -39,7 +39,7 @@ class FlaskApp:
         app.config['APPLICATION_ROOT'] = '/'
         app.config['PREFERRED_URL_SCHEME'] = 'https'
 
-        self.container.wire(modules=[attendance, auth, course, lecture, user])
+        self.container.wire(modules=[attendance, auth, course, lecture, admin])
         app.container = self.container
 
         db = self.container.db()
@@ -64,7 +64,7 @@ class FlaskApp:
         app.register_blueprint(course_bp)
         app.register_blueprint(lecture_bp)
         app.register_blueprint(attendance_bp)
-        app.register_blueprint(user_bp)
+        app.register_blueprint(admin_bp)
         app.register_blueprint(student_bp)
         app.add_url_rule("/", "index", lambda: redirect(url_for("auth.login")))
 

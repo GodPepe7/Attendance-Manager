@@ -26,3 +26,7 @@ class QrCodeExpired(Exception):
 
 class NoPasswordAndExpirationYetException(Exception):
     pass
+
+
+class DuplicateException(Exception):
+    pass

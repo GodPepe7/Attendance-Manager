@@ -1,13 +1,13 @@
 from typing import Optional
 
-from sqlalchemy import select, delete
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from src.application.dto import UpdateUserRequestDto
 from src.application.entities.role import Role
 from src.application.entities.user import User
-from src.application.exceptions import NotFoundException
+from src.application.exceptions import NotFoundException, DuplicateException
 from src.application.secondary_ports.user_repository import IUserRepository
 
 
@@ -32,7 +32,10 @@ class UserRepository(IUserRepository):
 
     def save(self, user: User) -> int:
         self.session.add(user)
-        self.session.commit()
+        try:
+            self.session.commit()
+        except IntegrityError:
+            raise DuplicateException(f"Email already in use by other")
         self.session.refresh(user)
         return user.id
 
@@ -41,13 +44,8 @@ class UserRepository(IUserRepository):
         self.session.commit()
         return True
 
-    def update(self, user_dto: UpdateUserRequestDto) -> None:
-        user = self.session.get(User, user_dto.id)
-        if not user or user.role != Role.PROFESSOR:
-            raise NotFoundException(f"Professor with ID {user_dto.id} doesn't exist")
-        user.name = user_dto.name
-        user.email = user_dto.email
+    def update(self, user: User) -> None:
         try:
             self.session.commit()
         except IntegrityError:
-            raise NotFoundException(f"Email {UpdateUserRequestDto.email} already in use by other user")
+            raise DuplicateException(f"Email already in use by other")

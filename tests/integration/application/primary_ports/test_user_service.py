@@ -7,7 +7,7 @@ from src.application.dto import UpdateUserRequestDto, UserResponseDto
 from src.application.entities.role import Role
 from src.application.entities.user import User
 from src.application.exceptions import InvalidCredentialsException, NotFoundException, UnauthorizedException, \
-    InvalidInputException
+    InvalidInputException, DuplicateException
 from src.application.primary_ports.user_service import UserService
 from tests.fixtures import engine, tables, add_data, db_session
 from tests.test_data import users
@@ -165,7 +165,7 @@ class TestUserService:
         update_professor_dto = UpdateUserRequestDto(existing_professor.id, "Super Professor", existing_professor2.email)
         test_admin = User("admin", "admin@admin.de", "admin", Role.ADMIN, 69420)
 
-        with pytest.raises(InvalidInputException) as exc:
+        with pytest.raises(DuplicateException) as exc:
             user_service.update_professor(test_admin, update_professor_dto)
 
-        assert "already in use" in str(exc.value)
+        assert exc

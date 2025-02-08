@@ -4,7 +4,7 @@ import random
 import pytest
 
 from src.adapters.secondary.course_repository_impl import CourseRepository
-from src.application.dto import CourseResponseDto, UpdateCourseRequestDto, UpdateUserRequestDto, UserResponseDto
+from src.application.dto import CourseResponseDto, UpdateCourseRequestDto
 from src.application.entities.course import Course
 from src.application.entities.role import Role
 from src.application.entities.user import User
