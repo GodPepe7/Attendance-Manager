@@ -25,7 +25,7 @@ def add_data(tables, engine):
     session.commit()
     session.close()
 
-    yield engine
+    return engine
 
 
 @pytest.fixture

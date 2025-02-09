@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import fernet
 from dependency_injector import containers, providers
 
@@ -11,7 +9,7 @@ from src.adapters.secondary.lecture_repository_impl import LectureRepository
 from src.adapters.secondary.user_repository_impl import UserRepository
 from src.application.primary_ports.attendance_service import AttendanceService
 from src.application.primary_ports.course_service import CourseService
-from src.application.primary_ports.encryption_service import EncryptionService
+from src.application.encryptor import Encryptor
 from src.application.primary_ports.lecture_service import LectureService
 from src.application.primary_ports.user_service import UserService
 
@@ -49,7 +47,7 @@ class Container(containers.DeclarativeContainer):
     )
 
     encryption_service = providers.Factory(
-        EncryptionService,
+        Encryptor,
         key=config.encryption_key()
     )
 

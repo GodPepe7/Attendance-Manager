@@ -17,7 +17,7 @@ from src.application.entities.role import Role
 from src.application.entities.user import User
 from src.application.exceptions import NotFoundException, QrCodeExpired, AttendanceLoggingException
 from src.application.primary_ports.attendance_service import AttendanceService
-from src.application.primary_ports.encryption_service import EncryptionService
+from src.application.encryptor import Encryptor
 from tests.fixtures import engine, tables, add_data, db_session
 from tests.test_data import courses
 
@@ -29,7 +29,7 @@ class TestAttendanceService:
         course_student_repo = CourseStudentRepository(db_session)
         course_repo = CourseRepository(db_session)
         lecture_repo = LectureRepository(db_session)
-        encryptor = EncryptionService(fernet.Fernet.generate_key())
+        encryptor = Encryptor(fernet.Fernet.generate_key())
         clock = Clock()
         attendance_service = AttendanceService(course_student_repo, lecture_repo, course_repo, encryptor, clock)
         return db_session, attendance_service

@@ -12,7 +12,7 @@ from src.application.secondary_ports.course_repository import ICourseRepository
 from src.application.secondary_ports.course_student_repository import ICourseStudentRepository
 from src.application.secondary_ports.lecture_repository import ILectureRepository
 from src.application.authorizer_utils import AuthorizerUtils
-from src.application.primary_ports.encryption_service import EncryptionService
+from src.application.encryptor import Encryptor
 
 
 @dataclass
@@ -28,7 +28,7 @@ class AttendanceService:
             course_student_repo: ICourseStudentRepository,
             lecture_repo: ILectureRepository,
             course_repo: ICourseRepository,
-            encryptor: EncryptionService,
+            encryptor: Encryptor,
             clock: IClock
     ):
         self.course_student_repo = course_student_repo

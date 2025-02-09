@@ -5,7 +5,7 @@ from fernet import Fernet
 from src.application.exceptions import InvalidInputException
 
 
-class EncryptionService:
+class Encryptor:
     def __init__(self, key: bytes):
         self.cipher_suite = Fernet(key)
 

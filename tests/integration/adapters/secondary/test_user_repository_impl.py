@@ -4,7 +4,6 @@ import pytest
 from sqlalchemy import Select
 
 from src.adapters.secondary.user_repository_impl import UserRepository
-from src.application.entities.course import Course
 from src.application.entities.role import Role
 from src.application.entities.user import User
 from src.application.exceptions import DuplicateException

@@ -22,7 +22,7 @@ from flask import Flask, jsonify, redirect, url_for
 
 
 class FlaskApp:
-    def __init__(self, container: containers.DeclarativeContainer, custom_config: dict = None):
+    def __init__(self, container: Container, custom_config: dict = None):
         self.container = container
         self.custom_config = custom_config
         self.app = self._create_app()

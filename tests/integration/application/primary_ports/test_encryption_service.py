@@ -3,11 +3,11 @@ import random
 
 import fernet
 
-from src.application.primary_ports.encryption_service import EncryptionService
+from src.application.encryptor import Encryptor
 
 
 class TestEncryptionService:
-    encryptor = EncryptionService(fernet.Fernet.generate_key())
+    encryptor = Encryptor(fernet.Fernet.generate_key())
 
     def test_encrypt_lecture_and_time_and_decrypt_back_gives_orginal_back(self):
         now = datetime.datetime.now().replace(microsecond=0)
