@@ -7,9 +7,9 @@ from src.application.dto import UpdateUserRequestDto, UserResponseDto
 from src.application.entities.role import Role
 from src.application.entities.user import User
 from src.application.exceptions import InvalidCredentialsException, NotFoundException, UnauthorizedException, \
-    InvalidInputException, DuplicateException
+    DuplicateException
 from src.application.primary_ports.user_service import UserService
-from tests.fixtures import engine, tables, add_data, db_session
+from tests.fixtures import db_session
 from tests.test_data import users
 
 

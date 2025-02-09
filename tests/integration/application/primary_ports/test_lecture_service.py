@@ -11,7 +11,7 @@ from src.application.entities.role import Role
 from src.application.entities.user import User
 from src.application.exceptions import NotFoundException
 from src.application.primary_ports.lecture_service import LectureService
-from tests.fixtures import engine, tables, add_data, db_session
+from tests.fixtures import db_session
 from tests.test_data import courses
 
 
@@ -19,6 +19,7 @@ class TestLectureService:
     @pytest.fixture
     def lecture_service(self, db_session):
         self.courses = [db_session.merge(course) for course in courses]
+        self.courses = courses
         lecture_repo = LectureRepository(db_session)
         course_repo = CourseRepository(db_session)
         lecture_service = LectureService(lecture_repo, course_repo)
