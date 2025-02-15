@@ -92,13 +92,13 @@ class AttendanceService:
         course = self.course_repo.get_by_id(course_id)
         if not course:
             raise NotFoundException(f"Course with ID: {course_id} doesn't exist")
-        is_valid = course.check_password(password, current_datetime)
-        if not is_valid:
-            raise AttendanceLoggingException("Password needs to be correct and not expired")
         lecture = self.lecture_repo.get_by_course_id_and_date(course_id, current_datetime.date())
         if not lecture:
             raise NotFoundException(
                 f"Attendance can only be logged on the day a lecture is held for this course!")
+        is_valid = course.check_password(password, current_datetime)
+        if not is_valid:
+            raise AttendanceLoggingException("Password needs to be correct and not expired")
         course_student = self.course_student_repo.get_by_course_id_and_student_id(course_id, user.id)
         if not course_student:
             course_student = CourseStudent(user, lecture.course_id)

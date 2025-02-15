@@ -6,16 +6,20 @@
 <div class="container mx-auto py-10">
   <div class="flex justify-between items-center mb-16">
     <h1 class="text-3xl font-bold">Your Courses</h1>
-    <button id="open-add-course"
-            hx-on:click="document.getElementById('add-course').showModal()"
-            class="bg-gray-700 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded flex items-center">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd"
-              d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-              clip-rule="evenodd"/>
-      </svg>
-      Create New Course
-    </button>
+    <div class="flex gap-8">
+      <button id="open-add-course"
+              hx-on:click="document.getElementById('add-course').showModal()"
+              class="bg-gray-700 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd"
+                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                clip-rule="evenodd"/>
+        </svg>
+        Create New Course
+      </button>
+      {% import "reusable/logoutBtn.html" as logout %}
+      {{ logout.logout_btn() }}
+    </div>
   </div>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for course in courses %}
@@ -53,11 +57,16 @@
 {% import "reusable/dialog.html" as dialog %}
 
 {% call dialog.render("add-course", "Add Course") %}
-<form id="add-course-form" method="post" hx-boost="true" action="">
+<form id="add-course-form"
+      hx-post="/courses"
+      hx-target="body"
+      hx-target-400="#course-error"
+>
   <div class="mb-8">
     <label for="add-course-name" class="block text-left text-sm font-medium text-gray-700">Name</label>
     <input type="text" id="add-course-name" name="name" required
            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+    <p id="course-error" class="text-red-500 mt-2"></p>
   </div>
   <div class="flex justify-center mt-4">
     <button type="submit"
@@ -80,13 +89,16 @@
   <label for="edit-course-name" class="block text-left text-sm font-medium text-gray-700">Course Name</label>
   <input type="text" id="edit-course-name" name="name" required
          class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+  <p id="edit-course-error-msg" class="mb-4 text-red-500 h-4"></p>
 </div>
 <div class="flex items-center justify-center gap-6 mt-4">
   <button type="button" id="delete-course-btn" hx-params="none"
           class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
     Delete
   </button>
-  <button type="button" id="edit-course-btn" hx-include="#edit-course-name"
+  <button type="button" id="edit-course-btn"
+          hx-include="#edit-course-name"
+          hx-target-4*="#edit-course-error-msg"
           class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
     Edit
   </button>
@@ -97,11 +109,13 @@
         const courseNameInput = document.getElementById("edit-course-name")
         const editBtn = document.getElementById("edit-course-btn")
         const deleteBtn = document.getElementById("delete-course-btn")
+        const errMsg = document.getElementById("edit-course-error-msg")
         editBtn.setAttribute("hx-patch", `/courses/${courseId}`)
         deleteBtn.setAttribute("hx-delete", `/courses/${courseId}`)
         htmx.process(editBtn)
         htmx.process(deleteBtn)
         courseNameInput.value = courseName
+        errMsg.textContent = ""
         dialog.showModal()
     }
 </script>

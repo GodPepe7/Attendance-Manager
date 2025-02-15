@@ -1,0 +1,10 @@
+{% macro logout_btn() -%}
+<button id="logout-btn"
+        hx-get="/auth/logout"
+        hx-boost="true"
+        hx-push-url="true"
+        hx-target="body"
+        class="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 rounded flex items-center">
+  Logout
+</button>
+{%- endmacro %}

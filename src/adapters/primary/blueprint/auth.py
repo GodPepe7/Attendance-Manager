@@ -57,4 +57,4 @@ def login(user_service: UserService = Provide[Container.user_service]):
 @auth.get("/logout")
 def logout():
     session.clear()
-    return "", 200
+    return redirect(url_for("auth.login"))

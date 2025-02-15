@@ -160,10 +160,14 @@
       </svg>
       <h1 class="text-2xl font-bold text-gray-800">{{ course.name }}</h1>
     </div>
-    <a href="/courses" hx-boost="true"
-       class="bg-gray-700 hover:bg-gray-500 text-white font-semibold py-2 px-4 border rounded shadow">
-      Back to Courses
-    </a>
+    <div class="flex gap-2">
+      <a href="/courses" hx-boost="true"
+         class="bg-gray-700 hover:bg-gray-500 text-white font-semibold py-2 px-4 border rounded shadow">
+        Back to Courses
+      </a>
+      {% import "reusable/logoutBtn.html" as logout %}
+      {{ logout.logout_btn() }}
+    </div>
   </header>
   <div class="relative z-10 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6">
     <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-md mb-4">

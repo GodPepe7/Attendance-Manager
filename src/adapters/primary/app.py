@@ -3,7 +3,6 @@ import mimetypes
 
 mimetypes.add_type('application/javascript', '.js')
 
-from dependency_injector import containers
 from werkzeug.middleware.proxy_fix import ProxyFix
 from src.adapters.primary.config.container import Container
 from src.adapters.primary.blueprint import attendance, auth, lecture, admin, course
